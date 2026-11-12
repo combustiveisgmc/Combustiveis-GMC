@@ -27,7 +27,9 @@ PROJETO = sb.PROJETO
 ESTADO = os.path.join(sb.LOCAL, 'supabase-d1-estado.json')
 CONTA_CLOUDFLARE = 'b28f3cec780adbc994189a364453bf20'   # a mesma de scripts/sincronizar.mjs
 FORA = {'d1_migrations', 'sessoes', 'sessoes_motoristas', 'tentativas_login'}
-COLUNAS_FORA = {('alteracoes_cadastros', 'pessoais')}
+# pessoais: CPF temporário (não guardar em lugar nenhum); consolidador_lotes.linhas: os abastecimentos do lote, que depois
+# de aplicado já estão em base_transacoes (cópia; ajuste de 12/11/2026)
+COLUNAS_FORA = {('alteracoes_cadastros', 'pessoais'), ('consolidador_lotes', 'linhas')}
 
 
 def d1(sql):
@@ -178,7 +180,10 @@ if __name__ == '__main__':
     if cmd == 'esquema':
         esquema()
     elif cmd == 'sincronizar':
-        sincronizar(tudo='--tudo' in sys.argv[2:])
+        try:
+            sincronizar(tudo='--tudo' in sys.argv[2:])
+        except Exception as e:   # ex.: a Cloudflare recusou a leitura (acontece e passa na próxima): uma linha de erro, sem quebrar
+            sb.saida({'tabelas': [], 'erros': [{'tabela': '(leitura do D1)', 'erro': str(e)[:300]}]})
     elif cmd == 'conferir':
         conferir()
     else:

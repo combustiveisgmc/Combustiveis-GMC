@@ -54,6 +54,13 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
   Senhas dos logins só como hash. `scripts/supabase_d1.py` (esquema / sincronizar / conferir): o vigia copia a cada 5 min
   só as tabelas que mudaram (`sincronizacao_cloudflare` mostra quando). Migração nova no D1 (coluna ou tabela): o log do
   vigia avisa "precisa de migração"; gerar o SQL com `esquema` e criar a migração no Supabase.
+- **Ajustes de estrutura (revisão de 12/11/2026):** `base_transacoes.chave` = placa|data e hora|combustível é a identidade
+  do abastecimento (única; não muda quando hodômetro ou litros são corrigidos; os 2 casos antigos repetidos ganham "#2").
+  O código da transação não é único e a `linha` muda quando um lote entra no meio da planilha: não usar nenhum dos dois
+  para ligar dados. Índices por chave, placa+data, data, unidade+data e código. Saíram do banco as colunas de fórmula que
+  eram cópia (ano/mês da data, placa+hodômetro, data_ref, def_posto; `ignorar` em FONTES) e "ano" virou `ano_veiculo`.
+  `consolidador_lotes` no Supabase fica sem a coluna `linhas` (os abastecimentos do lote já estão em base_transacoes).
+  ANP: `concatenado` não é único (mesmo município em estados diferentes); cruzar por estado + município + produto + mês.
 - Ainda não usado pelo site (continua na Cloudflare); próximo passo combinado: domínio próprio e site no Lovable usando o
   Supabase, deixando as planilhas por último.
 

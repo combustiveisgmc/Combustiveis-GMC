@@ -37,7 +37,10 @@ CTRL = lambda n: os.path.join(PROJETO, 'CONTROLES', n)
 # abas: várias abas na mesma tabela, com uma coluna fixa (ex.: produto) para dizer de qual veio
 # largo: aba com um mês por coluna (Metas x mes) -> uma linha por placa e mês
 FONTES = {
-    'base_transacoes': {'arquivo': CTRL('Base_copia.xlsx'), 'aba': 'Transações'},
+    # ignorar: colunas de fórmula da planilha que no banco são cópia (ano/mês da data, placa+hodômetro, vazias);
+    # renomear: "ano" é o ano do veículo; chave: identidade estável do abastecimento (ver chave_abastecimento)
+    'base_transacoes': {'arquivo': CTRL('Base_copia.xlsx'), 'aba': 'Transações', 'ignorar': ['ano_2', 'mes', 'cod_unid', 'data_ref', 'def_posto'],
+                        'renomear': {'ano': 'ano_veiculo'}, 'chave': True},
     'placas': {'arquivo': CTRL('Controle_motoristas_e_placas.xlsx'), 'aba': 'Carros'},
     'motoristas': {'arquivo': CTRL('Controle_motoristas_e_placas.xlsx'), 'aba': 'Motoristas'},
     'cartoes_placas': {'arquivo': CTRL('CONTROLE CARTÕES FROTA.xlsx'), 'aba': 'CARTÕES'},
@@ -139,6 +142,13 @@ def ler_fonte(nome):
         cols = unicos([nome_coluna(x) for x in t])
         if nome == 'placas':
             calcular_placas(cols, ls)
+        if f.get('ignorar'):
+            manter = [i for i, c in enumerate(cols) if c not in f['ignorar']]
+            cols = [cols[i] for i in manter]
+            ls = [(n, [v[i] for i in manter]) for n, v in ls]
+        cols = [f.get('renomear', {}).get(c, c) for c in cols]
+        if f.get('chave'):
+            cols, ls = cols + ['chave'], chave_abastecimento(cols, ls)
         return cols, ls
     finally:
         wb.close()
@@ -157,6 +167,22 @@ def calcular_placas(cols, linhas):
         meta, cap = num(v[im]), num(v[ic])
         v[ip] = round(meta - 0.5, 3) if meta and meta > 0 else None
         v[ia] = round(cap * meta * 0.75, 3) if meta and cap else None
+
+
+def chave_abastecimento(cols, linhas):
+    """Identidade estável do abastecimento (12/11/2026): placa|data e hora|combustível. Fica igual quando o portal corrige
+    hodômetro ou litros. O código da transação não serve (11 mil sem código, 67 repetidos) e a linha muda quando um lote
+    entra no meio da planilha. Hoje só 2 abastecimentos antigos repetem a combinação (RUI9F84 09/02/2024 e SIE2E12
+    19/07/2025): o segundo ganha "#2" (na ordem da planilha), e assim por diante."""
+    ip, idt, ic = (cols.index(c) for c in ('placa', 'data_transacao', 'tipo_combustivel'))
+    vistos, out = {}, []
+    for n, v in linhas:
+        d = v[idt]
+        k = '|'.join([str(v[ip] or '').strip().upper(), d.strftime('%Y-%m-%dT%H:%M:%S') if hasattr(d, 'strftime') else str(d or ''),
+                      str(v[ic] or '').strip().upper()])
+        vistos[k] = vistos.get(k, 0) + 1
+        out.append((n, v + [k if vistos[k] == 1 else f'{k}#{vistos[k]}']))
+    return out
 
 
 def unicos(cols):
