@@ -670,6 +670,12 @@ a.linha-lista:hover{background:var(--cartao-2);}
 .cd-cartoes{display:flex;align-items:flex-start;gap:10px;margin-top:var(--e-4);padding:12px 14px;border:1px solid var(--borda-forte);border-radius:var(--r);font-size:14px;line-height:1.4;cursor:pointer;}
 .cd-cartoes input{margin-top:3px;flex-shrink:0;width:16px;height:16px;}
 .cd-cartoes.oculto{display:none;}
+/* motoristas: CPF, nascimento e CNH só para criar o usuário e mandar aos cartões (não ficam guardados) */
+.cd-pessoais{margin:var(--e-4) 0 0;padding:12px 14px 4px;border:1px dashed var(--borda-forte);border-radius:var(--r);min-width:0;}
+.cd-pessoais.oculto{display:none;}
+.cd-pessoais legend{padding:0 4px;font-size:12px;font-weight:600;color:var(--texto-2);}
+.cd-pessoais > .nota-campo{display:block;margin:0 0 var(--e-3);}
+.campo-form[hidden]{display:none;}
 
 /* Evolução placas: matriz */
 .legenda-matriz{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--texto-2);}

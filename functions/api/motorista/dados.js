@@ -4,7 +4,7 @@ import { motoristaDaSessao, motoristaDoCadastro, chaveNome, ESPELHO_TESTE } from
 // Área do motorista: os abastecimentos de quem entrou (e só os dele). A parte da Base vem do vigia já separada por nome
 // (KV "painel-motoristas:<grupo>", scripts/painel_motoristas.mjs); as transações das APIs dos cartões que a Base ainda não
 // tem vêm do "tempo-real", filtradas aqui pelo mesmo nome.
-// GET /api/motorista/dados -> {nome, unidade, senhas: {ticket, truckpag, veloe}, geradoEm, linhas: [{dia, seg, placa, combustivel, posto, cidade, litros, km,
+// GET /api/motorista/dados -> {nome, unidade, usuario, senhaPropria, senhas: {ticket, truckpag, veloe}, geradoEm, linhas: [{dia, seg, placa, combustivel, posto, cidade, litros, km,
 //                              hodometro, abastecimento, tempoReal}], veiculos: {placa: {categoria, modelo, meta}},
 //                              prime: {avisos: {placa|dia|hodômetro: {motivo, aviso}}, parciais: [placa|dia|hodômetro],
 //                                      notas: [{mes, nota, estrelas}]}}
@@ -17,10 +17,10 @@ function grupoDe(chave) {   // igual ao scripts/painel_motoristas.mjs
 
 export async function onRequestGet({ request, env }) {
   const s = await motoristaDaSessao(env.DB, request);
-  if (!s) return json({ erro: 'Entre de novo com o seu CPF.' }, 401);
-  const cad = await motoristaDoCadastro(env, s.cpf);
+  if (!s) return json({ erro: 'Entre de novo com o seu usuário.' }, 401);
+  const cad = await motoristaDoCadastro(env, s.usuario);
   if (!cad || cad.situacao === 'DESLIGADO') return json({ erro: 'Seu acesso não está liberado. Fale com a gestão de combustível.' }, 403);
-  const espelhoDe = ESPELHO_TESTE[s.cpf] || null;   // motorista de teste: abastecimentos de um motorista real, só na tela
+  const espelhoDe = ESPELHO_TESTE[s.usuario] || null;   // motorista de teste: abastecimentos de um motorista real, só na tela
   const k = chaveNome(espelhoDe || cad.nome || s.nome);
   const [grupo, veic, tr] = await Promise.all([
     env.DADOS.get('painel-motoristas:' + grupoDe(k), 'json').catch(() => null),
@@ -63,5 +63,7 @@ export async function onRequestGet({ request, env }) {
       if (r) prime.notas.push({ mes: m.mes, nota: r.nota, estrelas: r.estrelas });
     }
   } catch {}   // tabelas do PRIME ainda não criadas: a área do motorista segue sem elas
-  return json({ nome: cad.nome, unidade: cad.unidade, espelhoDe, senhas: cad.senhas || {}, geradoEm: grupo ? grupo.geradoEm : null, tempoRealEm: tr ? tr.geradoEm : null, linhas, veiculos, prime });
+  // acesso a este portal (aba Senhas): o usuário e se ainda usa a senha inicial
+  const ac = await env.DB.prepare('SELECT senha_hash IS NOT NULL AS propria FROM motoristas_acesso WHERE usuario = ?').bind(s.usuario).first().catch(() => null);
+  return json({ nome: cad.nome, unidade: cad.unidade, usuario: s.usuario, senhaPropria: !!(ac && ac.propria), espelhoDe, senhas: cad.senhas || {}, geradoEm: grupo ? grupo.geradoEm : null, tempoRealEm: tr ? tr.geradoEm : null, linhas, veiculos, prime });
 }

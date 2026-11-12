@@ -3,6 +3,7 @@
 // sincronização gravá-la na planilha; depois a lista é publicada de novo. Os campos vêm do servidor (lib/cadastros.js).
 import { esc, fmt } from '../lib/dados.js';
 import { criarFiltros } from '../lib/filtros.js';
+import { confirmar } from '../lib/confirmar.js';
 
 const NOME_ESTADO = { pendente: 'Aguardando gravação', aguardando: 'Planilha aberta no Excel', aplicada: 'Gravada na planilha', erro: 'Erro ao gravar' };
 const emAberto = (a) => a.estado === 'pendente' || a.estado === 'aguardando';
@@ -11,7 +12,7 @@ const cmp = (a, b) => semAcento(a).localeCompare(semAcento(b), 'pt-BR', { numeri
 const fNum = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
 const TEXTO = {
   placas: { um: 'placa', varios: 'placas', busca: 'Placa, modelo ou marca…', novo: 'Adicionar placa', aba: 'Carros' },
-  motoristas: { um: 'motorista', varios: 'motoristas', busca: 'Nome ou CPF…', novo: 'Adicionar motorista', aba: 'Motoristas' },
+  motoristas: { um: 'motorista', varios: 'motoristas', busca: 'Nome ou usuário…', novo: 'Adicionar motorista', aba: 'Motoristas' },
 };
 // filtros de seleção múltipla (a mesma barra dos dashboards); campo vazio vira uma opção própria
 const valorOu = (campo, vazio) => (r) => (r[campo] === null || r[campo] === undefined || r[campo] === '' ? vazio : String(r[campo]));
@@ -25,8 +26,11 @@ const DIMENSOES = {
   motoristas: [
     { id: 'unidade', rotulo: 'Unidade', valor: valorOu('unidade', '(sem unidade)') },
     { id: 'situacao', rotulo: 'Situação', valor: valorOu('situacao', '(sem situação)') },
+    { id: 'acesso', rotulo: 'Área do motorista', valor: (r) => (r._acesso && r._acesso.ultimo ? 'Já entrou' : 'Nunca entrou') },
   ],
 };
+// último acesso à área do motorista (como em Gerenciar acessos)
+const quando = (iso) => { const d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
 
 export async function montar(ctx, tipo) {
   const { pagina } = ctx;
@@ -52,6 +56,12 @@ export async function montar(ctx, tipo) {
   // campos ocultos (matrícula, código Ticket, ID TruckPag) ficam fora da tabela e do formulário; o histórico ainda os mostra
   const todos = info.campos, campos = todos.filter((c) => !c.oculto), K = info.chave, editar = info.podeEditar;
   const campo = (id) => todos.find((c) => c.id === id);
+  // motoristas: coluna extra com o último acesso à área do motorista (tabela motoristas_acesso, não vem da planilha)
+  const ehMot = tipo === 'motoristas';
+  const colunas = campos.concat(ehMot ? [{ id: '_ultimo', rotulo: 'Último acesso', tipo: 'acesso', explica: 'Último acesso à área do motorista (Minha média)' }] : []);
+  const coluna = (id) => colunas.find((c) => c.id === id) || campo(id);
+  const usuarioDe = (r) => { const d = String(r.usuario ?? '').replace(/\D/g, ''); return d ? d.padStart(6, '0') : ''; };
+  let recado = null;   // aviso da última gravação desta tela (ex.: o usuário do motorista novo)
   ctx.definirSub(editar
     ? 'Planilha de controle de ' + T.varios + '. As alterações feitas aqui são gravadas na planilha pelo computador da sincronização.'
     : 'Consulta da planilha de controle de ' + T.varios + '.');
@@ -91,6 +101,8 @@ export async function montar(ctx, tipo) {
         <div class="grade-form" id="cd-campos"></div>
         <label class="cd-cartoes oculto" id="cd-cartoes"><input type="checkbox" name="cartoes" checked>
           <span><strong>Cadastrar também nos sites dos cartões frota</strong> (Ticket e TruckPag). Desmarque se o motorista já estiver lá.</span></label>
+        <fieldset class="cd-pessoais oculto" id="cd-pessoais"><legend id="cd-pessoais-titulo"></legend>
+          <p class="nota-campo" id="cd-pessoais-explica"></p><div class="grade-form" id="cd-pessoais-campos"></div></fieldset>
         <div class="dialogo-acoes">
           <button type="button" class="btn" id="cd-cancelar">Cancelar</button>
           <button type="submit" class="btn btn-principal" id="cd-salvar"></button>
@@ -105,7 +117,13 @@ export async function montar(ctx, tipo) {
   // ano e outros inteiros sem separador de milhar (2009, não 2.009); decimais com vírgula
   const paraCampo = (c, v) => (v === null || v === undefined ? '' : c.tipo === 'inteiro' ? String(v)
     : numerico(c) && typeof v === 'number' ? fNum.format(v) : String(v));
-  function celula(c, v) {
+  function celula(c, v, r) {
+    if (c.tipo === 'acesso') {
+      const a = (r && r._acesso) || {};
+      if (!a.ultimo) return '<span class="sem-dado">Nunca entrou</span>';
+      return esc(quando(a.ultimo)) + '<small class="cidade-linha">' + fmt.int(a.vezes || 0) + (a.vezes === 1 ? ' acesso' : ' acessos') +
+        ' · ' + (a.senhaPropria ? 'trocou a senha' : 'senha inicial') + '</small>';
+    }
     if (v === null || v === undefined || v === '') return '<span class="sem-dado">—</span>';
     if (c.tipo === 'senha') return estado.senhas ? '<span class="num">' + esc(v) + '</span>' : '<span class="senha-oculta" title="Use Mostrar senhas">••••</span>';
     if (numerico(c)) return '<span class="num">' + esc(paraCampo(c, v)) + '</span>';
@@ -147,6 +165,7 @@ export async function montar(ctx, tipo) {
         lista.push(r);
       }
     }
+    if (ehMot) for (const r of lista) { r._acesso = (info.acessos || {})[usuarioDe(r)] || null; r._ultimo = r._acesso && r._acesso.ultimo ? r._acesso.ultimo : ''; }
     return lista;
   }
 
@@ -166,7 +185,8 @@ export async function montar(ctx, tipo) {
     const resumo = [
       [tipo === 'placas' ? 'Placas' : 'Motoristas', fmt.int(todas.length)],
       ['Unidades', fmt.int(new Set(todas.map((r) => r.unidade).filter(Boolean)).size)],
-      tipo === 'placas' ? ['Sem meta', fmt.int(todas.filter((r) => !r.meta).length)] : ['Sem situação', fmt.int(todas.filter((r) => !r.situacao).length)],
+      tipo === 'placas' ? ['Sem meta', fmt.int(todas.filter((r) => !r.meta).length)] : ['Já entraram na área', fmt.int(todas.filter((r) => r._ultimo).length) + ' de ' + fmt.int(todas.length)],
+      ...(ehMot ? [['Entraram nos últimos 30 dias', fmt.int(todas.filter((r) => r._ultimo && Date.now() - Date.parse(r._ultimo) < 30 * 864e5).length)]] : []),
       tipo === 'placas' ? ['Desabilitadas', fmt.int(todas.filter((r) => r.situacao === 'DESABILITADA').length)] : ['Sem senha Ticket', fmt.int(todas.filter((r) => !r.senhaTicket).length)],
       ['Lista lida da planilha em', at ? at.toLocaleDateString('pt-BR') + ' ' + at.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'],
     ];
@@ -180,20 +200,21 @@ export async function montar(ctx, tipo) {
     const tDig = estado.busca.replace(/\D/g, '');
     const busca = tipo === 'placas'
       ? (r) => [r.placa, r.modelo, r.marca].some((v) => semAcento(v).replace(/[^a-z0-9]/g, '').includes(tPlaca))
-      : (r) => semAcento(r.nome).includes(t) || (tDig.length >= 3 && String(r.cpf || '').replace(/\D/g, '').includes(tDig));
+      : (r) => semAcento(r.nome).includes(t) || (tDig.length >= 3 && usuarioDe(r).includes(tDig));
     const salvo = ultimoSalvo && linhas().find((r) => (r._pendente && r._pendente.id === ultimoSalvo.id) || chaveNorm(r[K]) === ultimoSalvo.chave);
     const escondido = salvo && (!filtros.passa(salvo, null) || (t && !busca(salvo))) ? salvo : null;
     const avisos = [];
     if (noExcel) avisos.push(noExcel + (noExcel === 1 ? ' alteração espera' : ' alterações esperam') + ' a planilha de placas e motoristas ser fechada no Excel para ser gravada.');
     else if (pend.length) avisos.push(pend.length + (pend.length === 1 ? ' alteração sendo gravada' : ' alterações sendo gravadas') + ' na planilha. A lista é atualizada logo em seguida.');
     else if (gravadas) avisos.push((gravadas === 1 ? 'Alteração gravada' : 'Alterações gravadas') + ' na planilha. A lista é atualizada em instantes.');
-    $('cd-pendencias').classList.toggle('oculto', !avisos.length && !escondido);
+    $('cd-pendencias').classList.toggle('oculto', !avisos.length && !escondido && !recado);
     $('cd-pendencias').innerHTML = (avisos.length ? '<svg aria-hidden="true" class="girando"><use href="#i-atualizar"/></svg><span>' + esc(avisos.join(' ')) + '</span>' : '') +
+      (recado ? '<span class="cd-escondido"><strong>' + esc(recado) + '</strong> <button type="button" class="link-acao" id="cd-fechar-recado">Ok</button></span>' : '') +
       (escondido ? '<span class="cd-escondido">' + esc((tipo === 'placas' ? 'A placa ' + (escondido.placa || '') : (escondido.nome || 'O motorista')) +
         ' foi salv' + (tipo === 'placas' ? 'a' : 'o') + ', mas não aparece na tabela por causa dos filtros ou da busca.') +
         ' <button type="button" class="link-acao" id="cd-mostrar-salvo">Limpar filtros e busca</button></span>' : '');
 
-    const c = campo(estado.ordem.col);
+    const c = coluna(estado.ordem.col);
     visiveis = todas.filter((r) => !t || busca(r))
       .sort((a, b) => {
         const va = a[c.id], vb = b[c.id];
@@ -203,10 +224,10 @@ export async function montar(ctx, tipo) {
         return estado.ordem.dir * d || cmp(a[K], b[K]);
       });
     $('cd-conta').textContent = visiveis.length + ' ' + (visiveis.length === 1 ? T.um : T.varios);
-    $('cd-tabela').innerHTML = '<thead><tr>' + campos.map((col) => {
+    $('cd-tabela').innerHTML = '<thead><tr>' + colunas.map((col) => {
       const ativa = estado.ordem.col === col.id;
       return '<th aria-sort="' + (ativa ? (estado.ordem.dir > 0 ? 'ascending' : 'descending') : 'none') + '"' + (numerico(col) ? ' class="n"' : '') +
-        '><button type="button" data-col="' + col.id + '"' + (col.explica ? ' title="' + (col.tipo === 'leitura' ? '' : 'Calculado na planilha: ') + esc(col.explica) + '"' : '') + '>' +
+        '><button type="button" data-col="' + col.id + '"' + (col.explica ? ' title="' + (col.tipo === 'calculado' ? 'Calculado na planilha: ' : '') + esc(col.explica) + '"' : '') + '>' +
         esc(col.rotulo) + (ativa ? '<span class="seta">' + (estado.ordem.dir > 0 ? '▲' : '▼') + '</span>' : '') + '</button></th>';
     }).join('') + (editar ? '<th class="acoes-linha"><span>Ações</span></th>' : '') + '</tr></thead><tbody>' +
       (visiveis.length ? visiveis.map((r, i) => {
@@ -214,13 +235,14 @@ export async function montar(ctx, tipo) {
         const selo = p ? '<span class="selo-pendente" title="' + esc(p.estado === 'aplicada' ? 'Gravada na planilha; a lista é atualizada em instantes' : NOME_ESTADO[p.estado]) + '">' +
           (p.estado === 'aguardando' ? 'planilha aberta' : p.estado === 'aplicada' ? 'gravada, atualizando lista' : 'aguardando gravação') + '</span>' : '';
         const apagada = tipo === 'placas' && r.situacao === 'DESABILITADA';
-        return '<tr' + (apagada ? ' class="linha-apagada"' : '') + '>' + campos.map((col, j) => '<td' + (numerico(col) ? ' class="n"' :col.id === 'nome' ? ' class="trunc"' : '') + '>' +
-          (j === 0 ? '<strong>' + celula(col, r[col.id]) + '</strong>' + selo : celula(col, r[col.id])) + '</td>').join('') +
+        return '<tr' + (apagada ? ' class="linha-apagada"' : '') + '>' + colunas.map((col, j) => '<td' + (numerico(col) ? ' class="n"' : col.id === 'nome' ? ' class="trunc"' : col.id === 'usuario' ? ' class="num"' : '') + '>' +
+          (j === 0 ? '<strong>' + celula(col, r[col.id], r) + '</strong>' + selo : celula(col, r[col.id], r)) + '</td>').join('') +
           (editar ? '<td class="acoes-linha">' + (r._novo ? '<span class="sem-dado">aguardando</span>'
             : '<button type="button" class="btn-linha" data-editar="' + i + '">Editar</button>' + (tipo === 'placas'
               ? (apagada ? '<button type="button" class="btn-linha btn-linha-bom" data-situacao="ATIVA" data-i="' + i + '">Habilitar</button>'
-                : '<button type="button" class="btn-linha btn-linha-ruim" data-situacao="DESABILITADA" data-i="' + i + '">Desabilitar</button>') : '')) + '</td>' : '') + '</tr>';
-      }).join('') : '<tr><td colspan="' + (campos.length + 1) + '"><div class="vazio">Nenhum' + (tipo === 'placas' ? 'a placa' : ' motorista') + ' com esses filtros.</div></td></tr>') +
+                : '<button type="button" class="btn-linha btn-linha-ruim" data-situacao="DESABILITADA" data-i="' + i + '">Desabilitar</button>')
+              : r._acesso && r._acesso.senhaPropria ? '<button type="button" class="btn-linha" data-senha-inicial="' + i + '" title="A senha da área do motorista volta a ser o usuário">Senha inicial</button>' : '')) + '</td>' : '') + '</tr>';
+      }).join('') : '<tr><td colspan="' + (colunas.length + 1) + '"><div class="vazio">Nenhum' + (tipo === 'placas' ? 'a placa' : ' motorista') + ' com esses filtros.</div></td></tr>') +
       '</tbody>';
     if (editar) desenharHistorico();
   }
@@ -286,6 +308,35 @@ export async function montar(ctx, tipo) {
       '<input name="' + c.id + '" autocomplete="off" spellcheck="false"' + lista + modo + '>' + dl + dica + '</label>';
   }).join('');
 
+  // dados pessoais (só motoristas): pedidos para criar o usuário e mandar à Ticket/TruckPag; não ficam guardados
+  const PESSOAIS = info.pessoais || [];
+  const opcaoP = (v, t) => '<option value="' + esc(v) + '">' + esc(t) + '</option>';
+  $('cd-pessoais-campos').innerHTML = PESSOAIS.map((c) => '<label class="campo-form" data-pessoal="' + c.id + '"><span>' + esc(c.rotulo) +
+    ' <small class="cd-p-obr"></small></span>' + (c.tipo === 'opcao'
+      ? '<select name="p_' + c.id + '">' + opcaoP('', '—') + c.opcoes.map((o) => opcaoP(o, o)).join('') + '</select>'
+      : '<input name="p_' + c.id + '" autocomplete="off" spellcheck="false"' + (c.tipo === 'cpf' ? ' inputmode="numeric" placeholder="000.000.000-00" maxlength="14" data-mascara="cpf"'
+        : c.tipo === 'data' ? ' inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" data-mascara="data"' : ' maxlength="' + (c.max || 20) + '"') + '>') + '</label>').join('');
+  // quais aparecem e quais são obrigatórios: novo com cartões = todos (CPF e nascimento obrigatórios); novo sem cartões = só
+  // o CPF (dá o usuário); edição = CPF e nascimento, opcionais, só se o motorista tem ID TruckPag
+  function prepararPessoais() {
+    const box = $('cd-pessoais');
+    if (!ehMot || (editando && !editando.idTruckpag)) { box.classList.add('oculto'); return; }
+    const cartoes = !editando && form.cartoes.checked;
+    const mostrar = editando ? ['cpf', 'dataNascimento'] : cartoes ? PESSOAIS.map((c) => c.id) : ['cpf'];
+    const exigir = editando ? [] : cartoes ? ['cpf', 'dataNascimento'] : ['cpf'];
+    box.classList.remove('oculto');
+    box.querySelectorAll('[data-pessoal]').forEach((el) => {
+      el.hidden = !mostrar.includes(el.dataset.pessoal);
+      el.querySelector('.cd-p-obr').textContent = exigir.includes(el.dataset.pessoal) ? '' : '(opcional)';
+    });
+    $('cd-pessoais-titulo').textContent = editando ? 'Repetir na TruckPag (opcional)' : cartoes ? 'Dados para o usuário e para os cartões' : 'CPF para criar o usuário';
+    $('cd-pessoais-explica').textContent = editando
+      ? 'A TruckPag exige CPF e data de nascimento em toda alteração de nome ou senha. Eles vão só para lá e não ficam guardados. Em branco, a alteração fica só no portal e na planilha.'
+      : cartoes ? 'O usuário de acesso do motorista são os 6 primeiros números do CPF. CPF, nascimento e CNH vão para a Ticket e a TruckPag e são apagados depois: não ficam no portal nem na planilha.'
+        : 'O usuário de acesso do motorista são os 6 primeiros números do CPF. O CPF não fica guardado no portal nem na planilha.';
+  }
+  form.addEventListener('change', (e) => { if (e.target.name === 'cartoes') prepararPessoais(); });
+
   // ponto crítico e autonomia acompanham meta e tanque enquanto digita (a planilha recalcula ao abrir)
   const lerNum = (v) => { const t = String(v).trim(); if (!t) return null; const n = Number(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t); return Number.isFinite(n) ? n : null; };
   function recalcular() {
@@ -343,6 +394,7 @@ export async function montar(ctx, tipo) {
     // motorista novo: caixa "cadastrar nos sites dos cartões frota", marcada por padrão (desmarcada, o vigia pula os cartões)
     $('cd-cartoes').classList.toggle('oculto', !(tipo === 'motoristas' && !r));
     form.cartoes.checked = true;
+    if (ehMot) { form.usuario.closest('label').hidden = !r; prepararPessoais(); }
     dlg.showModal();
     (r ? form[campos[1].id] : form[campos[0].id]).focus();
   }
@@ -365,19 +417,39 @@ export async function montar(ctx, tipo) {
     const dados = {};
     for (const [k, v] of Object.entries(valores)) if (!editando || v !== paraCampo(campo(k), editando[k])) dados[k] = v;
     if (!Object.keys(dados).length) { erro.textContent = 'Nada foi alterado.'; erro.classList.remove('oculto'); return; }
+    // dados pessoais visíveis e preenchidos (vão só nesta alteração; o servidor confere de novo)
+    const pessoais = {};
+    if (ehMot && !$('cd-pessoais').classList.contains('oculto')) {
+      for (const el of $('cd-pessoais').querySelectorAll('[data-pessoal]')) {
+        const v = el.hidden ? '' : form['p_' + el.dataset.pessoal].value.trim();
+        if (!v && !el.hidden && !el.querySelector('.cd-p-obr').textContent) {
+          erro.textContent = 'Preencha ' + PESSOAIS.find((c) => c.id === el.dataset.pessoal).rotulo.toLowerCase() + '.'; erro.classList.remove('oculto');
+          form['p_' + el.dataset.pessoal].focus();
+          return;
+        }
+        if (v) pessoais[el.dataset.pessoal] = v;
+      }
+      if (editando && (pessoais.cpf ? 1 : 0) + (pessoais.dataNascimento ? 1 : 0) === 1) {
+        erro.textContent = 'Para repetir na TruckPag, informe CPF e data de nascimento (ou deixe os dois em branco).'; erro.classList.remove('oculto');
+        form[pessoais.cpf ? 'p_dataNascimento' : 'p_cpf'].focus();
+        return;
+      }
+    }
     const btn = $('cd-salvar'), rotulo = btn.textContent;
     btn.disabled = true; btn.textContent = 'Salvando…';
     try {
       const r = await fetch('/api/cadastros/' + tipo, {
         method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ acao: editando ? 'editar' : 'adicionar', chave: editando ? (editando._chaveOriginal ?? editando[K]) : undefined, dados,
-          ...(!editando && tipo === 'motoristas' ? { cartoes: form.cartoes.checked } : {}) }),
+          ...(ehMot ? { pessoais } : {}), ...(!editando && ehMot ? { cartoes: form.cartoes.checked } : {}) }),
       });
       const j = await r.json().catch(() => ({}));
       if (r.status === 401) { location.href = '/?entrar=1'; return; }
       if (!r.ok) { erro.textContent = j.erro || 'Não foi possível salvar. Tente de novo.'; erro.classList.remove('oculto'); return; }
       info.alteracoes.unshift({ ...j.alteracao, mensagem: null, linha: null });
       ultimoSalvo = { id: j.alteracao.id, chave: chaveNorm(j.alteracao.dados[K] ?? j.alteracao.chave) };
+      recado = j.aviso || (ehMot && !editando ? (j.alteracao.dados.nome || 'Motorista') + ': usuário de acesso ' + j.alteracao.dados.usuario + ' (a senha inicial é o mesmo número).' : null);
+      form.querySelectorAll('[name^="p_"]').forEach((el) => { el.value = ''; });   // os dados pessoais não ficam na tela
       dlg.close();
       desenhar();
       acompanhar();
@@ -440,7 +512,31 @@ export async function montar(ctx, tipo) {
     if (b) abrir(visiveis[Number(b.dataset.editar)]);
     const s = e.target.closest('[data-situacao]');
     if (s) mudarSituacao(visiveis[Number(s.dataset.i)], s.dataset.situacao, s);
+    const si = e.target.closest('[data-senha-inicial]');
+    if (si) senhaInicial(visiveis[Number(si.dataset.senhaInicial)], si);
   });
+
+  // ---------- motoristas: a senha da área do motorista volta a ser o usuário (ele esqueceu a que escolheu) ----------
+  async function senhaInicial(r, botao) {
+    const usr = usuarioDe(r);
+    if (!(await confirmar('A senha de ' + (r.nome || 'este motorista') + ' na área do motorista volta a ser o usuário (' + usr + '). ' +
+      'Se ele estiver conectado em algum aparelho, vai precisar entrar de novo.', { titulo: 'Voltar à senha inicial', ok: 'Voltar à senha inicial' }))) return;
+    botao.disabled = true; botao.textContent = 'Salvando…';
+    try {
+      const resp = await fetch('/api/cadastros/motoristas', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ acao: 'redefinir-senha', usuario: usr }) });
+      const j = await resp.json().catch(() => ({}));
+      if (resp.status === 401) { location.href = '/?entrar=1'; return; }
+      if (!resp.ok) throw new Error(j.erro || 'Não foi possível salvar. Tente de novo.');
+      info.acessos = info.acessos || {};
+      info.acessos[usr] = { ...(info.acessos[usr] || {}), senhaPropria: false, redefinidaEm: j.redefinidaEm };
+      recado = (r.nome || 'Motorista') + ': a senha voltou a ser o usuário ' + usr + '.';
+      desenhar();
+    } catch (err) {
+      recado = 'Não foi possível voltar a senha de ' + (r.nome || 'motorista') + ': ' + (err.message === 'Failed to fetch' ? 'sem conexão com o servidor.' : err.message);
+      desenhar();
+    }
+  }
   if (temSenhas) {
     $('cd-senhas').addEventListener('click', () => {
       estado.senhas = !estado.senhas;
@@ -451,6 +547,7 @@ export async function montar(ctx, tipo) {
   }
   $('cd-busca').addEventListener('input', (e) => { estado.busca = e.target.value; desenhar(); });
   $('cd-pendencias').addEventListener('click', (e) => {
+    if (e.target.closest('#cd-fechar-recado')) { recado = null; desenhar(); return; }
     if (!e.target.closest('#cd-mostrar-salvo')) return;
     estado.busca = $('cd-busca').value = '';
     filtros.limpar();   // chama desenhar()

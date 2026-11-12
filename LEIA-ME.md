@@ -157,9 +157,17 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
 - Página dos postos: linha "Cartões aceitos" no topo, aviso de cartão faltando, unidade e busca; cada posto mostra nome,
   cidade e cartão, com o botão do mapa à direita (tocar no posto também abre o mapa).
-- O motorista abre a página dos postos, toca em **Entrar** e digita o **CPF** (com ou sem pontos) e a **senha = 6 primeiros
-  números do CPF** (decisão do usuário: uma senha só, fácil de lembrar; quem souber o CPF de alguém consegue entrar).
-  Depois de 5 tentativas erradas o CPF fica bloqueado por 15 minutos. Fica conectado 30 dias no aparelho; "Sair" no topo.
+- O motorista abre a página dos postos, toca em **Entrar** e digita o **usuário** = os 6 primeiros números do CPF (se
+  digitar o CPF inteiro, por costume, vale só o começo) e a **senha**: a inicial é o próprio usuário; ele pode trocar na
+  aba **Senhas** ("Seu acesso a este portal" > Trocar minha senha; pelo menos 6 letras ou números). Esqueceu a senha que
+  escolheu: Cadastro > Motoristas > **Senha inicial** na linha dele (volta a ser o usuário e encerra as sessões abertas).
+  Depois de 5 tentativas erradas o usuário fica bloqueado por 15 minutos. Fica conectado 30 dias no aparelho; "Sair" no topo.
+- **Sem dados pessoais (12/11/2026, pedido do usuário):** o portal, a planilha e o banco não guardam CPF, data de
+  nascimento nem CNH dos motoristas. O usuário de 6 números fica na coluna C (USUARIO) da aba Motoristas; senha escolhida
+  só como hash, na tabela `motoristas_acesso` (que também guarda primeiro e último acesso e quantos acessos).
+- **Controle de acessos:** Cadastro > Motoristas mostra a coluna "Último acesso" (data, quantos acessos, senha inicial ou
+  trocada), o filtro "Área do motorista" (Já entrou / Nunca entrou) e, no resumo, quantos já entraram e quantos entraram
+  nos últimos 30 dias.
 - Quem pode entrar: motorista do Cadastro > Motoristas (planilha Controle_motoristas_e_placas) que não esteja DESLIGADO.
 - A tela (`/motorista/`) é um espelho da Operação por motorista só com os abastecimentos dele: média km/L contra a meta do
   mês (com % atingido), litros economizados ou gastos acima da meta, km, litros e abastecimentos do mês, mês a mês (% da
@@ -509,14 +517,15 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   Dashboars Logística, só leitura: abas `Base_Metas` e `BD_UND`). Ele vai junto com os dados da Base: ao salvar essa
   planilha, o vigia reenvia em cerca de 1 minuto. Unidade nova no orçamento precisa estar na aba `BD_UND`, com o mesmo
   INF ADICIONAL usado nas transações. Regras completas no briefing (seção 8d).
-- **Cadastro > Motoristas x cartões frota (Ticket e TruckPag):** a aba Motoristas da planilha ganhou as colunas H..N: DATA
-  NASCIMENTO, MATRICULA, CNH, CATEGORIA CNH, VALIDADE CNH, CODIGO TICKET e ID TRUCKPAG (criadas pelo vigia na primeira
-  gravação). Para **motorista novo** são obrigatórios a data de nascimento e as senhas Ticket e TruckPag (a TruckPag só
-  aceita de 1 a 4 números); os já cadastrados não precisam (decisão do usuário).
-  - **Completar com a Ticket:** de hora em hora o vigia consulta até 25 motoristas (cada um no máximo a cada 7 dias) e
-    preenche só o que estiver vazio: código do motorista no cliente Raja Log, matrícula e CNH (número, categoria, validade,
-    da transação mais recente dos últimos ~3 meses). Nunca troca o que já está preenchido. As alterações aparecem no
-    histórico do cadastro como "APIs dos cartões (automático)". A Ticket não informa data de nascimento.
+- **Cadastro > Motoristas x cartões frota (Ticket e TruckPag):** a aba Motoristas tem as colunas MOTORISTA, UNIDADE,
+  USUARIO, SENHA TICKET, SENHA TRUCKPAG, SENHA VELOE, SITUACAO, MATRICULA, CODIGO TICKET e ID TRUCKPAG. Desde 12/11/2026
+  **não há CPF, data de nascimento nem CNH** (a coluna CPF virou USUARIO = 6 primeiros números; as de nascimento e CNH
+  saíram: `py scripts/planilha_cadastros.py migrar-sem-cpf`, rodado uma vez). Para **motorista novo** o formulário pede o
+  CPF (dá o usuário; se os 6 números já forem de outro motorista, o portal sorteia outro e avisa) e, com "Cadastrar também
+  nos sites dos cartões" marcado, a data de nascimento (obrigatória) e a CNH (opcional), além das senhas Ticket e TruckPag.
+  Esses dados pessoais ficam só na alteração (`alteracoes_cadastros.pessoais`) até o vigia mandar aos cartões; depois são
+  apagados (e de qualquer jeito somem em 7 dias). Nunca vão para a planilha, para a lista do portal nem para o disco.
+  - **Completar com a Ticket:** desligado e removido em 12/11/2026 (consultava a Ticket pelo CPF e trazia a CNH).
   - **Cadastrar nos cartões (motorista novo):** **ligado em 06/11/2026** (testado com um motorista real). Na Ticket vai com tipo de
     senha IU (informada pelo usuário; a senha Ticket é a matrícula, 6 números), Gestor responsável "GESTOR FROTA" e sem a
     validade da CNH (com ela a Ticket recusa o cadastro novo). Ligado
@@ -524,21 +533,20 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
     sincronização), o motorista adicionado no portal é cadastrado na Ticket (só no cliente 245364 Raja Log) e na TruckPag
     (empresa 25298), e o código/ID voltam para a planilha. Editar nos cartões: por enquanto não (decisão do usuário; a
     TruckPag não deixa consultar motoristas, então só os criados pelo portal teriam o ID).
-  - **Motorista de teste:** nome começando por TESTE, FANTASMA ou MOTORISTA TESTE (ou o CPF fictício 111.444.777-35,
-    o MOTORISTA TESTE usado nos ajustes da área do motorista) nunca é cadastrado, editado nem completado nos cartões.
-  - **Editar na TruckPag (ligado em 27/10/2026):** quando alguém muda no portal o nome, o CPF, a senha TruckPag ou a data
-    de nascimento de um motorista, depois que o vigia grava na planilha ele atualiza o mesmo motorista na TruckPag (pelo ID
-    TruckPag). A TruckPag exige a data de nascimento: sem ela no cadastro, vai a que a TruckPag já tem (guardada da
-    exportação, fora do ownCloud). A situação (DESLIGADO etc.) não vai para a TruckPag. O resultado aparece no log do vigia
-    ("atualizado na TruckPag" ou o erro dela). Desligar: `"editar": false` em
+  - **Motorista de teste:** nome começando por TESTE, FANTASMA ou MOTORISTA TESTE (ou o usuário 111444, o MOTORISTA
+    TESTE usado nos ajustes da área do motorista) nunca é cadastrado nem editado nos cartões.
+  - **Editar na TruckPag (ligado em 27/10/2026):** quando alguém muda no portal o nome ou a senha TruckPag de um motorista,
+    depois que o vigia grava na planilha ele atualiza o mesmo motorista na TruckPag (pelo ID TruckPag). A TruckPag exige CPF
+    e data de nascimento em toda edição: o formulário de edição tem o bloco "Repetir na TruckPag (opcional)" com os dois
+    (não ficam guardados; apagados depois do envio). Em branco, a alteração fica só no portal e na planilha e o log do vigia
+    avisa. A situação (DESLIGADO etc.) não vai para a TruckPag. Desligar: `"editar": false` em
     `%LOCALAPPDATA%\GestaoCombustivel\motoristas-cartoes.json`.
   - **Editar na Ticket:** pronto mas desligado: a Ticket recusa a alteração pela API ("motorista pertence a outro cliente";
     os motoristas estão nos clientes Raja Log e Kemigas). Perguntar ao suporte da Ticket; para religar, `"editarTicket":
     true` no mesmo arquivo motoristas-cartoes.json.
-  - **ID TruckPag dos motoristas antigos:** vem da exportação "Motoristas" do portal da TruckPag (CSV com as colunas ID e
-    CPF). Para importar de novo (motoristas que entrarem na TruckPag por fora do portal):
-    `node scripts/importar_ids_truckpag.mjs "<arquivo.csv>"` mostra o resumo; com `--enviar` põe na fila do cadastro (só
-    quem está com o ID vazio). Em 27/10/2026 os 162 motoristas do cadastro receberam o ID.
+  - **ID TruckPag dos motoristas antigos:** em 27/10/2026 os 162 motoristas do cadastro receberam o ID pela exportação
+    "Motoristas" da TruckPag. O script que fazia isso (`importar_ids_truckpag.mjs`, ligava pelo CPF) saiu em 12/11/2026;
+    motorista que entrar na TruckPag por fora do portal: copie o ID dele (portal da TruckPag) para a coluna ID TRUCKPAG.
 - **Cadastros (Placas e Motoristas):**
   - **Placa desabilitada:** some das listas e escolhas do portal (filtro Placa dos painéis, bomba interna, Consulta de KM,
     Editar abastecimentos, aviso de cartão faltando e Cartões frota); os totais históricos continuam contando os abastecimentos dela.
@@ -546,7 +554,7 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
     e `Motoristas`. O script é `scripts/planilha_cadastros.py`.
   - **Publicação:** o vigia publica a lista na chave `cadastros` do KV quando a planilha muda (e ela para de mudar
     por 20 s). Para publicar na hora: `node scripts/sincronizar.mjs --cadastros`.
-  - **Alterações pelo portal:** ficam na tabela `alteracoes_cadastros`. O vigia acha a linha pela placa ou pelo CPF e
+  - **Alterações pelo portal:** ficam na tabela `alteracoes_cadastros`. O vigia acha a linha pela placa ou pelo usuário (motoristas) e
     grava só os campos alterados. Planilha aberta no Excel: espera fechar. Antes de gravar, guarda uma cópia em
     `.dados\copias-planilha\cadastros-*.xlsx`.
   - **Cabeçalho:** se as colunas mudarem de lugar ou de nome, o vigia não grava e mostra o erro no histórico. Nesse

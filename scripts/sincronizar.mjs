@@ -282,7 +282,7 @@ async function publicarCadastros(motivo) {
     // texto já em JSON: com "; charset" o api() envia como está (sem JSON.stringify de novo)
     await api('PUT', '/api/sync/cadastros', fs.readFileSync(CADASTROS_GERADO, 'utf8'), 'application/json; charset=utf-8');
   } finally {
-    try { fs.unlinkSync(CADASTROS_GERADO); } catch {}   // tem CPF e senhas: não fica no disco
+    try { fs.unlinkSync(CADASTROS_GERADO); } catch {}   // tem as senhas dos cartões: não fica no disco
   }
   const arq = planilhaCadastros();
   if (arq) {
@@ -510,13 +510,13 @@ async function processarApisCartoes(forcar) {
   // estornos feitos na TruckPag depois do D-1: exclui da Base_copia (scripts/estornos_truckpag.mjs; a cada 6 horas)
   try { await (await import('./estornos_truckpag.mjs')).processar({ api, log }); }
   catch (e) { log('Estornos TruckPag: ' + String(e.message || e).slice(0, 200)); }
-  // cadastro de motoristas x cartões (scripts/motoristas_cartoes.mjs): cria os novos (se ligado) e completa o cadastro com a
-  // Ticket (no máximo de hora em hora; cada motorista a cada 7 dias)
+  // cadastro de motoristas x cartões (scripts/motoristas_cartoes.mjs): cria os novos e repete as edições (se ligado), com os
+  // dados pessoais digitados no portal, que são apagados depois do envio. O "completar pela Ticket" (CNH etc.) saiu em
+  // 12/11/2026: o portal não guarda mais CPF, nascimento nem CNH
   try {
     const mc = await import('./motoristas_cartoes.mjs');
     await mc.criarNovos({ api, log });
     await mc.editarTruckpag({ api, log });
-    if (forcar || Date.now() >= proximoCadastroCartoes) { proximoCadastroCartoes = Date.now() + 60 * 60 * 1000; await mc.completar({ api, log }); }
   } catch (e) { log('Cadastro x cartões: ' + String(e.message || e).slice(0, 200)); }
   // conciliação de NFs (Fiscal/Financeiro): NFS dos cartões x notas dos postos, a cada 6 horas
   try { await (await import('./conciliacao_nfs.mjs')).processar({ kvPut, log, forcar }); }
@@ -525,7 +525,6 @@ async function processarApisCartoes(forcar) {
   try { await (await import('./conferencia_cartoes.mjs')).processar({ api, kvPut, log, forcar }); }
   catch (e) { log('Conferência com os cartões: ' + String(e.message || e).slice(0, 200)); }
 }
-let proximoCadastroCartoes = 0;
 
 const ultimoEstadoEdicao = new Map();
 async function processarEdicaoBase() {

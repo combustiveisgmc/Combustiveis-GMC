@@ -1,52 +1,43 @@
 // Cadastro de motoristas integrado aos cartões (Ticket Log e TruckPag). Chamado pelo vigia junto com as APIs dos cartões
 // (só no computador que tem as credenciais).
-//  1) completar(): para os motoristas da planilha Controle_motoristas_e_placas, preenche o que estiver VAZIO com o que a
-//     Ticket devolve (código do motorista no cliente Raja Log, matrícula, CNH, categoria e validade). Nunca troca o que
-//     já está preenchido. Consulta até 25 motoristas por vez e cada um no máximo a cada 7 dias.
-//  2) criarNovos(): motorista ADICIONADO pelo portal é cadastrado na Ticket (cliente 245364, decisão do usuário) e na
-//     TruckPag. DESLIGADO até o teste com um motorista real: só roda com "criar": true em
+// Desde 12/11/2026 o portal não guarda CPF, data de nascimento nem CNH (pedido do usuário): esses dados só existem na
+// alteração do Cadastro > Motoristas ("pessoais") até serem enviados aos cartões; depois o vigia avisa e o portal apaga
+// (/api/sync/cadastros/cartoes "limpar"; de qualquer jeito somem em 7 dias). Nada disso é gravado em disco aqui.
+//  1) criarNovos(): motorista ADICIONADO pelo portal é cadastrado na Ticket (cliente 245364, decisão do usuário) e na
+//     TruckPag, com o CPF, o nascimento e a CNH digitados no cadastro. Liga com "criar": true em
 //     %LOCALAPPDATA%\GestaoCombustivel\motoristas-cartoes.json.
-//  3) editarTruckpag(): edição feita no portal (nome, CPF, senha TruckPag, data de nascimento) é repetida na TruckPag pelo
-//     ID TruckPag do cadastro. Liga com "editar": true no mesmo arquivo. A TruckPag exige a data de nascimento em toda
-//     edição: sem ela no cadastro, vai a que a TruckPag já tem (da exportação "Motoristas", importar_ids_truckpag.mjs).
-//     Situação (DESLIGADO etc.) não vai: o código de "inativo" da TruckPag não está na documentação.
-//     Na Ticket ("editarTicket": true): PUT do motorista pelo código Ticket com tudo o que o cadastro tem (nome, CPF,
-//     matrícula, CNH, data de nascimento) e, se a senha Ticket mudou, a troca de senha (endereço próprio).
+//  2) editarTruckpag(): edição de nome ou senha TruckPag feita no portal é repetida na TruckPag pelo ID TruckPag do
+//     cadastro, se quem editou informou CPF e nascimento no formulário (a TruckPag exige os dois em toda edição).
+//     Liga com "editar": true. Situação (DESLIGADO etc.) não vai: o código de "inativo" da TruckPag não está na documentação.
+//     Na Ticket ("editarTicket": true): PUT do motorista pelo código Ticket (precisa do CPF e do nascimento da edição) e,
+//     se a senha Ticket mudou, a troca de senha (endereço próprio, só com o código).
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = path.join(process.env.LOCALAPPDATA || '', 'GestaoCombustivel', 'apis-cartoes.json');
 const CHAVE_CRIAR = path.join(process.env.LOCALAPPDATA || '', 'GestaoCombustivel', 'motoristas-cartoes.json');
-const ESTADO = path.join(PROJETO, '.dados', 'cartoes-api', 'motoristas-consulta.json');   // hash do CPF -> última consulta / criação
-// fora do ownCloud (dados pessoais): datas de nascimento que a TruckPag tem e o andamento das edições
-export const DATAS_TRUCKPAG = path.join(process.env.LOCALAPPDATA || '', 'GestaoCombustivel', 'datas-nascimento-truckpag.json');
+const ESTADO = path.join(PROJETO, '.dados', 'cartoes-api', 'motoristas-novos.json');   // id da alteração -> {ticket, truckpag}
 const ESTADO_EDICAO = path.join(process.env.LOCALAPPDATA || '', 'GestaoCombustivel', 'motoristas-edicao-truckpag.json');
 // tipo de senha na Ticket: IU = informada pelo usuário (o gestor define a senha). IE = impressa em envelope (exige o código de
 // controle do envelope: INFORME_CODIGO_CONTROLE_ENVELOPE); IM = informada pelo motorista. Valores achados em 06/11/2026.
 const TIPO_SENHA = 'IU';
 const CLIENTE_TICKET = 245364;      // RAJA LOG - FILIAIS: o único em que o portal cadastra (decisão do usuário)
 const EMPRESA_TRUCKPAG = 25298;     // empresa_id da Raja Log na TruckPag (lido de /veiculo)
-const POR_VEZ = 25, DIAS_REPETIR = 7;
 const lerJson = (a, p) => { try { return JSON.parse(fs.readFileSync(a, 'utf8')); } catch { return p; } };
-export const hash = (cpf) => crypto.createHash('sha256').update('motorista:' + cpf).digest('hex').slice(0, 24);   // o CPF não fica no disco
 const so = (v) => String(v ?? '').replace(/\D/g, '');
 // motorista de teste (área do motorista): nunca vai para a Ticket nem para a TruckPag (criar, editar ou completar)
-const CPFS_TESTE = new Set(['11144477735']);
-export const ehTeste = (m) => CPFS_TESTE.has(so(m && m.cpf)) || /^(MOTORISTA\s+)?(TESTE|FANTASMA)\b/i.test(String((m && m.nome) || '').trim());
-const p2 = (x) => String(x).padStart(2, '0');
-const isoDia = (d) => d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
-const brDeIso = (s) => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : null; };
+const USUARIOS_TESTE = new Set(['111444']);
+export const ehTeste = (m) => USUARIOS_TESTE.has(String((m && m.usuario) || '')) || /^(MOTORISTA\s+)?(TESTE|FANTASMA)\b/i.test(String((m && m.nome) || '').trim());
 const isoDeBr = (s) => { const m = String(s || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); return m ? m[3] + '-' + m[2] + '-' + m[1] : null; };
 
-// a Ticket só aceita data com hora ("yyyy-MM-dd'T'HH:mm:ss"); nascimento sem data no cadastro: a que a TruckPag tem
+// a Ticket só aceita data com hora ("yyyy-MM-dd'T'HH:mm:ss"). m = planilha + dados pessoais da alteração (CPF, nascimento, CNH)
 // semValidade: no cadastro novo a Ticket recusa com a validade da CNH ("Falha ao gerar offset ... TYPE_PINPAD", 06/11/2026);
 // sem ela o cadastro passa (a restrição de vencimento fica a padrão da Ticket)
 function corpoTicket(m, { semValidade = false } = {}) {
-  const nasc = isoDeBr(m.dataNascimento) || lerJson(DATAS_TRUCKPAG, {})[hash(so(m.cpf))];
+  const nasc = isoDeBr(m.dataNascimento);
   return { codigoCliente: CLIENTE_TICKET, codigoProduto: 4, nomeMotorista: m.nome, cpf: so(m.cpf), descricaoResponsavel: 'GESTOR FROTA',   // Gestor responsável: fixo (decisão do usuário)
    
     ...(nasc ? { dataNascimento: nasc + 'T00:00:00' } : {}), ...(m.matricula ? { numeroMatricula: Number(m.matricula) } : {}),
@@ -65,16 +56,6 @@ function ticket() {
     async codigo(cpf) {   // código do motorista no cliente Raja Log (null se não existe)
       const j = await chamar('GET', `/ticketlog-servicos/ebs/motorista/${CLIENTE_TICKET}/4/${cpf}`);
       return j.sucesso && j.informacoes && j.informacoes[0] ? j.informacoes[0].codigo : null;
-    },
-    async detalhes(codigo) {   // matrícula e CNH da transação mais recente (janela de 32 dias, até ~3 meses atrás)
-      for (let k = 0; k < 3; k++) {
-        const fim = new Date(Date.now() - k * 32 * 864e5), ini = new Date(fim.getTime() - 31 * 864e5);
-        const j = await chamar('POST', '/ticketlog-servicos/ebs/transacaoMotorista/search', { codigoCliente: CLIENTE_TICKET, codigoTipoCartao: 4, codigoProduto: 4,
-          codigoMotorista: codigo, considerarTransacao: 'T', ordem: 'T', dataTransacaoInicial: isoDia(ini) + 'T00:00:00', dataTransacaoFinal: isoDia(fim) + 'T23:59:59' });
-        const ls = (j.listaTransacoesPorMotorista || []).sort((a, b) => String(b.dataTransacao).localeCompare(String(a.dataTransacao)));
-        if (ls.length) return ls[0];
-      }
-      return null;
     },
     async alterar(codigo, m) {   // a alteração substitui o cadastro: vai tudo o que o portal sabe do motorista
       return chamar('PUT', '/ticketlog-servicos/ebs/motorista/' + codigo + '?version=new', corpoTicket(m));
@@ -104,7 +85,7 @@ async function truckpag(m, { id, dataIso } = {}) {
   return { erro: erros.slice(0, 300) };
 }
 
-// lista dos motoristas da planilha (com CPF): o mesmo arquivo do Cadastro, apagado logo depois de ler
+// lista dos motoristas da planilha (sem dados pessoais): o mesmo arquivo do Cadastro, apagado logo depois de ler
 function motoristasDaPlanilha() {
   const r = spawnSync('py', ['scripts/planilha_cadastros.py', 'gerar'], { cwd: PROJETO, encoding: 'utf8', windowsHide: true, shell: process.platform === 'win32',
     env: { ...process.env, PYTHONIOENCODING: 'utf-8' }, timeout: 5 * 60 * 1000 });
@@ -115,61 +96,29 @@ function motoristasDaPlanilha() {
   } finally { try { fs.unlinkSync(arq); } catch {} }
 }
 
-export async function completar({ api, log }) {
-  if (!fs.existsSync(CONFIG)) return;
-  const estado = lerJson(ESTADO, {});
-  const agora = Date.now();
-  const faltam = (m) => ['codigoTicket', 'matricula', 'cnh', 'cnhCategoria', 'cnhValidade'].filter((k) => m[k] === null || m[k] === undefined || m[k] === '');
-  const fila = motoristasDaPlanilha().filter((m) => !ehTeste(m) && so(m.cpf).length === 11 && m.situacao !== 'DESLIGADO' && faltam(m).length)
-    .filter((m) => !((estado[hash(so(m.cpf))] || {}).consultado > agora - DIAS_REPETIR * 864e5)).slice(0, POR_VEZ);
-  if (!fila.length) return;
-  const T = ticket(), itens = [];
-  for (const m of fila) {
-    const cpf = so(m.cpf), falta = faltam(m), dados = {};
-    try {
-      const codigo = m.codigoTicket || (await T.codigo(cpf));
-      if (codigo && !m.codigoTicket) dados.codigoTicket = Number(codigo);
-      if (codigo && falta.some((k) => k !== 'codigoTicket')) {
-        const t = await T.detalhes(Number(codigo));
-        if (t) {
-          if (falta.includes('matricula') && Number(t.numeroMatricula) > 0) dados.matricula = Number(t.numeroMatricula);
-          if (falta.includes('cnh') && t.numeroCarteiraMorotista) dados.cnh = String(t.numeroCarteiraMorotista).trim().slice(0, 20);
-          if (falta.includes('cnhCategoria') && /^[A-E]{1,2}$/i.test(String(t.categoriaCarteira || '').trim())) dados.cnhCategoria = String(t.categoriaCarteira).trim().toUpperCase();
-          if (falta.includes('cnhValidade') && brDeIso(t.dataVencimentoCarteira)) dados.cnhValidade = brDeIso(t.dataVencimentoCarteira);
-        }
-      }
-      estado[hash(cpf)] = { ...(estado[hash(cpf)] || {}), consultado: agora };
-      if (Object.keys(dados).length) itens.push({ cpf, dados });
-    } catch (e) { log('Cadastro x cartões: Ticket não respondeu (' + String(e.message || e).slice(0, 120) + '); tenta na próxima.'); break; }
-  }
-  if (itens.length) {
-    const j = await api('POST', '/api/sync/cadastros/cartoes', { itens });
-    log(`Cadastro x cartões: ${j.inseridos} motorista(s) completado(s) com dados da Ticket (de ${fila.length} consultados).`);
-  }
-  fs.mkdirSync(path.dirname(ESTADO), { recursive: true });
-  fs.writeFileSync(ESTADO, JSON.stringify(estado));
-}
+const semVazios = (o) => Object.fromEntries(Object.entries(o || {}).filter(([, v]) => v !== null && v !== undefined && v !== ''));
 
 export async function criarNovos({ api, log }) {
-  if (!fs.existsSync(CONFIG) || !lerJson(CHAVE_CRIAR, {}).criar) return;   // desligado até o teste com um motorista real
-  const estado = lerJson(ESTADO, {});
+  if (!fs.existsSync(CONFIG) || !lerJson(CHAVE_CRIAR, {}).criar) return;
   const { motoristas } = await api('GET', '/api/sync/cadastros/novos-motoristas');
-  const pendentes = motoristas.map((x) => x.dados).filter((m) => {
-    if (ehTeste(m)) return false;   // motorista de teste: não vai para os cartões
-    const cpf = so(m.cpf), e = estado[hash(cpf)] || {};
-    return cpf.length === 11 && !(e.ticket && e.truckpag);
+  if (!motoristas.length) return;
+  const estado = lerJson(ESTADO, {}), limpar = [], itens = [];
+  // motorista de teste ou já criado nos dois: só falta apagar os dados pessoais
+  const pendentes = motoristas.filter((x) => {
+    const e = estado[x.id] || {};
+    if (ehTeste(x.dados) || (e.ticket && e.truckpag)) { limpar.push(x.id); return false; }
+    return true;
   });
-  if (!pendentes.length) return;
-  // Gravada na planilha, a fila do portal fica com as senhas mascaradas ("••••", functions/api/sync/cadastros/resultado.js):
-  // as senhas e o resto vêm da planilha, pelo CPF. Em 10/11/2026 a fila mascarada fez a Ticket recusar (ORA-06502) e a
-  // TruckPag criar o motorista com a senha vazia.
-  const daPlanilha = new Map(motoristasDaPlanilha().map((p) => [so(p.cpf), p]));
-  const T = ticket(), itens = [];
-  for (const fila of pendentes) {
-    const cpf = so(fila.cpf), h = hash(cpf), e = estado[h] || {};
-    const p = daPlanilha.get(cpf);
-    if (!p) { log(`Cadastro x cartões: ${fila.nome} ainda não está na lista da planilha; tenta na próxima.`); continue; }
-    const m = { ...fila, ...Object.fromEntries(Object.entries(p).filter(([, v]) => v !== null && v !== undefined && v !== '')) };
+  // senhas e números vêm da planilha, pelo usuário (a fila de antes de 10/11/2026 tinha senhas mascaradas)
+  const daPlanilha = pendentes.length ? new Map(motoristasDaPlanilha().map((p) => [String(p.usuario || ''), p])) : new Map();
+  const T = pendentes.length ? ticket() : null;
+  for (const x of pendentes) {
+    const e = estado[x.id] || {};
+    const p = daPlanilha.get(String(x.dados.usuario || ''));
+    if (!p) { log(`Cadastro x cartões: ${x.dados.nome} ainda não está na lista da planilha; tenta na próxima.`); continue; }
+    const m = { ...x.dados, ...semVazios(p), ...semVazios(x.pessoais) };
+    const cpf = so(m.cpf);
+    if (cpf.length !== 11) { log(`Cadastro x cartões: ${m.nome} sem CPF no cadastro; não foi para os cartões.`); limpar.push(x.id); continue; }
     const senhaTicketOk = /^\d{4,6}$/.test(String(m.senhaTicket ?? '')), senhaTruckpagOk = /^\d{1,4}$/.test(String(m.senhaTruckpag ?? ''));
     if (!e.ticket && !senhaTicketOk) log(`Cadastro x cartões: ${m.nome} sem senha Ticket válida na planilha (só números); não foi para a Ticket.`);
     if (!e.truckpag && !senhaTruckpagOk) log(`Cadastro x cartões: ${m.nome} sem senha TruckPag válida na planilha (1 a 4 números); não foi para a TruckPag.`);
@@ -185,17 +134,19 @@ export async function criarNovos({ api, log }) {
       if (r.id) { dados.idTruckpag = Number(r.id); e.truckpag = 'criado'; }
       else { log(`Cadastro x cartões: TruckPag não cadastrou ${m.nome}: ${r.erro}`); if (/cpf/i.test(r.erro) && /utiliz|existe|cadastr/i.test(r.erro)) e.truckpag = 'já existia'; }
     }
-    estado[h] = e;
-    if (Object.keys(dados).length) { itens.push({ cpf, dados }); log(`Cadastro x cartões: ${m.nome} -> Ticket ${e.ticket || 'pendente'}, TruckPag ${e.truckpag || 'pendente'}.`); }
+    estado[x.id] = e;
+    if (Object.keys(dados).length) { itens.push({ usuario: String(x.dados.usuario), dados }); log(`Cadastro x cartões: ${m.nome} -> Ticket ${e.ticket || 'pendente'}, TruckPag ${e.truckpag || 'pendente'}.`); }
+    if (e.ticket && e.truckpag) limpar.push(x.id);   // feito nos dois: os dados pessoais podem sair
   }
-  if (itens.length) await api('POST', '/api/sync/cadastros/cartoes', { itens });
+  if (itens.length || limpar.length) await api('POST', '/api/sync/cadastros/cartoes', { itens, limpar });
+  for (const id of limpar) delete estado[id];
   fs.mkdirSync(path.dirname(ESTADO), { recursive: true });
   fs.writeFileSync(ESTADO, JSON.stringify(estado));
 }
+
 export async function editarTruckpag({ api, log }) {
   const chaves = lerJson(CHAVE_CRIAR, {});
   if (!fs.existsSync(CONFIG) || (!chaves.editar && !chaves.editarTicket)) return;
-  const T = ticket();
   const est = lerJson(ESTADO_EDICAO, {});
   if (!est.desde) {   // primeira vez ligado: vale só para edições daqui em diante
     fs.writeFileSync(ESTADO_EDICAO, JSON.stringify({ desde: new Date().toISOString().slice(0, 19) + 'Z' }));
@@ -203,19 +154,23 @@ export async function editarTruckpag({ api, log }) {
   }
   const { edicoes } = await api('GET', '/api/sync/cadastros/editados-motoristas?desde=' + encodeURIComponent(est.desde));
   if (!edicoes.length) return;
-  const RELEVANTES = ['nome', 'cpf', 'senhaTruckpag', 'dataNascimento'];
-  const DA_TICKET = ['nome', 'cpf', 'dataNascimento', 'matricula', 'cnh', 'cnhCategoria', 'cnhValidade', 'senhaTicket'];
+  const T = ticket();
+  const RELEVANTES = ['nome', 'senhaTruckpag'];
+  const DA_TICKET = ['nome', 'matricula', 'senhaTicket'];
   const lista = edicoes.some((e) => RELEVANTES.concat(DA_TICKET).some((k) => k in e.dados)) ? motoristasDaPlanilha() : [];
-  const datas = lerJson(DATAS_TRUCKPAG, {});
+  const limpar = [];
   for (const e of edicoes) {
-    if (ehTeste({ cpf: e.dados.cpf || e.chave, nome: e.dados.nome }) || CPFS_TESTE.has(so(e.chave))) { est.desde = e.aplicada_em; fs.writeFileSync(ESTADO_EDICAO, JSON.stringify(est)); continue; }
+    const usuario = String(e.chave || ''), m0 = lista.find((x) => String(x.usuario || '') === usuario);
+    const pes = semVazios(e.pessoais), m = m0 ? { ...m0, ...pes } : null;
+    if (e.pessoais) limpar.push(e.id);   // processada (deu certo ou não): os dados pessoais saem
+    if (ehTeste({ usuario, nome: (m0 && m0.nome) || e.dados.nome })) { est.desde = e.aplicada_em; fs.writeFileSync(ESTADO_EDICAO, JSON.stringify(est)); continue; }
     if (chaves.editarTicket && DA_TICKET.some((k) => k in e.dados)) {
-      const cpf = so(e.dados.cpf || e.chave), m = lista.find((x) => so(x.cpf) === cpf);
-      const codigo = m && (m.codigoTicket || (await T.codigo(so(e.chave))) || (await T.codigo(cpf)));
-      if (!m || !codigo) log(`Cadastro x cartões: edição de ${m ? m.nome : 'motorista'} não foi para a Ticket (motorista não encontrado no cliente Raja Log).`);
+      const codigo = m && m.codigoTicket;
+      if (!codigo) log(`Cadastro x cartões: edição de ${m ? m.nome : 'motorista'} não foi para a Ticket (sem código Ticket no cadastro).`);
       else {
         const campos = Object.keys(e.dados).filter((k) => DA_TICKET.includes(k) && k !== 'senhaTicket');
-        if (campos.length) {
+        if (campos.length && !(pes.cpf && pes.dataNascimento)) log(`Cadastro x cartões: edição de ${m.nome} não foi para a Ticket (sem CPF e nascimento na edição).`);
+        else if (campos.length) {
           const r = await T.alterar(Number(codigo), m);
           log(r.sucesso ? `Cadastro x cartões: ${m.nome} atualizado na Ticket (${campos.join(', ')}).`
             : `Cadastro x cartões: Ticket não aceitou a edição de ${m.nome}: ${String(r.mensagem || r.codigoErro || '').slice(0, 250)}`);
@@ -227,12 +182,10 @@ export async function editarTruckpag({ api, log }) {
       }
     }
     if (chaves.editar && RELEVANTES.some((k) => k in e.dados)) {
-      const cpf = so(e.dados.cpf || e.chave), antigo = so(e.chave);
-      const m = lista.find((x) => so(x.cpf) === cpf);
-      const dataIso = (m && isoDeBr(m.dataNascimento)) || datas[hash(cpf)] || datas[hash(antigo)];
+      const dataIso = isoDeBr(pes.dataNascimento);
       if (!m || !m.idTruckpag) log(`Cadastro x cartões: edição de ${m ? m.nome : 'motorista'} não foi para a TruckPag (sem ID TruckPag no cadastro).`);
       else if (!/^\d{1,4}$/.test(String(m.senhaTruckpag || ''))) log(`Cadastro x cartões: edição de ${m.nome} não foi para a TruckPag (a senha TruckPag do cadastro precisa ter de 1 a 4 números).`);
-      else if (!dataIso) log(`Cadastro x cartões: edição de ${m.nome} não foi para a TruckPag (sem data de nascimento; preencha no cadastro).`);
+      else if (!so(pes.cpf) || !dataIso) log(`Cadastro x cartões: edição de ${m.nome} não foi para a TruckPag (CPF e nascimento não foram informados na edição).`);
       else {
         const r = await truckpag(m, { id: Number(m.idTruckpag), dataIso });
         log(r.id ? `Cadastro x cartões: ${m.nome} atualizado na TruckPag (${Object.keys(e.dados).filter((k) => RELEVANTES.includes(k)).join(', ')}).`
@@ -242,4 +195,5 @@ export async function editarTruckpag({ api, log }) {
     est.desde = e.aplicada_em;   // processada (deu certo ou não): não repete
     fs.writeFileSync(ESTADO_EDICAO, JSON.stringify(est));
   }
+  if (limpar.length) await api('POST', '/api/sync/cadastros/cartoes', { itens: [], limpar });
 }

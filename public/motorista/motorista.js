@@ -163,6 +163,54 @@ document.addEventListener('click', (e) => {
   if (li) li.querySelector('.btn-mapa').click();
 });
 
+// ---------- acesso a este portal (aba Senhas): usuário e troca da senha. A senha inicial é o próprio usuário (6 primeiros
+// números do CPF); a gestão pode voltar para ela em Cadastro > Motoristas ----------
+function htmlConta(d) {
+  return '<section class="mt-cartao" aria-labelledby="mt-tc"><h2 id="mt-tc">Seu acesso a este portal</h2>' +
+    '<p class="mt-conta-usuario">Usuário <b>' + esc(d.usuario || '') + '</b></p>' +
+    '<p class="mt-nota" id="mt-conta-situacao">' + (d.senhaPropria ? 'Você já trocou a sua senha.'
+      : 'Você ainda usa a senha inicial (o mesmo número do usuário). Troque por uma que só você saiba.') + '</p>' +
+    '<button type="button" class="mt-senhas-botao" id="mt-conta-abrir" aria-expanded="false" aria-controls="mt-conta-form">Trocar minha senha</button>' +
+    '<form class="mt-conta-form" id="mt-conta-form" hidden novalidate>' +
+      '<label class="mt-campo"><span>Senha atual</span><input type="password" name="atual" autocomplete="current-password" required></label>' +
+      '<label class="mt-campo"><span>Nova senha <small>(pelo menos 6 letras ou números)</small></span><input type="password" name="nova" autocomplete="new-password" minlength="6" maxlength="60" required></label>' +
+      '<label class="mt-campo"><span>Repita a nova senha</span><input type="password" name="repetir" autocomplete="new-password" maxlength="60" required></label>' +
+      '<p class="mt-conta-msg" id="mt-conta-msg" role="alert" hidden></p>' +
+      '<div class="mt-conta-acoes"><button type="button" class="mt-senhas-botao" id="mt-conta-cancelar">Cancelar</button>' +
+      '<button type="submit" class="mt-botao-principal" id="mt-conta-salvar">Salvar nova senha</button></div>' +
+    '</form></section>';
+}
+pagina.addEventListener('click', (e) => {
+  const abrir = e.target.closest && e.target.closest('#mt-conta-abrir, #mt-conta-cancelar');
+  if (!abrir) return;
+  const form = document.getElementById('mt-conta-form'), botao = document.getElementById('mt-conta-abrir');
+  const mostrar = abrir.id === 'mt-conta-abrir';
+  form.hidden = !mostrar; botao.hidden = mostrar; botao.setAttribute('aria-expanded', String(mostrar));
+  form.reset(); document.getElementById('mt-conta-msg').hidden = true;
+  if (mostrar) form.atual.focus(); else botao.focus();
+});
+pagina.addEventListener('submit', async (e) => {
+  if (e.target.id !== 'mt-conta-form') return;
+  e.preventDefault();
+  const form = e.target, msg = document.getElementById('mt-conta-msg'), btn = document.getElementById('mt-conta-salvar');
+  const aviso = (t, bom) => { msg.textContent = t; msg.hidden = false; msg.classList.toggle('mt-bom', !!bom); msg.classList.toggle('mt-ruim', !bom); };
+  if (!form.atual.value || !form.nova.value) { aviso('Preencha a senha atual e a nova.'); return; }
+  if (form.nova.value.length < 6) { aviso('A nova senha precisa ter pelo menos 6 letras ou números.'); form.nova.focus(); return; }
+  if (form.nova.value !== form.repetir.value) { aviso('A nova senha e a repetição estão diferentes.'); form.repetir.focus(); return; }
+  btn.disabled = true; btn.textContent = 'Salvando…';
+  try {
+    const r = await fetch('/api/motorista/senha', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ atual: form.atual.value, nova: form.nova.value }) });
+    if (r.status === 401) { location.href = '/?entrar=1'; return; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { aviso(j.erro || 'Não foi possível trocar a senha. Tente de novo.'); return; }
+    form.reset();
+    document.getElementById('mt-conta-situacao').textContent = 'Você já trocou a sua senha.';
+    aviso('Senha trocada. Use a nova senha na próxima vez que entrar.', true);
+  } catch { aviso('Sem conexão. Verifique a internet e tente de novo.'); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar nova senha'; }
+});
+
 // ---------- menu: 4 abas (design-system/MOTORISTA.md); a aba fica no endereço (#media...) e a página abre sempre na Média ----------
 const ICO = (d) => '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
 const ABAS = [
@@ -206,7 +254,7 @@ async function iniciar() {
   // página em 4 abas: topo + painéis + menu (postos e senhas não mudam com o mês)
   const teste = d.espelhoDe ? '<p class="mt-teste" role="note">Acesso de teste: mostrando os abastecimentos de ' + esc(d.espelhoDe) + ' (só nesta tela).</p>' : '';
   const painel = (id, html) => '<section class="mt-aba" data-painel="' + id + '" id="mt-painel-' + id + '" tabindex="-1" hidden>' + html + '</section>';
-  const fixos = painel('postos', '<div id="mt-postos"></div>') + painel('senhas', htmlSenhas(d.senhas));
+  const fixos = painel('postos', '<div id="mt-postos"></div>') + painel('senhas', htmlSenhas(d.senhas) + htmlConta(d));
   if (!linhas.length) {
     const vazio = '<p class="mt-vazio">Ainda não encontramos abastecimentos de diesel no seu nome nos últimos meses. ' +
       'Se você abasteceu, fale com a gestão de combustível para conferir o seu cadastro.</p>';

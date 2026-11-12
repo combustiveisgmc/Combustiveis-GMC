@@ -696,7 +696,7 @@ const DESCRICOES = {
   'conferencia-cartoes': 'Compara a Base_copia com a Ticket e a TruckPag, separando o que mudou no cartão das correções feitas no portal.',
   'cartoes-frota': 'Situação dos cartões Ticket, TruckPag e Veloe de cada placa, último uso e avisos dos motoristas.',
   'cadastro-placas': 'Cadastro dos veículos da planilha de controle: categoria, unidade, meta, ponto crítico e tanque.',
-  'cadastro-motoristas': 'Cadastro dos motoristas da planilha de controle: unidade, CPF e senhas dos cartões.',
+  'cadastro-motoristas': 'Cadastro dos motoristas da planilha de controle: unidade, usuário da área do motorista, senhas dos cartões e últimos acessos.',
   'acessos': 'Criar, editar e excluir logins e escolher o que cada pessoa pode usar no portal.',
 };
 

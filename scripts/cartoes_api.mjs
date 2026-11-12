@@ -140,6 +140,10 @@ const quandoDe = (d) => d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-'
 const idDe = (ev) => ev._api + ':' + ev._id;
 const lerJson = (arq, padrao) => { try { return JSON.parse(fs.readFileSync(arq, 'utf8')); } catch { return padrao; } };
 
+// as APIs mandam o CPF do motorista em cada transação (cpfMotorista na Ticket, motorista_cpf na TruckPag): sai antes de
+// guardar, ninguém usa (desde 12/11/2026 o portal não guarda CPF de motorista)
+export const semCpf = (ls) => (Array.isArray(ls) ? ls.map((t) => Object.fromEntries(Object.entries(t || {}).filter(([k]) => !/cpf/i.test(k)))) : ls);
+
 // transações de um dia, guardadas em .dados/cartoes-api/AAAA-MM-DD.json; busca de novo conforme a idade do dia
 async function transacoesDoDia(dia, hoje, log) {
   const arq = path.join(CACHE, dia + '.json');
@@ -154,7 +158,7 @@ async function transacoesDoDia(dia, hoje, log) {
   const validade = recente || !fechado ? 5 * 60e3 : ultimos ? 60 * 60e3 : dia >= somarDias(hoje, -REVISAO) ? 24 * 3600e3 : Infinity;
   if (c && idade < validade) return { ...c, buscou: false, tardios: [] };
   try {
-    const [ticket, truckpag] = await Promise.all([buscarTicket(dia), buscarTruckpag(dia)]);
+    const [ticket, truckpag] = (await Promise.all([buscarTicket(dia), buscarTruckpag(dia)])).map(semCpf);
     const novo = { dia, em: Date.now(), ticket, truckpag };
     fs.mkdirSync(CACHE, { recursive: true });
     fs.writeFileSync(arq, JSON.stringify(novo));

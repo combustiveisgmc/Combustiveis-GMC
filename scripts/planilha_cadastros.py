@@ -2,9 +2,12 @@
 
     py scripts/planilha_cadastros.py gerar                      lista para o portal (.dados/cadastros.json)
     py scripts/planilha_cadastros.py gravar <alteracoes.json>   grava as alterações feitas no portal
+    py scripts/planilha_cadastros.py migrar-sem-cpf <copia>     uma vez (12/11/2026): CPF vira USUARIO (6 primeiros números)
+                                                                e saem DATA NASCIMENTO, CNH, CATEGORIA CNH e VALIDADE CNH
 
 Quem chama é o vigia (scripts/sincronizar.mjs). Cuidados ao gravar:
-  - a linha é achada pela placa (aba Carros) ou pelo CPF (aba Motoristas); só os campos alterados são escritos;
+  - a linha é achada pela placa (aba Carros) ou pelo usuário (aba Motoristas); só os campos alterados são escritos;
+  - a aba Motoristas não tem dados pessoais (CPF, nascimento, CNH) desde 12/11/2026: só o USUARIO de 6 números;
   - se a planilha estiver aberta no Excel, não grava e devolve "aguardando" (o vigia tenta de novo);
   - antes de gravar, guarda uma cópia em .dados\\copias-planilha (as 30 mais recentes);
   - confere o cabeçalho das abas: se as colunas mudaram de lugar, não grava nada;
@@ -36,14 +39,17 @@ ABAS = {
         ('AUTON MARGEM DE SEG.', 'autonomia'), ('SITUACAO', 'situacao')],
         # coluna K (ATIVA / DESABILITADA) foi criada pelo portal: se ainda não existir, é criada na primeira gravação
         'opcionais': {'SITUACAO': 'ATIVA'}},
-    'motoristas': {'aba': 'Motoristas', 'chave': 'cpf', 'colunas': [
-        ('MOTORISTA', 'nome'), ('UNIDADE', 'unidade'), ('CPF', 'cpf'), ('SENHA TICKET', 'senhaTicket'),
+    # C = USUARIO: login da área do motorista (6 primeiros números do CPF, guardados como texto por causa do zero à esquerda)
+    'motoristas': {'aba': 'Motoristas', 'chave': 'usuario', 'colunas': [
+        ('MOTORISTA', 'nome'), ('UNIDADE', 'unidade'), ('USUARIO', 'usuario'), ('SENHA TICKET', 'senhaTicket'),
         ('SENHA TRUCKPAG', 'senhaTruckpag'), ('SENHA VELOE', 'senhaVeloe'), ('SITUACAO', 'situacao'),
-        # H..N: o que os cartões pedem para cadastrar o motorista (criadas na primeira gravação, se faltarem)
-        ('DATA NASCIMENTO', 'dataNascimento'), ('MATRICULA', 'matricula'), ('CNH', 'cnh'), ('CATEGORIA CNH', 'cnhCategoria'),
-        ('VALIDADE CNH', 'cnhValidade'), ('CODIGO TICKET', 'codigoTicket'), ('ID TRUCKPAG', 'idTruckpag')],
-        'novas': {'DATA NASCIMENTO', 'MATRICULA', 'CNH', 'CATEGORIA CNH', 'VALIDADE CNH', 'CODIGO TICKET', 'ID TRUCKPAG'}},
+        # H..J: números dos cartões (criadas na primeira gravação, se faltarem)
+        ('MATRICULA', 'matricula'), ('CODIGO TICKET', 'codigoTicket'), ('ID TRUCKPAG', 'idTruckpag')],
+        'novas': {'MATRICULA', 'CODIGO TICKET', 'ID TRUCKPAG'}},
 }
+# layout antigo da aba Motoristas (até 12/11/2026), para a migração
+ANTIGAS_MOTORISTAS = ['MOTORISTA', 'UNIDADE', 'CPF', 'SENHA TICKET', 'SENHA TRUCKPAG', 'SENHA VELOE', 'SITUACAO', 'DATA NASCIMENTO',
+                      'MATRICULA', 'CNH', 'CATEGORIA CNH', 'VALIDADE CNH', 'CODIGO TICKET', 'ID TRUCKPAG']
 CALCULADOS = {'pontoCritico', 'autonomia'}
 NUMEROS = {'ano', 'meta', 'capTanque', 'matricula', 'codigoTicket', 'idTruckpag'}
 
@@ -62,8 +68,19 @@ def planilha():
 
 
 def norm_chave(tipo, v):
-    s = str(v or '').upper()
-    return re.sub(r'[^A-Z0-9]', '', s) if tipo == 'placas' else re.sub(r'\D', '', s)
+    if tipo == 'placas':
+        return re.sub(r'[^A-Z0-9]', '', str(v or '').upper())
+    return usuario(v) or ''
+
+
+def usuario(v):
+    """Usuário do motorista: 6 números como texto ('012345'); célula numérica perde o zero à esquerda."""
+    if v is None or v == '' or isinstance(v, bool):
+        return None
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)
+    d = re.sub(r'\D', '', str(v))
+    return d.zfill(6) if 0 < len(d) <= 6 else (d or None)
 
 
 def saida(obj):
@@ -133,6 +150,8 @@ def formula(v):
 def valor_exibido(campo, v):
     if v is None or v == '':
         return None
+    if campo == 'usuario':
+        return usuario(v)
     if campo in NUMEROS:
         return numero(v)
     if isinstance(v, (dt.datetime, dt.date)):   # data digitada no Excel
@@ -205,6 +224,9 @@ def escrever(ws, r, tipo, campo, v):
     cel = ws.cell(r, col)
     if v is None or v == '':
         cel.value = None
+    elif campo == 'usuario':
+        cel.value = usuario(v)
+        cel.number_format = '@'
     elif campo in NUMEROS:
         cel.value = int(v) if campo in ('ano', 'matricula', 'codigoTicket', 'idTruckpag') or float(v).is_integer() else float(v)
     elif campo == 'modelo' and isinstance(cel.value, int) and re.fullmatch(r'[1-9]\d*', str(v)):
@@ -308,9 +330,66 @@ def gravar(arquivo_json):
     saida({'itens': itens, 'copia': copia})
 
 
+def migrar_sem_cpf(copia_fora):
+    """Uma vez (12/11/2026, pedido do usuário): a coluna CPF vira USUARIO (6 primeiros números) e as colunas DATA NASCIMENTO,
+    CNH, CATEGORIA CNH e VALIDADE CNH saem da aba Motoristas. A cópia de antes vai para copia_fora (fora do ownCloud, para
+    apagar depois de conferir: tem CPF). Saída: contagens, nunca CPF."""
+    caminho = planilha()
+    if not caminho or not os.path.isfile(caminho):
+        return saida({'erro': 'Planilha não encontrada.'})
+    if planilha_aberta(caminho):
+        return saida({'erro': 'A planilha está aberta no Excel. Feche e rode de novo.'})
+    wb = openpyxl.load_workbook(caminho)
+    ws = aba(wb, 'Motoristas')
+    cab = [chave(ws.cell(1, i).value) for i in range(1, len(ANTIGAS_MOTORISTAS) + 1)]
+    if cab != ANTIGAS_MOTORISTAS:
+        return saida({'erro': 'O cabeçalho da aba Motoristas não é o esperado (já migrada?).', 'cabecalho': cab})
+    shutil.copy2(caminho, copia_fora)
+    ultima = ultima_linha(ws)
+    vistos, sem, repetidos = {}, 0, 0
+    for r in range(2, ultima + 1):
+        if ws.cell(r, 1).value in (None, ''):
+            continue
+        d = re.sub(r'\D', '', str(ws.cell(r, 3).value or ''))
+        u = d[:6] if len(d) == 11 else None
+        if not u:
+            sem += 1
+        elif u in vistos:
+            repetidos += 1
+        else:
+            vistos[u] = r
+        ws.cell(r, 3).value = u
+        ws.cell(r, 3).number_format = '@'
+    ws.cell(1, 3).value = 'USUARIO'
+    larguras = {i: ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width for i in range(1, 15)}
+    for col in (12, 11, 10, 8):   # da direita para a esquerda: VALIDADE CNH, CATEGORIA CNH, CNH, DATA NASCIMENTO
+        ws.delete_cols(col)
+    restantes = [i for i in range(1, 15) if i not in (8, 10, 11, 12)]
+    for novo, velho in enumerate(restantes, start=1):
+        letra = openpyxl.utils.get_column_letter(novo)
+        if larguras.get(velho):
+            ws.column_dimensions[letra].width = larguras[velho]
+    if ws.auto_filter.ref:
+        ws.auto_filter.ref = f'A1:{openpyxl.utils.get_column_letter(len(restantes))}{ultima}'
+    conferir_cabecalho(ws, ABAS['motoristas'])
+    tmp = os.path.join(os.path.dirname(COPIAS), 'migrando-cadastros.xlsx')
+    os.makedirs(os.path.dirname(tmp), exist_ok=True)
+    wb.save(tmp)
+    openpyxl.load_workbook(tmp, read_only=True).close()
+    import planilha_cartoes as pc
+    try:
+        pc.substituir(tmp, caminho, copia_fora)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+    saida({'ok': True, 'motoristas': len(vistos) + sem + repetidos, 'usuarios': len(vistos), 'semCpf': sem, 'repetidos': repetidos})
+
+
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8')
-    if len(sys.argv) >= 2 and sys.argv[1] == 'gerar':
+    if len(sys.argv) >= 3 and sys.argv[1] == 'migrar-sem-cpf':
+        migrar_sem_cpf(sys.argv[2])
+    elif len(sys.argv) >= 2 and sys.argv[1] == 'gerar':
         gerar()
     elif len(sys.argv) >= 3 and sys.argv[1] == 'gravar':
         gravar(sys.argv[2])

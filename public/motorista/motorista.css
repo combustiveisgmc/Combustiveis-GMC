@@ -136,3 +136,18 @@
   .mt-nav a[aria-current="page"]{color:var(--placa);}
   .mt-nav a[aria-current="page"]::before{top:auto;bottom:-1px;left:10px;right:10px;border-radius:3px 3px 0 0;}
 }
+/* acesso a este portal (aba Senhas): usuário e troca da senha */
+.mt-conta-usuario{margin:0;font-size:14px;color:var(--asfalto-suave);}
+.mt-conta-usuario b{margin-left:6px;font-size:24px;font-weight:500;color:var(--asfalto);letter-spacing:.08em;font-variant-numeric:tabular-nums;}
+#mt-conta-abrir{align-self:flex-start;}
+.mt-conta-form{display:flex;flex-direction:column;gap:12px;}
+.mt-conta-form[hidden]{display:none;}
+.mt-campo{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500;color:var(--asfalto-suave);}
+.mt-campo small{font-weight:400;color:var(--suave);}
+.mt-campo input{height:48px;padding:0 14px;border:1px solid var(--contorno);border-radius:var(--raio);background:transparent;color:var(--asfalto);font:inherit;font-size:16px;}
+.mt-campo input:focus-visible{outline:2px solid var(--foco);outline-offset:1px;}
+.mt-conta-msg{margin:0;font-size:14px;}
+.mt-conta-acoes{display:flex;gap:10px;flex-wrap:wrap;}
+.mt-botao-principal{min-height:44px;padding:0 18px;border:0;border-radius:var(--raio-pilula);background:var(--placa);color:var(--sobre-placa);font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+.mt-botao-principal:disabled{opacity:.6;cursor:default;}
+.mt-botao-principal:focus-visible{outline:2px solid var(--asfalto);outline-offset:2px;}

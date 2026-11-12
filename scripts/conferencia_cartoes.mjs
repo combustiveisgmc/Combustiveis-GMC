@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buscarTicket, buscarTruckpag, eventoTicket, eventoTruckpag, temConfig, CORE, completarDoHistorico, HISTORICO } from './cartoes_api.mjs';
+import { buscarTicket, buscarTruckpag, eventoTicket, eventoTruckpag, temConfig, CORE, completarDoHistorico, HISTORICO, semCpf } from './cartoes_api.mjs';
 
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE = path.join(PROJETO, '.dados', 'cartoes-api', 'conferencia');
@@ -42,7 +42,7 @@ async function lerDia(dia, log) {
   const c = lerJson(arq, null);
   if (c && Date.now() - c.em < VALIDADE) return c;
   try {
-    const [ticket, truckpag] = await Promise.all([buscarTicket(dia), buscarTruckpag(dia)]);
+    const [ticket, truckpag] = (await Promise.all([buscarTicket(dia), buscarTruckpag(dia)])).map(semCpf);   // sem o CPF do motorista
     const novo = { dia, em: Date.now(), ticket, truckpag };
     fs.mkdirSync(CACHE, { recursive: true });
     fs.writeFileSync(arq, JSON.stringify(novo));

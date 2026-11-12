@@ -1,7 +1,7 @@
 import { motoristaDaSessao } from '../../lib/motoristas.js';
 import { comSeguranca } from '../../lib/auth.js';
 
-// Área do motorista: sem a sessão do motorista (entrou com o CPF), volta para a tela inicial com o "Entrar" aberto.
+// Área do motorista: sem a sessão do motorista (entrou com o usuário de 6 números), volta para a tela inicial com o "Entrar" aberto.
 export async function onRequest({ request, env, next }) {
   const s = await motoristaDaSessao(env.DB, request);
   if (!s) return new Response(null, { status: 302, headers: { Location: '/?entrar=1', 'Cache-Control': 'no-store' } });

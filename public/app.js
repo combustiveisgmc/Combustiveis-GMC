@@ -193,14 +193,13 @@
     el.classList.toggle('oculto', !msg);
   }
 
-  // motorista entra com o CPF: a sessão dele já dura 30 dias, então "Mantenha conectado" só aparece para a gestão
-  // e a senha dele são números (6 primeiros do CPF): teclado numérico no celular
+  // motorista entra com o usuário de 6 números (ou digita o CPF inteiro, por costume): a sessão dele já dura 30 dias,
+  // então "Mantenha conectado" só aparece para a gestão. A senha pode ter letras (ele pode trocar): teclado normal
   function ajustarManter() {
-    var cpf = /^[\d.\-\s]+$/.test($('usuario').value.trim());
-    document.querySelector('#form-login .manter').hidden = cpf;
-    $('nota-motorista').hidden = !cpf || !$('usuario').value.trim();
-    $('senha').inputMode = cpf ? 'numeric' : 'text';
-    if (cpf) $('manter').checked = false;
+    var mot = /^[\d.\-\s]+$/.test($('usuario').value.trim());
+    document.querySelector('#form-login .manter').hidden = mot;
+    $('nota-motorista').hidden = !mot || !$('usuario').value.trim();
+    if (mot) $('manter').checked = false;
   }
   $('usuario').addEventListener('input', ajustarManter);
   function abrirLogin() {

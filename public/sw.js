@@ -1,4 +1,4 @@
-const CACHE_NAME = 'postos-autorizados-v14';   // v14: média do motorista sem os abastecimentos fora do PRIME (v13: miolo dos ícones Duotone mais visível)
+const CACHE_NAME = 'postos-autorizados-v15';   // v15: login do motorista pelo usuário de 6 números, sem CPF (v14: média do motorista sem os abastecimentos fora do PRIME)
 const SHELL_FILES = [
   '/',
   '/app.css',
