@@ -1,0 +1,3 @@
+# Projeto Supabase do portal Gestão de Combustível (integração GitHub: pasta ".", branch main).
+# As tabelas ficam em supabase/migrations; scripts/supabase_sync.py carrega e atualiza os dados das planilhas.
+project_id = "gestao-combustivel"
