@@ -11,7 +11,7 @@
 //
 // Por que Node e não Python: o Python da Microsoft Store isola a pasta AppData dos programas que ele abre,
 // e o Wrangler aberto por ele não enxerga o login.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -750,6 +750,34 @@ async function plantao() {
   return !!r.ativo;
 }
 
+// Supabase (banco de dados novo, 12/11/2026): planilha que mudou é recarregada na tabela dela (scripts/supabase_sync.py).
+// Roda em segundo plano (a Base_copia leva ~1 min) para não atrasar o resto da volta; uma de cada vez, no máximo a cada 60 s.
+// Sem %LOCALAPPDATA%\GestaoCombustivel\supabase.json (ex.: computador reserva sem credencial) o script só responde "pulado".
+let supabaseRodando = false, proximoSupabase = 0, ultimoErroSupabase = '';
+function processarSupabase() {
+  if (supabaseRodando || Date.now() < proximoSupabase) return;
+  supabaseRodando = true;
+  proximoSupabase = Date.now() + 60 * 1000;
+  let out = '';
+  const p = spawn('py', ['scripts/supabase_sync.py', 'sincronizar'], { cwd: PROJETO, windowsHide: true, shell: process.platform === 'win32',
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  const fim = setTimeout(() => { try { p.kill(); } catch {} }, 15 * 60 * 1000);
+  p.stdout.on('data', (d) => { out += d; });
+  p.stderr.on('data', (d) => { out += d; });
+  p.on('close', () => {
+    clearTimeout(fim);
+    supabaseRodando = false;
+    let r = null;
+    try { r = JSON.parse(out.trim().split(/\r?\n/).pop()); } catch {}
+    if (!r) { const m = 'Supabase: falhou (' + out.trim().slice(-200) + ')'; if (m !== ultimoErroSupabase) log(m); ultimoErroSupabase = m; return; }
+    if (r.tabelas && r.tabelas.length) log('Supabase: ' + r.tabelas.map((t) => t.tabela + ' (' + t.linhas + ' linhas)').join(', ') + ' atualizada(s).');
+    const m = (r.erros || []).map((e) => e.tabela + ': ' + e.erro).join('; ');
+    if (m && m !== ultimoErroSupabase) log('Supabase: erro em ' + m);
+    ultimoErroSupabase = m;
+  });
+  p.on('error', () => { clearTimeout(fim); supabaseRodando = false; });
+}
+
 // --vigiar: fica rodando e confere a cada 10 s (a tarefa agendada inicia no logon e religa se cair)
 if (process.argv.includes('--vigiar')) {
   const c = configVigia();
@@ -771,6 +799,7 @@ if (process.argv.includes('--vigiar')) {
       if (await plantao()) { try { await processarLocais(); } catch (e) { erro('nas coordenadas dos postos', e); } }
       if (await plantao()) { try { processarGeocodificacao(); } catch (e) { erro('na busca de coordenadas (OpenStreetMap)', e); } }
       if (await plantao()) { try { verificar(false); } catch (e) { erro('na vigia', e); } }
+      if (await plantao()) { try { processarSupabase(); } catch (e) { erro('no Supabase', e); } }
     }
     setTimeout(volta, INTERVALO_VIGIA * 1000);
   };

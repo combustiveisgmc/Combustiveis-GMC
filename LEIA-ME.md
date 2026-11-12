@@ -25,6 +25,31 @@ Precisa só do Node.js instalado. Não rode `npm install`: os comandos baixam o 
 npm, fora desta pasta, para o ownCloud não sincronizar milhares de arquivos. Na primeira vez em um
 computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
+## Banco de dados no Supabase (desde 12/11/2026)
+
+- Projeto Supabase (Postgres 17) ligado ao repositório do GitHub (pasta `.`, branch `main`). As tabelas ficam em
+  `supabase/migrations/*.sql`. No plano gratuito a integração não aplicou a migração sozinha; ela foi aplicada direto no banco
+  e registrada em `supabase_migrations.schema_migrations` (assim a integração não repete). Migração nova: testar dentro de uma
+  transação desfeita (rollback), aplicar e registrar do mesmo jeito.
+- Credenciais só no computador da sincronização: `%LOCALAPPDATA%\GestaoCombustivel\supabase.json` (`url`, `service_role` =
+  chave secreta `sb_secret_`, `db` = conexão "Session pooler"; o endereço direto `db.<projeto>.supabase.co` é só IPv6 e não
+  funciona daqui). Nunca vão para o GitHub nem para o chat.
+- Tabelas (espelho das planilhas, uma por aba): `base_transacoes` (a Base_copia: no banco não há "cópia", a base é editada
+  direto — decisão do usuário), `placas`, `motoristas` (sem CPF/nascimento/CNH), `cartoes_placas`, `placas_mercosul`,
+  `bomba_precos`, `bomba_fornecedores`, `postos_localizacao`, `negociacoes`, `negociacoes_rotas`, `orcamento_metas`,
+  `orcamento_unidades`, `metas_mes` (Base > Metas x mes, uma linha por placa e mês), `bomba_compras` (Base > Bomba interna e
+  Bomba Interna Arla), `transacoes_negadas`, `anp_precos`; e `sincronizacao_planilhas` (quando cada uma foi carregada).
+  Toda tabela tem `id`, `linha` (linha da planilha) e `sincronizado_em`. RLS ligado em todas, sem política: só a chave
+  secreta lê e grava (a chave pública não vê nada).
+- Atualização: `scripts/supabase_sync.py`. O vigia chama `sincronizar` a cada volta (em segundo plano, no máximo a cada 60 s):
+  a planilha que mudou (e parou de mudar há 20 s) é recarregada inteira na tabela dela, numa transação. Valor que não cabe no
+  tipo da coluna, ou coluna nova na planilha: aquela tabela não muda e o log do vigia mostra "Supabase: erro em ...". O que
+  já foi carregado fica em `%LOCALAPPDATA%\GestaoCombustivel\supabase-estado.json` (apagar uma entrada força recarregar).
+  - `py scripts/supabase_sync.py sincronizar --tudo` recarrega todas (~3 min); `conferir` compara linhas planilha x banco.
+  - Coluna nova numa planilha: `py scripts/supabase_sync.py esquema` mostra o SQL; criar uma migração com o `alter table`.
+- Ainda não usado pelo site (continua na Cloudflare); próximo passo combinado: domínio próprio e site no Lovable usando o
+  Supabase, deixando as planilhas por último.
+
 ## Código no GitHub
 
 - Repositório **privado** https://github.com/combustiveisgmc/Combustiveis-GMC (conta `combustiveisgmc`, branch `main`).

@@ -319,6 +319,8 @@ def sincronizar(tudo=False, so=None):
         if not os.path.isfile(f['arquivo']):
             continue
         st = os.stat(f['arquivo'])
+        if not tudo and dt.datetime.now().timestamp() - st.st_mtime < 20:
+            continue   # planilha sendo gravada agora (Excel, vigia, ownCloud): espera ela parar de mudar
         marca = {'mtime': st.st_mtime, 'tamanho': st.st_size}
         e = estado.get(nome) or {}
         if tudo or e.get('mtime') != marca['mtime'] or e.get('tamanho') != marca['tamanho']:
