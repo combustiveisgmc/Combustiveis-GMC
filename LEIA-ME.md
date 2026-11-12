@@ -25,6 +25,15 @@ Precisa só do Node.js instalado. Não rode `npm install`: os comandos baixam o 
 npm, fora desta pasta, para o ownCloud não sincronizar milhares de arquivos. Na primeira vez em um
 computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
+## Código no GitHub
+
+- Repositório **privado** https://github.com/combustiveisgmc/Combustiveis-GMC (conta `combustiveisgmc`, branch `main`).
+- O histórico do git fica **fora do ownCloud**, em `C:\Users\Raja\git\gestao-combustivel.git` (o ownCloud corta arquivos e
+  estragaria o histórico); nesta pasta há só o arquivo `.git` apontando para lá. Em outro computador: `git clone` normal.
+- Não sobem (`.gitignore`): `.dados/`, `CONTROLES/`, planilhas, `.dev.vars`, `.wrangler/` (banco local) e `node_modules/`.
+- Mandar as mudanças: `git add -A`, `git commit -m "o que mudou"`, `git push`. Publicar o site continua sendo `npm run publicar`
+  (o GitHub não publica nada sozinho).
+
 ## Visual (design v2, refeito do zero em 28/10/2026)
 
 - Baseado no Figma "SaaS – Sales Management Dashboard – Muvic" (layout Blacksale) e no protótipo `prototipos/design-muvic`.
