@@ -47,6 +47,13 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
   já foi carregado fica em `%LOCALAPPDATA%\GestaoCombustivel\supabase-estado.json` (apagar uma entrada força recarregar).
   - `py scripts/supabase_sync.py sincronizar --tudo` recarrega todas (~3 min); `conferir` compara linhas planilha x banco.
   - Coluna nova numa planilha: `py scripts/supabase_sync.py esquema` mostra o SQL; criar uma migração com o `alter table`.
+- **Banco da Cloudflare (D1) no Supabase:** as 30 tabelas do D1 (alterações, bomba interna, consolidador, conferência,
+  PRIME, notificações, contratos ANP, logins e funções, acessos dos motoristas etc.) estão no Supabase com os mesmos nomes,
+  colunas e chaves (`supabase/migrations/20261112200000_cloudflare_d1.sql`). Fora: sessões e tentativas de login
+  (temporárias), `d1_migrations` e a coluna `alteracoes_cadastros.pessoais` (CPF temporário; não vai para lugar nenhum).
+  Senhas dos logins só como hash. `scripts/supabase_d1.py` (esquema / sincronizar / conferir): o vigia copia a cada 5 min
+  só as tabelas que mudaram (`sincronizacao_cloudflare` mostra quando). Migração nova no D1 (coluna ou tabela): o log do
+  vigia avisa "precisa de migração"; gerar o SQL com `esquema` e criar a migração no Supabase.
 - Ainda não usado pelo site (continua na Cloudflare); próximo passo combinado: domínio próprio e site no Lovable usando o
   Supabase, deixando as planilhas por último.
 
