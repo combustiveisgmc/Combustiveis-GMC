@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Teste de design · Início</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* Protótipo do design "SaaS – Sales Management Dashboard – Muvic" (Figma Community) aplicado à tela Início.
+   Valores tirados do frame Dashboard_Custom: cores, raios, espaçamentos e tipografia. Dados ilustrativos. */
+:root {
+  --fundo-lateral: #121212;   /* Drawer */
+  --fundo: #161616;           /* Header_Navigation, Graph_1..3, Profile */
+  --cartao: #262626;          /* Total Revenue, General Sale, Top Sale... */
+  --texto: #ffffff;
+  --suave: #828282;           /* rótulos de eixo, "Sale Generated" */
+  --verde: #41b06e;           /* botão Export PDF, toggle, "View Report" */
+  --sobe: #2ea41b;
+  --desce: #ff1717;
+  --selo: #bc7c01;            /* contadores do menu, rótulo do gráfico */
+  --borda-lateral: #4d4d4d;
+  --chip-ok: #3dbf4a; --chip-alerta: #f6c25e; --chip-ruim: #f92f2f;
+  --ic-verde: #cbecd8; --ic-roxo: #c4c3e9; --ic-areia: #e9e1c3;
+  --r: 5px; --r-icone: 15px; --r-pilula: 25px;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { background: var(--fundo); color: var(--texto); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 14px; }
+a { color: inherit; text-decoration: none; }
+svg.ic { width: 18px; height: 18px; flex: none; }
+
+.app { display: flex; min-height: 100vh; }
+
+/* ---------- lateral (Drawer: 249px, padding 25, gap 25) ---------- */
+.lateral { width: 249px; flex: none; background: var(--fundo-lateral); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+.lateral-corpo { padding: 25px; display: flex; flex-direction: column; gap: 25px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #333 transparent; }
+.logo { display: flex; align-items: center; gap: 8px; padding: 10px; }
+.logo img { width: 30px; height: 30px; }
+.logo strong { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.perfil { background: var(--fundo); border-radius: var(--r); padding: 25px; display: flex; align-items: center; gap: 15px; }
+.avatar { width: 38px; height: 38px; border-radius: var(--r-pilula); background: var(--verde); display: grid; place-items: center; font-weight: 600; border: 3px solid #fff; flex: none; }
+.perfil strong { display: block; font-size: 16px; font-weight: 600; }
+.perfil span { font-size: 12px; }
+.secao { display: flex; flex-direction: column; gap: 6px; }
+.secao h3 { font-size: 16px; font-weight: 600; padding: 10px 15px 10px 10px; }
+.item { display: flex; align-items: center; gap: 10px; padding: 10px 15px 10px 10px; border-radius: var(--r); font-weight: 500; font-size: 14px; color: #e6e6e6; }
+.item:hover { background: #1c1c1c; }
+.item.ativo { background: var(--cartao); color: #fff; }
+.item.ativo svg { color: var(--verde); }
+.item .rot { flex: 1; }
+.selo { background: var(--selo); border-radius: var(--r-pilula); font-size: 12px; font-weight: 500; padding: 1px 7px; line-height: 17px; }
+.lateral-rodape { border-top: 1px solid var(--borda-lateral); padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; }
+.lateral-rodape .item { padding-left: 10px; flex: 1; }
+.toggle { width: 34px; height: 20px; border-radius: 13px; background: var(--verde); position: relative; flex: none; }
+.toggle::after { content: ''; position: absolute; right: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+
+/* ---------- conteúdo ---------- */
+.conteudo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.barra { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 25px 25px 12px; background: var(--fundo); }
+.barra h1 { font-size: 20px; font-weight: 600; }
+.barra-acoes { display: flex; gap: 25px; align-items: center; }
+.campo { display: flex; align-items: center; gap: 5px; padding: 10px 15px; border: 1px solid #fff; border-radius: var(--r); font-size: 14px; color: #fff; background: transparent; height: 38px; }
+.campo input { background: none; border: 0; color: #fff; font: inherit; width: 120px; outline: none; }
+.campo input::placeholder { color: #fff; }
+.btn-icone { width: 38px; padding: 10px; justify-content: center; }
+.btn-verde { display: flex; align-items: center; gap: 5px; padding: 10px 15px; background: var(--verde); border-radius: var(--r); height: 38px; border: 0; color: #fff; font: 500 14px 'Plus Jakarta Sans', sans-serif; cursor: pointer; }
+
+.faixa { display: flex; gap: 25px; padding: 12px 25px; }
+.faixa:last-child { padding-bottom: 25px; }
+.cartao { background: var(--cartao); border-radius: var(--r); padding: 25px; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
+.cab-cartao { display: flex; align-items: center; justify-content: space-between; gap: 19px; min-height: 32px; }
+.cab-cartao h2 { font-size: 14px; font-weight: 500; }
+.btn-mais { width: 32px; height: 32px; border: 1px solid #fff; border-radius: var(--r); display: grid; place-items: center; }
+.sel { display: flex; align-items: center; gap: 25px; padding: 8px 15px; border: 1px solid #fff; border-radius: var(--r); font-size: 12px; height: 32px; }
+
+.saudacao { padding: 12px 25px 0; }
+.saudacao h2 { font-size: 24px; font-weight: 500; }
+.saudacao p { color: var(--suave); font-size: 12px; margin-top: 5px; max-width: 760px; }
+
+/* indicadores (Graph_1: Total Revenue / Customers / Transactions) */
+.kpi { flex: 1; flex-direction: row; align-items: center; gap: 20px; padding: 20px; }
+.kpi-icone { width: 73px; height: 73px; border-radius: var(--r-icone); display: grid; place-items: center; flex: none; }
+.kpi-icone svg { width: 38px; height: 38px; }
+.kpi-texto { display: flex; flex-direction: column; gap: 25px; min-width: 0; flex: 1; }
+.kpi-rot { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.kpi-rot svg { width: 16px; height: 16px; color: var(--suave); }
+.kpi-linha { display: flex; align-items: center; gap: 25px; }
+.kpi-num { font-size: 24px; font-weight: 500; white-space: nowrap; }
+.var { display: flex; flex-direction: column; gap: 3px; font-size: 10px; font-weight: 500; }
+.var b { display: flex; align-items: center; gap: 3px; font-weight: 500; }
+.var b.sobe { color: var(--sobe); } .var b.desce { color: var(--desce); }
+.var b svg { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; padding: 1px; }
+
+/* gráfico (General Sale Activity) */
+.g-principal { flex: 0 0 61.5%; }
+.resumo-graf { display: flex; align-items: flex-end; justify-content: space-between; }
+.resumo-graf small { color: var(--suave); font-size: 10px; display: block; margin-bottom: 5px; }
+.resumo-graf strong { font-size: 24px; font-weight: 500; }
+.link-verde { color: var(--verde); font-size: 12px; font-weight: 500; }
+.area-graf { position: relative; height: 244px; }
+
+/* média contra a meta (no lugar de Top Selling Products) */
+.g-lado { flex: 1; }
+.medidor { position: relative; height: 170px; }
+.medidor-centro { position: absolute; inset: auto 0 6px; text-align: center; }
+.medidor-centro strong { font-size: 24px; font-weight: 500; display: block; }
+.medidor-centro small { color: var(--suave); font-size: 10px; }
+.linha-lista { display: flex; align-items: center; gap: 15px; padding: 10px; }
+.mini-icone { width: 46px; height: 46px; border-radius: var(--r-icone); display: grid; place-items: center; flex: none; color: #121212; }
+.mini-icone svg { width: 22px; height: 22px; }
+.linha-lista div { flex: 1; min-width: 0; }
+.linha-lista strong { font-size: 14px; font-weight: 600; display: block; }
+.linha-lista div span { font-size: 12px; color: #d0d0d0; }
+
+/* tabela (Top Transactions) */
+.g-tabela { flex: 0 0 50.4%; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; font-weight: 500; padding: 5px; }
+td { padding: 6px 5px; font-weight: 400; vertical-align: middle; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tbody tr { border-top: 1px solid #333; }
+tbody tr:hover { background: #2c2c2c; cursor: pointer; }
+.chip { display: inline-block; padding: 2px 8px; border-radius: var(--r-pilula); font-size: 10px; font-weight: 600; color: #fff; white-space: nowrap; }
+.chip.ok { background: var(--chip-ok); } .chip.alerta { background: var(--chip-alerta); color: #3a2a00; } .chip.ruim { background: var(--chip-ruim); }
+
+/* atalhos (Todos os painéis) */
+.g-atalhos { flex: 1; }
+.atalhos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.atalhos a { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: var(--r); background: var(--fundo); font-size: 12px; font-weight: 500; }
+.atalhos a:hover { outline: 1px solid var(--verde); }
+.atalhos svg { color: var(--verde); }
+
+.aviso-teste { position: fixed; right: 16px; bottom: 16px; background: var(--selo); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: var(--r-pilula); }
+
+@media (max-width: 1100px) {
+  .faixa { flex-wrap: wrap; }
+  .g-principal, .g-tabela, .g-lado, .g-atalhos, .kpi { flex: 1 1 100%; }
+}
+@media (max-width: 760px) {
+  .lateral { display: none; }
+  .barra { flex-wrap: wrap; padding: 16px 16px 8px; }
+  .barra-acoes { gap: 10px; flex-wrap: wrap; }
+  .faixa, .saudacao { padding-left: 16px; padding-right: 16px; }
+  .atalhos { grid-template-columns: 1fr; }
+  .g-tabela { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- ícones do portal, com traço 1.5 para ficar no peso dos ícones "vuesax linear" do design -->
+  <symbol id="i-inicio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-motorista" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 14.5V21M9.6 11.2 3.5 9.5M14.4 11.2l6.1-1.7"/></symbol>
+  <symbol id="i-despesas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+  <symbol id="i-evolucao" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12M15 9v12"/></symbol>
+  <symbol id="i-media" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 18 4-5"/><path d="M4 18h16"/></symbol>
+  <symbol id="i-anp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 16l4-5 4 3 6-8"/><path d="M15 6h4v4"/></symbol>
+  <symbol id="i-contrato" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-mapa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol>
+  <symbol id="i-etiqueta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+  <symbol id="i-tanque" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 13h14M9 17h6"/></symbol>
+  <symbol id="i-nota" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h7M9 9h2"/></symbol>
+  <symbol id="i-consolidar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M17 13v8M13 17h8"/></symbol>
+  <symbol id="i-cartao" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></symbol>
+  <symbol id="i-caminhao" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-usuarios" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/></symbol>
+  <symbol id="i-sair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-tema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-busca" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-3.5-3.5"/></symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-atualizar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2M18.5 2v4h-4M5.5 22v-4h4"/></symbol>
+  <symbol id="i-baixar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-mais" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+  <symbol id="i-cima" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18V6M7 11l5-5 5 5"/></symbol>
+  <symbol id="i-baixo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v12M17 13l-5 5-5-5"/></symbol>
+  <symbol id="i-gota" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="lateral" aria-label="Menu">
+    <div class="lateral-corpo">
+      <div class="logo"><img src="logo-mark.png" alt=""><strong>Gestão</strong></div>
+
+      <div class="perfil">
+        <div class="avatar" aria-hidden="true">J</div>
+        <div><strong>João</strong><span>Administrador</span></div>
+      </div>
+
+      <nav class="secao">
+        <h3>Geral</h3>
+        <a class="item ativo" href="#"><svg class="ic"><use href="#i-inicio"/></svg><span class="rot">Início</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-cartao"/></svg><span class="rot">Cartões frota</span><span class="selo">6</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-consolidar"/></svg><span class="rot">Consolidador</span></a>
+      </nav>
+
+      <nav class="secao">
+        <h3>Dashboards</h3>
+        <a class="item" href="#"><svg class="ic"><use href="#i-motorista"/></svg><span class="rot">Operação por motorista</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-despesas"/></svg><span class="rot">Despesas</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-evolucao"/></svg><span class="rot">Evolução placas</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-media"/></svg><span class="rot">Média geral</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-anp"/></svg><span class="rot">Preço x ANP</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-contrato"/></svg><span class="rot">Contratos x ANP</span></a>
+      </nav>
+
+      <nav class="secao">
+        <h3>Bomba interna</h3>
+        <a class="item" href="#"><svg class="ic"><use href="#i-tanque"/></svg><span class="rot">Estoque</span><span class="selo">2</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-nota"/></svg><span class="rot">Conciliação de NFs</span></a>
+      </nav>
+
+      <nav class="secao">
+        <h3>Conta</h3>
+        <a class="item" href="#"><svg class="ic"><use href="#i-usuarios"/></svg><span class="rot">Gerenciar acessos</span></a>
+        <a class="item" href="#"><svg class="ic"><use href="#i-sair"/></svg><span class="rot">Sair</span></a>
+      </nav>
+    </div>
+    <div class="lateral-rodape">
+      <span class="item"><svg class="ic"><use href="#i-tema"/></svg><span class="rot">Tema escuro</span></span>
+      <span class="toggle" aria-hidden="true"></span>
+    </div>
+  </aside>
+
+  <div class="conteudo">
+    <header class="barra">
+      <h1>Início</h1>
+      <div class="barra-acoes">
+        <label class="campo"><svg class="ic"><use href="#i-busca"/></svg><input placeholder="Buscar painel"></label>
+        <span class="campo"><svg class="ic"><use href="#i-calendario"/></svg>Outubro 2026<svg class="ic"><use href="#i-seta"/></svg></span>
+        <span class="campo btn-icone" title="Atualizar"><svg class="ic"><use href="#i-atualizar"/></svg></span>
+        <button class="btn-verde" type="button"><svg class="ic"><use href="#i-baixar"/></svg>Exportar PDF</button>
+      </div>
+    </header>
+
+    <div class="saudacao">
+      <h2>Olá, João</h2>
+      <p>Resumo de outubro de 2026 até 27/10, o último abastecimento na Base, comparado com os mesmos dias de setembro. Clique num bloco para abrir o painel.</p>
+    </div>
+
+    <!-- Graph_1: três indicadores -->
+    <section class="faixa">
+      <a class="cartao kpi" href="#">
+        <span class="kpi-icone" style="background:var(--ic-verde);color:#1f6b40"><svg><use href="#i-despesas"/></svg></span>
+        <span class="kpi-texto">
+          <span class="kpi-rot">Gasto em outubro<svg><use href="#i-info"/></svg></span>
+          <span class="kpi-linha"><span class="kpi-num">R$ 1.284.530</span>
+            <span class="var"><b class="desce"><svg><use href="#i-cima"/></svg>4,2%</b>vs. setembro</span></span>
+        </span>
+      </a>
+      <a class="cartao kpi" href="#">
+        <span class="kpi-icone" style="background:var(--ic-roxo);color:#3d3b8f"><svg><use href="#i-gota"/></svg></span>
+        <span class="kpi-texto">
+          <span class="kpi-rot">Litros abastecidos<svg><use href="#i-info"/></svg></span>
+          <span class="kpi-linha"><span class="kpi-num">212.430 L</span>
+            <span class="var"><b class="desce"><svg><use href="#i-cima"/></svg>2,8%</b>vs. setembro</span></span>
+        </span>
+      </a>
+      <a class="cartao kpi" href="#">
+        <span class="kpi-icone" style="background:var(--ic-areia);color:#7a6420"><svg><use href="#i-etiqueta"/></svg></span>
+        <span class="kpi-texto">
+          <span class="kpi-rot">Preço médio do diesel<svg><use href="#i-info"/></svg></span>
+          <span class="kpi-linha"><span class="kpi-num">R$ 6,047/L</span>
+            <span class="var"><b class="sobe"><svg><use href="#i-baixo"/></svg>1,1%</b>vs. setembro</span></span>
+        </span>
+      </a>
+    </section>
+
+    <!-- Graph_2: gráfico + média contra a meta -->
+    <section class="faixa">
+      <div class="cartao g-principal">
+        <div class="cab-cartao">
+          <h2>Gasto diário com combustível</h2>
+          <span class="sel">Outubro<svg class="ic" style="width:16px;height:16px"><use href="#i-seta"/></svg></span>
+        </div>
+        <div class="resumo-graf">
+          <div><small>Média por dia</small><strong>R$ 47.575</strong></div>
+          <a class="link-verde" href="#">Abrir Despesas</a>
+        </div>
+        <div class="area-graf"><canvas id="graf-gasto" aria-label="Gasto diário de outubro"></canvas></div>
+      </div>
+
+      <div class="cartao g-lado">
+        <div class="cab-cartao">
+          <h2>Média km/L contra a meta</h2>
+          <a class="btn-mais" href="#" aria-label="Abrir Média geral"><svg class="ic" style="width:16px;height:16px"><use href="#i-mais"/></svg></a>
+        </div>
+        <div class="medidor">
+          <canvas id="graf-meta" aria-label="Média 2,41 km/L, 96% da meta"></canvas>
+          <div class="medidor-centro"><strong>2,41 km/L</strong><small>96% da meta de 2,50 km/L</small></div>
+        </div>
+        <div class="linha-lista">
+          <span class="mini-icone" style="background:var(--ic-verde)"><svg><use href="#i-caminhao"/></svg></span>
+          <div><strong>Cavalo</strong><span>2,28 km/L · meta 2,35</span></div>
+          <span class="chip alerta">97%</span>
+        </div>
+        <div class="linha-lista">
+          <span class="mini-icone" style="background:var(--ic-roxo)"><svg><use href="#i-caminhao"/></svg></span>
+          <div><strong>Truck</strong><span>3,64 km/L · meta 3,50</span></div>
+          <span class="chip ok">104%</span>
+        </div>
+        <div class="linha-lista">
+          <span class="mini-icone" style="background:var(--ic-areia)"><svg><use href="#i-caminhao"/></svg></span>
+          <div><strong>Toco</strong><span>4,02 km/L · meta 4,60</span></div>
+          <span class="chip ruim">87%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Graph_3: tabela de indicadores + atalhos -->
+    <section class="faixa">
+      <div class="cartao g-tabela">
+        <div class="cab-cartao">
+          <h2>Números de cada painel</h2>
+          <a class="btn-mais" href="#" aria-label="Mais"><svg class="ic" style="width:16px;height:16px"><use href="#i-mais"/></svg></a>
+        </div>
+        <table>
+          <thead><tr><th>Painel</th><th>Indicador</th><th class="num">Valor</th><th class="num">Setembro</th><th>Situação</th></tr></thead>
+          <tbody>
+            <tr><td>Operação</td><td>Economia de litros</td><td class="num">−3.120 L</td><td class="num">+1.840 L</td><td><span class="chip ruim">Acima da meta</span></td></tr>
+            <tr><td>Evolução placas</td><td>Placas abaixo da meta</td><td class="num">38 de 142</td><td class="num">41 de 139</td><td><span class="chip alerta">27% das placas</span></td></tr>
+            <tr><td>Postos externos</td><td>Pago acima do negociado</td><td class="num">R$ 4.870</td><td class="num">R$ 6.215</td><td><span class="chip alerta">3 desatualizadas</span></td></tr>
+            <tr><td>Preço x ANP</td><td>Diesel contra ANP Brasil</td><td class="num">−0,112 R$/L</td><td class="num">−0,086 R$/L</td><td><span class="chip ok">1,8% abaixo</span></td></tr>
+            <tr><td>Contratos x ANP</td><td>Contratos acima de +5%</td><td class="num">3 de 21</td><td class="num">1 de 21</td><td><span class="chip ruim">Pedem reajuste</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cartao g-atalhos">
+        <div class="cab-cartao">
+          <h2>Todos os painéis</h2>
+          <a class="link-verde" href="#">Ver todos</a>
+        </div>
+        <div class="atalhos">
+          <a href="#"><svg class="ic"><use href="#i-motorista"/></svg>Operação por motorista</a>
+          <a href="#"><svg class="ic"><use href="#i-despesas"/></svg>Despesas</a>
+          <a href="#"><svg class="ic"><use href="#i-media"/></svg>Média geral</a>
+          <a href="#"><svg class="ic"><use href="#i-anp"/></svg>Preço x ANP</a>
+          <a href="#"><svg class="ic"><use href="#i-mapa"/></svg>Mapa de calor</a>
+          <a href="#"><svg class="ic"><use href="#i-etiqueta"/></svg>Preço postos externos</a>
+          <a href="#"><svg class="ic"><use href="#i-tanque"/></svg>Estoque bomba interna</a>
+          <a href="#"><svg class="ic"><use href="#i-nota"/></svg>Conciliação de NFs</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="aviso-teste">Protótipo · dados ilustrativos</div>
+
+<script>
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#828282';
+
+// gasto diário ilustrativo de 1 a 27/10 (R$ mil)
+const dias = Array.from({ length: 27 }, (_, i) => i + 1);
+const gasto = [41, 46, 52, 49, 38, 22, 18, 47, 55, 58, 51, 36, 21, 17, 50, 57, 61, 54, 40, 23, 19, 52, 59, 66, 56, 42, 24];
+const media = gasto.reduce((a, b) => a + b, 0) / gasto.length;
+const iMax = gasto.indexOf(Math.max(...gasto));
+
+// faixa vertical no maior dia, linha tracejada na média e rótulo dourado, como no gráfico do design
+const destaque = {
+  id: 'destaque',
+  beforeDatasetsDraw(c) {
+    const { ctx, chartArea: a, scales: { x, y } } = c;
+    const px = x.getPixelForValue(iMax), w = 26, topo = y.getPixelForValue(gasto[iMax]);
+    const g = ctx.createLinearGradient(0, topo, 0, a.bottom);
+    g.addColorStop(0, 'rgba(255,255,255,.28)'); g.addColorStop(1, 'rgba(255,255,255,.02)');
+    ctx.save(); ctx.fillStyle = g;
+    ctx.beginPath(); ctx.roundRect(px - w / 2, topo, w, a.bottom - topo, 5); ctx.fill();
+    ctx.setLineDash([6, 5]); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1;
+    const py = y.getPixelForValue(media);
+    ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke(); ctx.restore();
+  },
+  afterDatasetsDraw(c) {
+    const { ctx, scales: { x, y } } = c;
+    const px = x.getPixelForValue(iMax), py = y.getPixelForValue(gasto[iMax]);
+    const txt = 'R$ ' + gasto[iMax] + ' mil';
+    ctx.save(); ctx.font = "500 12px 'Plus Jakarta Sans'";
+    const w = ctx.measureText(txt).width + 20;
+    ctx.fillStyle = '#bc7c01'; ctx.beginPath(); ctx.roundRect(px - w / 2, py - 34, w, 25, 5); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, px, py - 21.5);
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#41b06e'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+  },
+};
+
+new Chart(document.getElementById('graf-gasto'), {
+  type: 'line',
+  data: { labels: dias.map((d) => String(d).padStart(2, '0')), datasets: [{ data: gasto, borderColor: '#41b06e', borderWidth: 2.5, tension: 0.4, pointRadius: 0, pointHoverRadius: 5, pointHoverBackgroundColor: '#41b06e' }] },
+  options: {
+    maintainAspectRatio: false, layout: { padding: { top: 36 } },
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: '#121212', borderColor: '#4d4d4d', borderWidth: 1, displayColors: false, callbacks: { title: (i) => i[0].label + '/10', label: (i) => 'R$ ' + i.raw + ' mil' } } },
+    scales: {
+      x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } },
+      y: { min: 0, max: 80, grid: { display: false }, border: { display: false }, ticks: { stepSize: 20, callback: (v) => v ? v + 'k' : '0' } },
+    },
+  },
+  plugins: [destaque],
+});
+
+// medidor: meio donut em verde (96% da meta)
+new Chart(document.getElementById('graf-meta'), {
+  type: 'doughnut',
+  data: { datasets: [{ data: [96, 4], backgroundColor: ['#41b06e', '#333333'], borderWidth: 0, borderRadius: 25 }] },
+  options: { maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '88%', plugins: { legend: { display: false }, tooltip: { enabled: false } } },
+});
+</script>
+</body>
+</html>

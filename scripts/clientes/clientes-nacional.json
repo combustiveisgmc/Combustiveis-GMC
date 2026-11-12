@@ -1,0 +1,560 @@
+[
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Fortaleza (Mucuripe)",
+  "endereco": "Rua Ernesto Igel, s/n, Mucuripe, CEP 60180-425",
+  "cidade": "FORTALEZA",
+  "uf": "CE",
+  "lat": -3.7165815,
+  "lng": -38.4652897,
+  "confianca": "media",
+  "como": "Coordenada oficial do mapa de unidades do site nacionalgas.com.br (JSON data-filiais); reverse Nominatim cai na Rua Ernesto Igel, Cais do Porto, Fortaleza",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/reverse?format=json&lat=-3.7165815&lon=-38.4652897"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Crato",
+  "endereco": "Avenida Castelo Branco, 1800, Muriti, CEP 63133-100",
+  "cidade": "CRATO",
+  "uf": "CE",
+  "lat": -7.2248017,
+  "lng": -39.3728747,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. Castelo Branco, Crato",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Teresina",
+  "endereco": "Rua Chanceler Edson Queiroz, 300, Dirceu Arcoverde, CEP 64077-750",
+  "cidade": "TERESINA",
+  "uf": "PI",
+  "lat": -5.097285,
+  "lng": -42.7606182,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua Chanceler Edson Queiroz, Dirceu Arcoverde, Teresina",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - São Luís (Itaqui)",
+  "endereco": "Avenida dos Portugueses, s/n, Lotes 6 e 7, Itaqui, CEP 65085-582",
+  "cidade": "SAO LUIS",
+  "uf": "MA",
+  "lat": -2.5455703,
+  "lng": -44.3019102,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. dos Portugueses, São Luís (área de Itaqui)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Imperatriz",
+  "endereco": "Rodovia BR-010, km 1352, Santa Rita, CEP 65917-220",
+  "cidade": "IMPERATRIZ",
+  "uf": "MA",
+  "lat": -5.5430684,
+  "lng": -47.4642349,
+  "confianca": "media",
+  "como": "Unidade da marca Paragás (grupo Nacional Gás/GEQ) listada no mapa oficial; reverse Nominatim cai na BR-010, Imperatriz",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Guamaré",
+  "endereco": "Rodovia RN-221, km 27, Zona Rural, CEP 59598-000",
+  "cidade": "GUAMARE",
+  "uf": "RN",
+  "lat": -5.1257772,
+  "lng": -36.3832887,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na 'Estrada da Brasil Gás', Guamaré (polo de Guamaré)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Suape",
+  "endereco": "Av. Portuária de Suape, s/n, Ilha da Cocaia",
+  "cidade": "IPOJUCA",
+  "uf": "PE",
+  "lat": -8.45069,
+  "lng": -35.0208466,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai em Ipojuca (região de Suape), sem área industrial nomeada no OSM",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Maceió",
+  "endereco": "Avenida Durval de Góes Monteiro, 1801, Tabuleiro dos Martins, CEP 57061-000",
+  "cidade": "MACEIO",
+  "uf": "AL",
+  "lat": -9.6208602,
+  "lng": -35.7484976,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site, mas reverse Nominatim cai na Rua Pau Brasil, Chã da Jaqueira (não na Av. Durval de Góes Monteiro/Tabuleiro); posição não confirmada",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Aracaju",
+  "endereco": "Avenida Melício Machado, 979, Atalaia, CEP 49037-445",
+  "cidade": "ARACAJU",
+  "uf": "SE",
+  "lat": -10.9962324,
+  "lng": -37.0648274,
+  "confianca": "alta",
+  "como": "Centro da área industrial 'Nacional Gás' mapeada no OSM (landuse=industrial, Atalaia); coordenada do site fica a ~900 m (-10.9893597,-37.0605839, na Av. Melício Machado)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Nacional%20G%C3%A1s,%20Aracaju"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Mataripe",
+  "endereco": "Fazenda Caípe de Fora, s/n, Lote 5, Mataripe, CEP 43900-000",
+  "cidade": "SAO FRANCISCO DO CONDE",
+  "uf": "BA",
+  "lat": -12.711776,
+  "lng": -38.586501,
+  "confianca": "alta",
+  "como": "Área industrial 'Nacional Gás' mapeada no OSM em Mataripe (ao lado da Liquigás/refinaria). A coordenada do site (-12.6301,-38.6778) caía no centro de São Francisco do Conde e foi descartada",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Nacional%20G%C3%A1s,%20S%C3%A3o%20Francisco%20do%20Conde"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Jequié",
+  "endereco": "Avenida Tote Lomanto, s/n, Suíssa, CEP 45205-311",
+  "cidade": "JEQUIE",
+  "uf": "BA",
+  "lat": -13.8514769,
+  "lng": -40.0921417,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. Tote Lomanto, Jequié",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Itabuna",
+  "endereco": "Rodovia BR-415, km 09, trecho Itabuna/Ibicaraí - Fernando Gomes, CEP 45613-550",
+  "cidade": "ITABUNA",
+  "uf": "BA",
+  "lat": -14.7881482,
+  "lng": -39.2482631,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site (reverse: Rodovia Jorge Amado, Parque Verde, Itabuna), mas o endereço indica trecho Itabuna-Ibicaraí (oeste) e o OSM tem um polígono 'Nacional Gás' em -14.8503785,-39.3627856 (landuse=retail). Não foi possível confirmar qual é a base",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Nacional%20G%C3%A1s,%20Itabuna"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Juazeiro",
+  "endereco": "Avenida 04, 808, QI-I, Bairro Distrito Industrial, CEP 48909-753",
+  "cidade": "JUAZEIRO",
+  "uf": "BA",
+  "lat": -9.4643168,
+  "lng": -40.492983,
+  "confianca": "alta",
+  "como": "Coordenada oficial do site; reverse Nominatim retorna ponto 'Nacional Gás, 808, Avenida Quatro, Distrito Industrial, Juazeiro'",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/reverse?format=json&lat=-9.4643168&lon=-40.492983"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Belém",
+  "endereco": "Rua Salgado Filho, s/n, Miramar, CEP 66119-010",
+  "cidade": "BELEM",
+  "uf": "PA",
+  "lat": -1.40455,
+  "lng": -48.4873629,
+  "confianca": "media",
+  "como": "Unidade Paragás listada no mapa oficial; reverse Nominatim cai na Rua Salgado Filho, Miramar, Belém",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Santarém",
+  "endereco": "Rua Vinte e Quatro de Outubro, 3477, Salé, CEP 68040-385",
+  "cidade": "SANTAREM",
+  "uf": "PA",
+  "lat": -2.4236902,
+  "lng": -54.7417727,
+  "confianca": "alta",
+  "como": "Edifício industrial 'Paragás' mapeado no OSM na Rua 24 de Outubro; coordenada do site fica a ~1,3 km (-2.4209304,-54.7299974)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Parag%C3%A1s,%20Santar%C3%A9m"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Marabá",
+  "endereco": "Rua Antonio Santis, s/n, Quadra 07A Lote 01, Vale do Aeroporto, CEP 68501-815",
+  "cidade": "MARABA",
+  "uf": "PA",
+  "lat": -5.378782,
+  "lng": -49.136183,
+  "confianca": "baixa",
+  "como": "Coordenada do site caía em área rural a 80 km (descartada). Usado o bairro Vale do Aeroporto (Rua do Aeroporto, Photon/OSM), do endereço oficial; ponto aproximado",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Altamira",
+  "endereco": "Avenida Perimetral, s/n, esq. Rua Acesso 8, Sudam II, CEP 68374-274",
+  "cidade": "ALTAMIRA",
+  "uf": "PA",
+  "lat": -3.2145702,
+  "lng": -52.2361211,
+  "confianca": "media",
+  "como": "Unidade Paragás do mapa oficial; reverse Nominatim cai na Av. Perimetral, Altamira",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Itaituba",
+  "endereco": "Rodovia Transamazônica, km 03, Comércio, CEP 68180-010",
+  "cidade": "ITAITUBA",
+  "uf": "PA",
+  "lat": -4.250657,
+  "lng": -56.0071309,
+  "confianca": "media",
+  "como": "Unidade Paragás do mapa oficial; reverse Nominatim cai na Rodovia Transamazônica, Itaituba",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás (Paragás) - Macapá",
+  "endereco": "Rodovia Duca Serra, s/n, Lote 21 V 2, Marabaixo, CEP 68906-301",
+  "cidade": "MACAPA",
+  "uf": "AP",
+  "lat": 0.0296077,
+  "lng": -51.1114477,
+  "confianca": "media",
+  "como": "Unidade Paragás do mapa oficial; reverse Nominatim cai na Rodovia Duca Serra, Macapá",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Brasília",
+  "endereco": "SIN (Setor de Inflamáveis), Lote 14/A, Guará, CEP 71225-000",
+  "cidade": "BRASILIA",
+  "uf": "DF",
+  "lat": -15.7508868,
+  "lng": -47.9250462,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai no SCIA/SOFN, vizinho ao Setor de Inflamáveis. Endereço confirmado pelo CNPJ filial 06.980.064/0100-64",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://cnpjcheck.com.br/empresa/nacional-gas-butano-distribuidora-ltda-06980064010064"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Goiânia (Senador Canedo)",
+  "endereco": "Rodovia GO-536, km 1, Módulo 10, Distrito Industrial Brasil Central, CEP 75251-725",
+  "cidade": "SENADOR CANEDO",
+  "uf": "GO",
+  "lat": -16.7356898,
+  "lng": -49.1183262,
+  "confianca": "media",
+  "como": "Unidade chamada 'Goiania' no site, mas endereço e coordenada ficam em Senador Canedo (GO-536, polo de GLP). Reverse Nominatim confirma GO-536",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Cuiabá",
+  "endereco": "Avenida X, 1150-A, Coxipó da Ponte - Distrito Industrial, CEP 78098-500",
+  "cidade": "CUIABA",
+  "uf": "MT",
+  "lat": -15.6649085,
+  "lng": -56.0610065,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua X, Cuiabá (Distrito Industrial)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Campo Grande",
+  "endereco": "Avenida Duque de Caxias, 6906, Sala 1, Vila Nova Campo Grande, CEP 79105-000",
+  "cidade": "CAMPO GRANDE",
+  "uf": "MS",
+  "lat": -20.466401,
+  "lng": -54.72067,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. Duque de Caxias, Núcleo Industrial. ATENÇÃO: endereço com 'Sala 1' pode ser unidade operacional/depósito e não fábrica de envase",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Betim",
+  "endereco": "Rodovia BR-381 Fernão Dias, km 485, Distrito Industrial - Jardim Piemont Norte, CEP 32689-898",
+  "cidade": "BETIM",
+  "uf": "MG",
+  "lat": -19.9658661,
+  "lng": -44.0850962,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rodovia Fernão Dias, Distrito Industrial, Betim. Polo de GLP (Ultragaz/Supergasbras) mapeado no OSM a ~2 km; base Nacional Gás não mapeada",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Uberlândia",
+  "endereco": "Rua Licério Pinheiro de Paula, 100-A, Distrito Industrial, CEP 38402-336",
+  "cidade": "UBERLANDIA",
+  "uf": "MG",
+  "lat": -18.8662966,
+  "lng": -48.2956624,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua Licério Pinheiro de Paula, Setor Industrial",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Serra",
+  "endereco": "Rua Geraldo Dell Puppo, s/n, Área C, Bairro Civit II, CEP 29168-074",
+  "cidade": "SERRA",
+  "uf": "ES",
+  "lat": -20.1897996,
+  "lng": -40.2398701,
+  "confianca": "alta",
+  "como": "Coordenada oficial do site na Rua Geraldo Del Puppo; área industrial 'Nacional Gás' mapeada no OSM a ~400 m (-20.1930236,-40.2389782)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Nacional%20G%C3%A1s,%20Serra"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Duque de Caxias",
+  "endereco": "Avenida Fabor, 1100, Campos Elíseos, CEP 25225-030",
+  "cidade": "DUQUE DE CAXIAS",
+  "uf": "RJ",
+  "lat": -22.7120236,
+  "lng": -43.2774172,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. Fabor, junto à REDUC, Campos Elyseos",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Macaé",
+  "endereco": "Rua Lazir de Lima, s/n, Distrito Industrial - Cabiúnas, CEP 27977-500",
+  "cidade": "MACAE",
+  "uf": "RJ",
+  "lat": -22.3414389,
+  "lng": -41.7616326,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site, mas reverse Nominatim cai em Nova Holanda (Rua Dr. Benedito Carlos Ferreira), não confirmando Rua Lazir de Lima/Cabiúnas",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Mauá",
+  "endereco": "Avenida Ayrton Senna da Silva, 1421, Jardim Sílvia Maria, CEP 09380-440",
+  "cidade": "MAUA",
+  "uf": "SP",
+  "lat": -23.6394152,
+  "lng": -46.4668044,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Av. Ayrton Senna da Silva, Mauá (região da RECAP)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Paulínia",
+  "endereco": "Rua Antônio Carvalho Lage Filho, 425, Bonfim, CEP 13147-073",
+  "cidade": "PAULINIA",
+  "uf": "SP",
+  "lat": -22.7136767,
+  "lng": -47.1358166,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua Antonio de Carvalho Lage Filho, Bonfim. Há área 'Liquigas' no OSM a ~800 m (-22.7187055,-47.1416644), possivelmente outra planta",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - São José dos Campos",
+  "endereco": "Estrada Dom José Antônio do Couto, 100, Campos de São José, CEP 12226-551",
+  "cidade": "SAO JOSE DOS CAMPOS",
+  "uf": "SP",
+  "lat": -23.1842062,
+  "lng": -45.8131093,
+  "confianca": "media",
+  "como": "Edifício industrial 'Liquigas' (ex-Liquigás, ativo integrado pela Nacional Gás/NGC) no OSM, zona leste perto de Campos de São José. A coordenada do site (-23.1877,-45.9610) cai na Urbanova (zona oeste), incompatível com o endereço; vínculo Liquigás=esta unidade é inferido",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Liquig%C3%A1s,%20S%C3%A3o%20Jos%C3%A9%20dos%20Campos"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Bauru",
+  "endereco": "Rua Maurita Vaz Malmonge, 2-140, Distrito Industrial Marcus Vinícius Feliz Machado, CEP 17039-770",
+  "cidade": "BAURU",
+  "uf": "SP",
+  "lat": -22.3148269,
+  "lng": -48.9802833,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua Maurita Vaz Malmonge. Endereço confirmado por CNPJ filial 06.980.064/0103-07",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://casadosdados.com.br/solucao/cnpj/nacional-gas-butano-distribuidora-ltda-06980064010307"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Ribeirão Preto",
+  "endereco": "Rodovia Alexandre Balbo, km 326,4, Parque Residencial Cidade Universitária, CEP 14052-800",
+  "cidade": "RIBEIRAO PRETO",
+  "uf": "SP",
+  "lat": -21.1041615,
+  "lng": -47.8056479,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rodovia Alexandre Balbo, Distrito Industrial",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Presidente Prudente",
+  "endereco": "Rodovia Raposo Tavares, km 561, Sala 01, Presidente Prudente, CEP 19043-140",
+  "cidade": "PRESIDENTE PRUDENTE",
+  "uf": "SP",
+  "lat": -22.0803639,
+  "lng": -51.383875,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site, mas reverse Nominatim cai no Conjunto Brasil Novo, não na Raposo Tavares. Endereço com 'Sala 01' sugere unidade operacional/escritório, talvez não fábrica de envase",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Araucária",
+  "endereco": "Rua Edson Queiroz, 214, Chapada, CEP 83707-741",
+  "cidade": "ARAUCARIA",
+  "uf": "PR",
+  "lat": -25.5570022,
+  "lng": -49.3699823,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai na Rua Edson Queiróz, Araucária (perto da REPAR)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Apucarana",
+  "endereco": "Avenida Francisco Kitano, 97, Parque Industrial Zona Norte, CEP 86806-385",
+  "cidade": "APUCARANA",
+  "uf": "PR",
+  "lat": -23.5291436,
+  "lng": -51.4495806,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site, mas reverse Nominatim cai na Av. Brasil, Apucarana (não confirma Av. Francisco Kitano)",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Itajaí",
+  "endereco": "Rua Benjamim Dagnoni, 1355, Rio do Meio, CEP 88316-100",
+  "cidade": "ITAJAI",
+  "uf": "SC",
+  "lat": -26.95142,
+  "lng": -48.7083707,
+  "confianca": "alta",
+  "como": "Área industrial 'Nacional Gás Distribuidora' mapeada no OSM em Rio do Meio, Itajaí. A coordenada do site (-26.9201,-48.6476) caía em Cabeçudas e foi descartada",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://nominatim.openstreetmap.org/search?format=json&q=Nacional%20G%C3%A1s,%20Itaja%C3%AD"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Canoas",
+  "endereco": "Rua Antônio Frederico Ozanan, 935, Brigadeira, CEP 92420-360",
+  "cidade": "CANOAS",
+  "uf": "RS",
+  "lat": -29.921477,
+  "lng": -51.1888616,
+  "confianca": "baixa",
+  "como": "Coordenada oficial do site, mas reverse Nominatim cai na Rua Carlos Drumond de Andrade, Centro (não na Av. Ozanan/Brigadeira). Endereço confirmado por CNPJ filial 06.980.064/0096-43",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/",
+   "https://casadosdados.com.br/solucao/cnpj/nacional-gas-butano-distribuidora-ltda-06980064009643"
+  ]
+ },
+ {
+  "empresa": "Nacional Gás",
+  "nome": "Nacional Gás - Passo Fundo",
+  "endereco": "Rodovia BR-285, 2745, Sala 02, Valinhos, CEP 99043-800",
+  "cidade": "PASSO FUNDO",
+  "uf": "RS",
+  "lat": -28.2226171,
+  "lng": -52.365953,
+  "confianca": "media",
+  "como": "Coordenada oficial do site; reverse Nominatim cai em rodovia em Passo Fundo. Endereço com 'Sala 02' sugere unidade operacional/depósito, talvez não fábrica de envase",
+  "fontes": [
+   "https://nacionalgas.com.br/a-nacional-gas/"
+  ]
+ }
+]

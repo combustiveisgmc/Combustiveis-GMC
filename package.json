@@ -1,0 +1,14 @@
+{
+  "name": "gestao-combustivel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes wrangler@4 pages dev",
+    "db:local": "npx --yes wrangler@4 d1 migrations apply DB --local",
+    "db:remoto": "npx --yes wrangler@4 d1 migrations apply DB --remote",
+    "criar-usuario": "node scripts/criar-usuario.mjs",
+    "importar-base": "py scripts/importar_base.py",
+    "atualizar-dados": "node scripts/sincronizar.mjs --forcar",
+    "publicar": "npx --yes wrangler@4 pages deploy public --project-name gestao-combustivel --branch main --commit-dirty=true"
+  }
+}

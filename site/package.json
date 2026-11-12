@@ -1,0 +1,16 @@
+{
+  "name": "gestao-combustivel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "criar-projeto": "wrangler pages project create gestao-combustivel --production-branch main",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "db:remoto": "wrangler d1 migrations apply DB --remote",
+    "criar-usuario": "node scripts/criar-usuario.mjs",
+    "publicar": "wrangler pages deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

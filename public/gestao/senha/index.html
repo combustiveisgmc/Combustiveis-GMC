@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Trocar Senha</title>
+<meta name="theme-color" content="#121212">
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .cartao-senha{
+    max-width:440px;margin:12px auto 0;
+    background:var(--branco);border:0;border-radius:var(--raio);
+    padding:25px;
+  }
+  .cartao-senha h2{margin:0;font-size:20px;font-weight:600;line-height:1.15;}
+  .cartao-senha .explica{margin:6px 0 18px;font-size:13px;color:var(--asfalto-suave);}
+  .dica{margin:4px 0 0;font-size:12px;color:var(--suave);}
+  .ok{
+    margin:0 0 14px;padding:10px 14px;border-radius:var(--raio);
+    background:rgba(65,176,110,.16);color:var(--placa);font-weight:500;font-size:14px;
+  }
+  .topo-acoes{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+  .topo-acoes a{color:var(--asfalto);font-size:14px;font-weight:500;border:1px solid var(--contorno);border-radius:var(--raio);padding:8px 15px;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-in">
+    <img src="/logo-mark.png" alt="" width="40" height="40">
+    <h1>Gestão de combustível</h1>
+    <div class="topo-acoes"><a href="/gestao/" id="voltar" class="oculto">Voltar</a></div>
+  </div>
+</header>
+
+<main>
+  <form class="cartao-senha" id="form-senha" novalidate>
+    <h2 id="titulo">Trocar senha</h2>
+    <p class="explica" id="explica">Escolha uma senha nova para entrar na gestão.</p>
+    <p class="erro oculto" id="erro" role="alert"></p>
+    <p class="ok oculto" id="ok" role="status"></p>
+
+    <div class="campo">
+      <label for="atual" id="rotulo-atual">Senha atual</label>
+      <input id="atual" type="password" autocomplete="current-password" required>
+    </div>
+    <div class="campo">
+      <label for="nova">Senha nova</label>
+      <input id="nova" type="password" autocomplete="new-password" minlength="8" required aria-describedby="dica-nova">
+      <p class="dica" id="dica-nova">Pelo menos 8 caracteres.</p>
+    </div>
+    <div class="campo">
+      <label for="repetir">Repita a senha nova</label>
+      <input id="repetir" type="password" autocomplete="new-password" required>
+    </div>
+    <div class="acoes">
+      <button type="submit" class="btn btn-primario" id="btn-salvar">Salvar senha nova</button>
+    </div>
+  </form>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function aviso(id, msg) {
+    $(id).textContent = msg || '';
+    $(id).classList.toggle('oculto', !msg);
+  }
+
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(function (r) { if (r.status === 401) { location.href = '/?entrar=1'; return null; } return r.json(); })
+    .then(function (u) {
+      if (!u) return;
+      if (u.trocar_senha) {
+        $('titulo').textContent = 'Crie sua senha';
+        $('rotulo-atual').textContent = 'Senha inicial (a que você recebeu)';
+        $('explica').textContent = 'Primeiro acesso, ' + (u.nome || '').split(' ')[0] +
+          '. Troque a senha inicial por uma só sua antes de continuar.';
+      } else {
+        $('voltar').classList.remove('oculto');
+      }
+    })
+    .catch(function () {});
+
+  $('form-senha').addEventListener('submit', function (e) {
+    e.preventDefault();
+    aviso('erro', ''); aviso('ok', '');
+    var atual = $('atual').value, nova = $('nova').value, repetir = $('repetir').value;
+    if (!atual || !nova) { aviso('erro', 'Preencha a senha atual e a senha nova.'); return; }
+    if (nova.length < 8) { aviso('erro', 'A senha nova precisa ter pelo menos 8 caracteres.'); $('nova').focus(); return; }
+    if (nova !== repetir) { aviso('erro', 'As duas senhas novas não são iguais.'); $('repetir').focus(); return; }
+
+    var btn = $('btn-salvar');
+    btn.disabled = true; btn.textContent = 'Salvando…';
+    fetch('/api/trocar-senha', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senha_atual: atual, senha_nova: nova })
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.status === 401) { location.href = '/?entrar=1'; return; }
+        if (!res.ok) { aviso('erro', res.d.erro || 'Não foi possível trocar a senha.'); return; }
+        $('form-senha').reset();
+        aviso('ok', 'Senha nova salva. Abrindo a gestão…');
+        setTimeout(function () { location.href = '/gestao/'; }, 1200);
+      })
+      .catch(function () { aviso('erro', 'Sem conexão com o servidor. Verifique a internet.'); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Salvar senha nova'; });
+  });
+})();
+</script>
+</body>
+</html>

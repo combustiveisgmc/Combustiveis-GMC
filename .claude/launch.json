@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 8788 },
+    { "name": "prototipo", "runtimeExecutable": "py", "runtimeArgs": ["-m", "http.server", "8790", "--bind", "127.0.0.1", "--directory", "prototipos/design-muvic"], "port": 8790 },
+    { "name": "prototipo-login", "runtimeExecutable": "py", "runtimeArgs": ["-m", "http.server", "8791", "--bind", "127.0.0.1", "--directory", "prototipos/login"], "port": 8791 }
+  ]
+}

@@ -1,0 +1,28 @@
+# Dados e segredos: nunca vão para o GitHub
+.dados/
+CONTROLES/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+*.xlsx
+*.xlsm
+*.xls
+cc.sql
+
+# Bancos e estado local do wrangler (usuários de teste, sessões)
+.wrangler/
+**/.wrangler/
+
+# Dependências e temporários
+node_modules/
+**/node_modules/
+__pycache__/
+*.pyc
+*.log
+~$*
+*.tmp
+
+# Cópias de conflito do ownCloud
+*conflicted copy*
+*(conflito*

@@ -1,0 +1,370 @@
+[
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Betim (sede/terminal)",
+  "endereco": "Rodovia BR-381 Fernão Dias, s/n, km 485,3, Santo Antônio, Betim-MG, CEP 32684-298",
+  "cidade": "BETIM",
+  "uf": "MG",
+  "lat": -19.9548774,
+  "lng": -44.0999916,
+  "confianca": "alta",
+  "como": "OSM way 1347238872 'Supergasbras' landuse=industrial com addr Rod. Fernão Dias 485,3 (centro do polígono). ANP inst. 1033097 (terminal + base GLP). CNPJ 19.791.896/0001-00",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896000100",
+   "https://www.openstreetmap.org/way/1347238872"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Jequié",
+  "endereco": "Avenida Governador Aurélio Rodrigues Viana, s/n, Kennedy, Jequié-BA, CEP 45201-475",
+  "cidade": "JEQUIE",
+  "uf": "BA",
+  "lat": -13.8410725,
+  "lng": -40.1074552,
+  "confianca": "media",
+  "como": "OSM way 614450198 'MinasGas' building=industrial (Minasgas = marca antiga do grupo SHV). Fica ~1,5 km ao norte do trecho da Av. Gov. Aurélio Viana achado no Photon (-13.855,-40.113); não confirmado que é o mesmo lote. ANP inst. 1033107. CNPJ 19.791.896/0088-53",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896008853",
+   "https://www.openstreetmap.org/way/614450198"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Duque de Caxias (Av. Monroe 160)",
+  "endereco": "Avenida Monroe, 160, Campos Elíseos, Duque de Caxias-RJ, CEP 25225-040",
+  "cidade": "DUQUE DE CAXIAS",
+  "uf": "RJ",
+  "lat": -22.7090909,
+  "lng": -43.2785152,
+  "confianca": "media",
+  "como": "Photon: OSM way 87508567 'Avenida Monro' em Campos Elyseos (nível de rua, sem número). ANP inst. 1152291. CNPJ 19.791.896/0099-06",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896009906",
+   "https://www.openstreetmap.org/way/87508567"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Duque de Caxias (Av. Monroe 189)",
+  "endereco": "Avenida Monroe, 189, Vila Actura/Campos Elíseos, Duque de Caxias-RJ, CEP 25225-040",
+  "cidade": "DUQUE DE CAXIAS",
+  "uf": "RJ",
+  "lat": -22.7090909,
+  "lng": -43.2785152,
+  "confianca": "media",
+  "como": "Photon: mesma via (OSM way 87508567 'Avenida Monro'); a ANP registra 2 instalações (1152290 e 1152291) na mesma avenida, provavelmente vizinhas/frente a frente. CNPJ 19.791.896/0098-25",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896009825",
+   "https://www.openstreetmap.org/way/87508567"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Itajaí",
+  "endereco": "Rodovia Jorge Lacerda, s/n, km 4, Espinheiros, Itajaí-SC, CEP 88311-600",
+  "cidade": "ITAJAI",
+  "uf": "SC",
+  "lat": -26.8886419,
+  "lng": -48.7291967,
+  "confianca": "baixa",
+  "como": "Nominatim: ponto da Rod. Jorge Lacerda em Espinheiros (nível de rua; km não conferido). ANP inst. 1030520. CNPJ 19.791.896/0074-58",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896007458"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - São Francisco do Conde (Mataripe)",
+  "endereco": "Rodovia BA-523 Candeias-Madre de Deus, s/n, km 6,9, Caípe de Fora, São Francisco do Conde-BA, CEP 43900-000",
+  "cidade": "SAO FRANCISCO DO CONDE",
+  "uf": "BA",
+  "lat": -12.7244166,
+  "lng": -38.5956235,
+  "confianca": "baixa",
+  "como": "Nominatim: BA-523 em Vila Caípe/Mataripe (nível de rua; km não conferido). ANP inst. 1030504. CNPJ 19.791.896/0082-68",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896008268"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Serra (Civit II)",
+  "endereco": "Rua 4A, s/n, Quadra 09, Civit II, Laranjeiras, Serra-ES, CEP 29168-077",
+  "cidade": "SERRA",
+  "uf": "ES",
+  "lat": -20.1939696,
+  "lng": -40.2382394,
+  "confianca": "alta",
+  "como": "OSM way 463957631 'Supergasbras' landuse=industrial industrial=glp, Civit II (centro do polígono). ANP inst. 1033104. CNPJ 19.791.896/0052-42",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896005242",
+   "https://www.openstreetmap.org/way/463957631"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Ribeirão Preto",
+  "endereco": "Rodovia Alexandre Balbo (SP-328), s/n, km 326, Parque Residencial Cidade Universitária, Ribeirão Preto-SP, CEP 14052-800",
+  "cidade": "RIBEIRAO PRETO",
+  "uf": "SP",
+  "lat": -21.096614,
+  "lng": -47.7968634,
+  "confianca": "baixa",
+  "como": "Nominatim: Rod. Alexandre Balbo, trecho Distrito Industrial (km 326 não conferido; o CEP aponta para a região da Cidade Universitária). ANP inst. 1033109. CNPJ 19.791.896/0089-34",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896008934"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Campo Grande",
+  "endereco": "Rua Nilo Javari Barem, 841, Vila Eliane, Campo Grande-MS, CEP 79103-280",
+  "cidade": "CAMPO GRANDE",
+  "uf": "MS",
+  "lat": -20.453708,
+  "lng": -54.6802455,
+  "confianca": "media",
+  "como": "Nominatim: Rua Nilo Javari Barem (nível de rua, sem número). ANP inst. 1030503. CNPJ 19.791.896/0086-91",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896008691"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Uberlândia",
+  "endereco": "Rua Licério Pinheiro de Paula, 100, Distrito Industrial, Uberlândia-MG, CEP 38402-336",
+  "cidade": "UBERLANDIA",
+  "uf": "MG",
+  "lat": -18.8664656,
+  "lng": -48.2964279,
+  "confianca": "media",
+  "como": "OSM node 13429384841 'Supergasbras' (shop=gas) na própria Rua Licério Pinheiro de Paula; Nominatim da rua a ~80 m. ANP inst. 1048221. CNPJ 19.791.896/0069-90",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896006990",
+   "https://www.openstreetmap.org/node/13429384841"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Londrina",
+  "endereco": "Rua Reciclagem, 100, CILO 3, Londrina-PR, CEP 86073-015",
+  "cidade": "LONDRINA",
+  "uf": "PR",
+  "lat": -23.273727,
+  "lng": -51.2108732,
+  "confianca": "media",
+  "como": "Nominatim: Rua da Reciclagem, Londrina (nível de rua). ANP inst. 1107085. CNPJ 19.791.896/0058-38",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896005838"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Passo Fundo",
+  "endereco": "Rodovia BR-285, s/n, km 301,1, Valinhos, Passo Fundo-RS, CEP 99042-800",
+  "cidade": "PASSO FUNDO",
+  "uf": "RS",
+  "lat": -28.2343186,
+  "lng": -52.4329678,
+  "confianca": "baixa",
+  "como": "Nominatim: BR-285 no bairro Valinhos (km não conferido). ANP inst. 1048232. CNPJ 19.791.896/0093-10",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896009310"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Araucária",
+  "endereco": "Rodovia do Xisto (BR-476), 1850, Thomaz Coelho, Araucária-PR, CEP 83707-440",
+  "cidade": "ARAUCARIA",
+  "uf": "PR",
+  "lat": -25.5742588,
+  "lng": -49.3881728,
+  "confianca": "baixa",
+  "como": "Photon: Marginal Rodovia do Xisto em Araucária, OSM way 304077847 (nível de rua; número 1850 não conferido). ANP inst. 1033103. CNPJ 19.791.896/0046-02",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896004602"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Brasília (Setor de Inflamáveis)",
+  "endereco": "Setor de Inflamáveis Sul, s/n, Lotes 3 e 3A, Guará/SIA, Brasília-DF, CEP 71225-000",
+  "cidade": "BRASILIA",
+  "uf": "DF",
+  "lat": -15.8010225,
+  "lng": -47.9388675,
+  "confianca": "media",
+  "como": "OSM way 266446812 'Supergasbras' building=yes; não conferido que fica no lote do Setor de Inflamáveis (o endereço não foi geocodificado). ANP inst. 1033098. CNPJ 19.791.896/0005-26",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896000526",
+   "https://www.openstreetmap.org/way/266446812"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Curitibanos",
+  "endereco": "Rodovia BR-470, 5972, Bom Jesus, Curitibanos-SC, CEP 89520-000",
+  "cidade": "CURITIBANOS",
+  "uf": "SC",
+  "lat": -27.3127297,
+  "lng": -50.5771297,
+  "confianca": "baixa",
+  "como": "Nominatim: BR-470 (Rod. Ingo Hering) em Curitibanos (número não conferido). ANP inst. 1048249 (base pequena, 1 tanque). CNPJ 19.791.896/0129-66",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896012966"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Timóteo",
+  "endereco": "Rodovia BR-381, 2006, km 195, Cachoeira do Vale, Timóteo-MG, CEP 35184-000",
+  "cidade": "TIMOTEO",
+  "uf": "MG",
+  "lat": -19.5403182,
+  "lng": -42.6861709,
+  "confianca": "baixa",
+  "como": "Nominatim: BR-381 em Cachoeira do Vale, Timóteo (nível de rua). ANP inst. 1048253 (base pequena, 1 tanque). CNPJ 19.791.896/0140-71",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896014071"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Belém (Miramar)",
+  "endereco": "Rua Salgado Filho, s/n, Miramar, Belém-PA, CEP 66119-010",
+  "cidade": "BELEM",
+  "uf": "PA",
+  "lat": -1.40455,
+  "lng": -48.4873629,
+  "confianca": "media",
+  "como": "Nominatim: Rua Salgado Filho, Miramar (área dos terminais de combustíveis; nível de rua). ANP inst. 1033110. CNPJ 19.791.896/0090-78",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896009078"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Biguaçu",
+  "endereco": "Rua Hipólito Henrique Pfleger, 3535, Rio Caveiras, Biguaçu-SC, CEP 88161-770",
+  "cidade": "BIGUACU",
+  "uf": "SC",
+  "lat": -27.5084615,
+  "lng": -48.6462016,
+  "confianca": "baixa",
+  "como": "Nominatim: Rua Hipólito Henrique Pfleger (via longa; número não conferido). ANP inst. 1048224 (base pequena, 1 tanque). CNPJ 19.791.896/0027-31",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896002731"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Canoas (Av. Frederico Ozanan)",
+  "endereco": "Avenida Antônio Frederico Ozanan, 1134, Brigadeira, Canoas-RS, CEP 92420-360",
+  "cidade": "CANOAS",
+  "uf": "RS",
+  "lat": -29.8766025,
+  "lng": -51.1667066,
+  "confianca": "baixa",
+  "como": "Photon: Rua Antônio Frederico Ozanan, OSM way 1336454476 (nível de rua; número 1134 não conferido). ANP inst. 1033100. CNPJ 19.791.896/0014-17",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896001417"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Canoas (Rua Primavera)",
+  "endereco": "Rua Primavera, 2710, Vila Rio Branco, Canoas-RS, CEP 92200-300",
+  "cidade": "CANOAS",
+  "uf": "RS",
+  "lat": -29.9637677,
+  "lng": -51.2038763,
+  "confianca": "baixa",
+  "como": "Nominatim: Rua Primavera, Rio Branco, Canoas (nível de rua). ANP inst. 1048245. CNPJ 19.791.896/0118-03",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896011803"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Cuiabá",
+  "endereco": "Avenida X, 1150, Distrito Industrial, Coxipó da Ponte, Cuiabá-MT, CEP 78098-500",
+  "cidade": "CUIABA",
+  "uf": "MT",
+  "lat": -15.6665693,
+  "lng": -55.9781656,
+  "confianca": "media",
+  "como": "Nominatim: Avenida X, Distrito Industrial de Cuiabá (nível de rua). ANP inst. 1048244. CNPJ 19.791.896/0114-80",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896011480"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Paulínia",
+  "endereco": "Avenida Ernesto Igel, 440, Bonfim, Paulínia-SP, CEP 13140-031",
+  "cidade": "PAULINIA",
+  "uf": "SP",
+  "lat": -22.7162635,
+  "lng": -47.140439,
+  "confianca": "alta",
+  "como": "OSM way 430669832 'SuperGasbras' landuse=industrial junto à Av. Ernesto Igel (polo de GLP da REPLAN). ANP inst. 1033101. CNPJ 19.791.896/0019-21",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896001921",
+   "https://www.openstreetmap.org/way/430669832"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - Ipojuca (Suape)",
+  "endereco": "Avenida Portuária, s/n, Distrito Industrial de Ipojuca (Complexo de Suape), Ipojuca-PE, CEP 55598-105",
+  "cidade": "IPOJUCA",
+  "uf": "PE",
+  "lat": -8.3954516,
+  "lng": -34.9788006,
+  "confianca": "baixa",
+  "como": "Nominatim: Av. Portuária, Suape (nível de rua). A ANP (inst. 1029732) ainda registra a base em nome de MINASGAS S/A (CNPJ 02.046.455/0002-54, baixado); a filial Supergasbras 19.791.896/0158-09 está ativa no mesmo endereço",
+  "fontes": [
+   "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/tancagem-do-abastecimento-nacional-de-combustiveis",
+   "https://brasilapi.com.br/api/cnpj/v1/19791896015809",
+   "https://brasilapi.com.br/api/cnpj/v1/02046455000254"
+  ]
+ },
+ {
+  "empresa": "Supergasbras",
+  "nome": "Supergasbras - São Luís (Itaqui)",
+  "endereco": "Rua dos Portugueses, s/n, km 9 (parte), Itaqui, São Luís-MA, CEP 65085-582",
+  "cidade": "SAO LUIS",
+  "uf": "MA",
+  "lat": -2.5760841,
+  "lng": -44.3668498,
+  "confianca": "baixa",
+  "como": "Nominatim: área industrial do Porto do Itaqui (não é o lote). DÚVIDA: filial ativa com CNAE 4682-6/00 desde 2004, mas não aparece na tancagem da ANP 2022-2026 (pode operar em base de terceiros ou em pool) | Filial ativa, mas sem registro de tancagem na ANP: pode operar em base de terceiros.",
+  "fontes": [
+   "https://brasilapi.com.br/api/cnpj/v1/19791896004190"
+  ]
+ }
+]

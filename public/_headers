@@ -1,0 +1,9 @@
+# Cabeçalhos de segurança dos arquivos estáticos (Cloudflare Pages). As respostas das Functions (APIs, /gestao e
+# /motorista) recebem os mesmos por lib/auth.js (CABECALHOS_SEGURANCA).
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)

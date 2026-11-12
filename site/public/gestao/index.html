@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gestão de Combustível</title>
+<meta name="theme-color" content="#0E5A3A">
+<link rel="icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .topo-in, .gestao main{max-width:1080px;}
+  .quem{font-size:15px;color:var(--asfalto-suave);white-space:nowrap;}
+  .quem strong{color:var(--asfalto);}
+  .topo-acoes{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+  .topo-acoes a{color:var(--asfalto-suave);font-size:14px;font-weight:600;}
+  .btn-sair{
+    background:var(--branco);border:2px solid var(--linha);border-radius:8px;
+    padding:8px 12px;font-weight:700;font-size:14px;
+  }
+  .boas-vindas h2{margin:8px 0 4px;font-size:30px;font-weight:800;line-height:1.1;}
+  .boas-vindas p{margin:0;color:var(--asfalto-suave);max-width:60ch;}
+  .area-vazia{
+    margin-top:28px;padding:28px 22px;
+    border:2px dashed var(--linha);border-radius:10px;
+    background:var(--branco);
+  }
+  .area-vazia h3{margin:0 0 4px;font-size:19px;}
+  .area-vazia p{margin:0;color:var(--asfalto-suave);}
+  @media (max-width:560px){ .quem{display:none;} }
+</style>
+</head>
+<body class="gestao">
+
+<header class="topo">
+  <div class="topo-in">
+    <img src="/logo-mark.png" alt="" width="40" height="40">
+    <h1>Gestão de combustível</h1>
+    <div class="topo-acoes">
+      <span class="quem" id="quem"></span>
+      <a href="/">Ver postos</a>
+      <button type="button" class="btn-sair" id="btn-sair">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="boas-vindas">
+    <h2 id="ola">Olá</h2>
+    <p>Esta é a área da equipe de gestão. Os motoristas continuam vendo só a lista de postos.</p>
+  </section>
+
+  <section class="area-vazia">
+    <h3>Ferramentas de gestão</h3>
+    <p>As telas de gestão vão aparecer aqui conforme forem sendo construídas.</p>
+  </section>
+</main>
+
+<script src="/gestao/gestao.js"></script>
+</body>
+</html>

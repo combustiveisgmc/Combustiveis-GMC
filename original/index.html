@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F5132">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Postos Autorizados</title>
+<style>
+  :root{
+    --bg:#F6F4EF;
+    --ink:#1B2420;
+    --road:#0F5132;
+    --road-dark:#0A3B25;
+    --amber:#E8A33D;
+    --ok-bg:#E1F3E3;
+    --ok-ink:#1E7B34;
+    --block-bg:#FBE2E1;
+    --block-ink:#B23A32;
+    --card:#FFFFFF;
+    --line:#E4E0D6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  .topbar{
+    background:var(--road);
+    color:#fff;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    position:sticky;
+    top:0;
+    z-index:10;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  .topbar .mark{
+    width:46px;height:46px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .topbar .mark img{
+    width:100%;height:100%;object-fit:contain;
+  }
+  .topbar .titles{min-width:0;flex:1 1 auto;overflow:hidden;}
+  .topbar h1{
+    font-size:16.5px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:.1px;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .topbar .sub{
+    font-size:12px;
+    opacity:.85;
+    margin-top:1px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .back-btn{
+    flex-shrink:0;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 12px;
+    border-radius:10px;
+    display:none;
+    align-items:center;
+    gap:5px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .back-btn:active{background:rgba(255,255,255,.28);}
+
+  main{max-width:640px;margin:0 auto;padding:22px 18px 60px;}
+
+  /* --- tela 1: escolha de unidade --- */
+  #screen-unidades .lead{
+    font-size:15.5px;
+    color:#4B564F;
+    margin:2px 0 20px;
+    line-height:1.45;
+  }
+  .unidade-grid{display:flex;flex-direction:column;gap:12px;}
+  .unidade-btn{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 20px;
+    font-size:19px;
+    font-weight:700;
+    color:var(--ink);
+    text-align:left;
+    cursor:pointer;
+    box-shadow:0 1px 2px rgba(20,30,20,.04);
+  }
+  .unidade-btn:active{background:#EFEBE0; transform:scale(.99);}
+  .unidade-btn .count{
+    font-size:13px;
+    font-weight:600;
+    color:#6E786F;
+    background:#EFEDE4;
+    padding:5px 10px;
+    border-radius:20px;
+  }
+  .unidade-btn .arrow{color:var(--road); font-size:20px; margin-left:10px;}
+
+  /* --- tela 2: lista de postos --- */
+  #screen-postos{display:none;}
+  .search-wrap{margin-bottom:18px;}
+  .search-wrap input{
+    width:100%;
+    font-size:16px;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .search-wrap input:focus{outline:2px solid var(--road); outline-offset:1px;}
+
+  .posto-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px 18px;
+    margin-bottom:12px;
+  }
+  .posto-nome{font-size:17.5px;font-weight:700;line-height:1.3;}
+  .posto-cidade{font-size:14.5px;color:#5C665D;margin-top:2px;}
+  .badges{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .badge{
+    font-size:13px;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:20px;
+    line-height:1.2;
+  }
+  .badge.cartao{background:#FDF0DD;color:#8A5A12;} /* cor padrão de reserva */
+  .badge.maps{
+    background:var(--bg);
+    color:var(--road-dark);
+    border:1.5px solid var(--road-dark);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+  }
+  .badge.maps:active{background:#E7E3D6;}
+  .aviso{
+    margin-top:10px;
+    padding:8px 12px;
+    background:#FFF6E0;
+    border-left:3px solid var(--amber);
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    color:#7A5A12;
+    line-height:1.35;
+  }
+  .install-banner{
+    background:var(--amber);
+    color:#3D2A05;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:13.5px;
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:9;
+  }
+  .install-banner span{flex:1 1 auto;}
+  .install-banner button#btn-instalar{
+    background:#3D2A05;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .install-banner button#btn-instalar-fechar{
+    background:transparent;
+    border:none;
+    color:#3D2A05;
+    font-size:16px;
+    padding:4px;
+    flex-shrink:0;
+  }
+  .ios-instrucao{
+    background:#FFF6E0;
+    border-bottom:1px solid var(--line);
+    padding:14px 18px;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .ios-instrucao button{
+    margin-top:10px;
+    background:var(--road);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:13.5px;
+  }
+  .badge.status-ok{background:var(--ok-bg);color:var(--ok-ink);}
+  .badge.status-block{background:var(--block-bg);color:var(--block-ink);}
+
+  .empty, .loading{
+    text-align:center;
+    color:#6E786F;
+    font-size:15px;
+    padding:40px 20px;
+    line-height:1.5;
+  }
+  .footer-note{
+    text-align:center;
+    font-size:12.5px;
+    color:#8A9188;
+    margin-top:26px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="mark"><img src="logo-mark.png" alt="" /></div>
+    <div class="titles">
+      <h1>Postos Autorizados</h1>
+      <div class="sub" id="topbar-sub">Escolha sua unidade</div>
+    </div>
+    <button class="back-btn" id="btn-trocar">↺ Trocar</button>
+  </div>
+
+  <div id="install-banner" class="install-banner" style="display:none;">
+    <span>📲 Instale este app no seu celular pra abrir mais rápido</span>
+    <button id="btn-instalar">Instalar</button>
+    <button id="btn-instalar-fechar" aria-label="Fechar">✕</button>
+  </div>
+
+  <div id="ios-instrucao" class="ios-instrucao" style="display:none;">
+    <p>Pra instalar no iPhone: toque no botão de compartilhar
+      <strong>(⬆️ na barra do Safari)</strong> e escolha
+      <strong>"Adicionar à Tela de Início"</strong>.</p>
+    <button id="btn-ios-fechar">Entendi</button>
+  </div>
+
+  <main>
+    <section id="screen-unidades">
+      <p class="lead">Toque na sua unidade para ver os postos onde você pode abastecer.</p>
+      <div class="unidade-grid" id="unidade-grid"></div>
+      <div class="loading" id="loading-msg">Carregando unidades...</div>
+    </section>
+
+    <section id="screen-postos">
+      <div class="search-wrap">
+        <input type="text" id="busca" placeholder="Buscar por posto ou cidade">
+      </div>
+      <div id="lista-postos"></div>
+      <div class="empty" id="empty-msg" style="display:none;">Nenhum posto encontrado com essa busca.</div>
+    </section>
+
+    <div class="footer-note">Lista de postos atualizada pela equipe de negociação de combustível.</div>
+  </main>
+
+<script>
+(function(){
+  var DATA = [];
+  var unidadeAtual = null;
+
+  function parseCSV(text){
+    // remove BOM se presente
+    if(text.charCodeAt(0) === 0xFEFF){ text = text.slice(1); }
+    var lines = text.replace(/\r/g,"").split("\n").filter(function(l){return l.trim().length>0;});
+    var headers = lines[0].split(";");
+    var rows = [];
+    for(var i=1;i<lines.length;i++){
+      var cols = lines[i].split(";");
+      var obj = {};
+      for(var j=0;j<headers.length;j++){
+        obj[headers[j].trim()] = (cols[j]||"").trim();
+      }
+      rows.push(obj);
+    }
+    return rows;
+  }
+
+  function normalizeStatus(s){
+    return (s||"").toUpperCase().indexOf("AUTORIZ") !== -1 ? "ok" : "block";
+  }
+
+  var CARTAO_CORES = {
+    'TICKETLOG':      { bg:'#5CAE49', fg:'#FFFFFF' },  // verde do cartão físico
+    'VELOE':          { bg:'#4B2E83', fg:'#FFFFFF' },  // roxo do cartão físico
+    'TRUCKPAG':       { bg:'#278187', fg:'#FFFFFF' },  // verde-azulado do cartão físico
+    'IDENTIFICAÇÃO':  { bg:'#1D4E9B', fg:'#FFFFFF' },  // azul
+    'IDENTIFICACAO':  { bg:'#1D4E9B', fg:'#FFFFFF' }
+  };
+  var CARTAO_PADRAO = { bg:'#8A8F86', fg:'#FFFFFF' };
+
+  function corDoCartao(nome){
+    var chave = (nome||"").trim().toUpperCase();
+    return CARTAO_CORES[chave] || CARTAO_PADRAO;
+  }
+
+  function renderUnidades(){
+    var counts = {};
+    var order = [];
+    DATA.forEach(function(r){
+      if(!(r.Unidade in counts)){ counts[r.Unidade]=0; order.push(r.Unidade); }
+      counts[r.Unidade]++;
+    });
+    order.sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+
+    var grid = document.getElementById('unidade-grid');
+    grid.innerHTML = "";
+    order.forEach(function(u){
+      var btn = document.createElement('button');
+      btn.className = 'unidade-btn';
+      var label = counts[u] === 1 ? '1 posto' : counts[u] + ' postos';
+      btn.innerHTML = '<span>'+u+'</span><span style="display:flex;align-items:center;gap:8px;">'+
+        '<span class="count">'+label+'</span><span class="arrow">›</span></span>';
+      btn.addEventListener('click', function(){ abrirUnidade(u); });
+      grid.appendChild(btn);
+    });
+    document.getElementById('loading-msg').style.display = 'none';
+  }
+
+  function abrirUnidade(u){
+    unidadeAtual = u;
+    document.getElementById('screen-unidades').style.display = 'none';
+    document.getElementById('screen-postos').style.display = 'block';
+    document.getElementById('back-btn') ; // noop
+    document.getElementById('btn-trocar').style.display = 'flex';
+    document.getElementById('topbar-sub').textContent = u;
+    document.getElementById('busca').value = '';
+    renderPostos('');
+    window.scrollTo(0,0);
+  }
+
+  function voltarUnidades(){
+    unidadeAtual = null;
+    document.getElementById('screen-postos').style.display = 'none';
+    document.getElementById('screen-unidades').style.display = 'block';
+    document.getElementById('btn-trocar').style.display = 'none';
+    document.getElementById('topbar-sub').textContent = 'Escolha sua unidade';
+    window.scrollTo(0,0);
+  }
+
+  function renderPostos(filtro){
+    var lista = DATA.filter(function(r){ return r.Unidade === unidadeAtual; });
+    if(filtro){
+      var f = filtro.toLowerCase();
+      lista = lista.filter(function(r){
+        return (r.Posto||"").toLowerCase().indexOf(f)!==-1 ||
+               (r.Cidade||"").toLowerCase().indexOf(f)!==-1;
+      });
+    }
+    lista.sort(function(a,b){
+      return (a.Cidade||"").localeCompare(b.Cidade||"",'pt-BR') ||
+             (a.Posto||"").localeCompare(b.Posto||"",'pt-BR');
+    });
+
+    var wrap = document.getElementById('lista-postos');
+    wrap.innerHTML = "";
+    document.getElementById('empty-msg').style.display = lista.length ? 'none' : 'block';
+
+    lista.forEach(function(r){
+      var st = normalizeStatus(r.Status);
+      var card = document.createElement('div');
+      card.className = 'posto-card';
+      var cor = corDoCartao(r.Cartao);
+      var mapsBtn = '';
+      if(r.Latitude && r.Longitude){
+        var mapsUrl = 'https://www.google.com/maps/search/?api=1&query='+
+          encodeURIComponent(r.Latitude)+','+encodeURIComponent(r.Longitude);
+        mapsBtn = '<a class="badge maps" href="'+mapsUrl+'" target="_blank" rel="noopener">📍 Abrir no mapa</a>';
+      }
+      var avisoHtml = '';
+      if(r.Aviso && r.Aviso.trim()){
+        avisoHtml = '<div class="aviso">📋 '+r.Aviso+'</div>';
+      }
+      card.innerHTML =
+        '<div class="posto-nome">'+r.Posto+'</div>'+
+        '<div class="posto-cidade">'+r.Cidade+'</div>'+
+        '<div class="badges">'+
+          '<span class="badge cartao" style="background:'+cor.bg+';color:'+cor.fg+';">'+(r.Cartao||"—")+'</span>'+
+          mapsBtn+
+        '</div>'+
+        avisoHtml;
+      wrap.appendChild(card);
+    });
+  }
+
+  document.getElementById('btn-trocar').addEventListener('click', voltarUnidades);
+  document.getElementById('busca').addEventListener('input', function(e){
+    renderPostos(e.target.value);
+  });
+
+  fetch('postos.csv')
+    .then(function(resp){
+      if(!resp.ok) throw new Error('csv not found');
+      return resp.text();
+    })
+    .then(function(text){
+      var todos = parseCSV(text);
+      // só entram postos autorizados - bloqueados são controle interno, não aparecem pro motorista
+      DATA = todos.filter(function(r){ return normalizeStatus(r.Status) === 'ok'; });
+      renderUnidades();
+    })
+    .catch(function(){
+      document.getElementById('loading-msg').textContent =
+        'Não foi possível carregar a lista de postos. Avise a equipe de negociação.';
+    });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+
+  // --- instalação embutida no layout ---
+  function jaInstalado(){
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+  }
+  function isIOS(){
+    return /iphone|ipad|ipod/i.test(navigator.userAgent);
+  }
+
+  var deferredPrompt = null;
+  var banner = document.getElementById('install-banner');
+  var iosBox = document.getElementById('ios-instrucao');
+
+  if (!jaInstalado()) {
+    if (isIOS()) {
+      banner.style.display = 'flex';
+      banner.querySelector('span').textContent = '📲 Instale este app no seu iPhone';
+      document.getElementById('btn-instalar').textContent = 'Como instalar';
+      document.getElementById('btn-instalar').addEventListener('click', function(){
+        iosBox.style.display = 'block';
+        banner.style.display = 'none';
+      });
+    } else {
+      window.addEventListener('beforeinstallprompt', function(e){
+        e.preventDefault();
+        deferredPrompt = e;
+        banner.style.display = 'flex';
+      });
+      document.getElementById('btn-instalar').addEventListener('click', function(){
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){
+          banner.style.display = 'none';
+          deferredPrompt = null;
+        });
+      });
+    }
+  }
+  document.getElementById('btn-instalar-fechar').addEventListener('click', function(){
+    banner.style.display = 'none';
+  });
+  document.getElementById('btn-ios-fechar').addEventListener('click', function(){
+    iosBox.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', function(){
+    banner.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>

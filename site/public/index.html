@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postos Autorizados</title>
+<meta name="description" content="Postos onde os motoristas podem abastecer, por unidade.">
+<meta name="theme-color" content="#0E5A3A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-in">
+    <img src="logo-mark.png" alt="" width="40" height="40">
+    <h1>Postos autorizados</h1>
+    <button type="button" class="link-gestao" id="abrir-login">Entrar</button>
+  </div>
+</header>
+
+<div class="instalar oculto" id="faixa-instalar">
+  <div class="instalar-in">
+    <span id="faixa-texto">Instale no celular para abrir mais rápido</span>
+    <button type="button" class="btn-inst" id="btn-instalar">Instalar</button>
+    <button type="button" class="btn-fechar" id="btn-fechar-instalar" aria-label="Fechar">×</button>
+  </div>
+</div>
+<div class="ios-ajuda oculto" id="ios-ajuda">
+  <p>No iPhone: toque em <strong>Compartilhar</strong> na barra do Safari e escolha <strong>Adicionar à Tela de Início</strong>.</p>
+  <button type="button" class="btn-trocar" id="btn-ios-ok">Entendi</button>
+</div>
+
+<main>
+  <!-- tela 1: escolher unidade -->
+  <section id="tela-unidades" aria-labelledby="titulo-unidades">
+    <div class="busca">
+      <label for="busca-geral">Procurar posto ou cidade</label>
+      <input type="search" id="busca-geral" autocomplete="off" placeholder="Ex.: Marabá, Magnolia">
+    </div>
+
+    <div id="resultado-geral" class="oculto">
+      <ul class="postos" id="lista-geral"></ul>
+      <p class="mensagem oculto" id="vazio-geral">Nenhum posto autorizado com esse nome ou cidade.</p>
+    </div>
+
+    <nav class="placa" id="placa" aria-labelledby="titulo-unidades">
+      <h2 class="placa-titulo" id="titulo-unidades">Qual é a sua unidade?</h2>
+      <ul id="lista-unidades"></ul>
+    </nav>
+    <p class="mensagem" id="carregando">Carregando postos…</p>
+  </section>
+
+  <!-- tela 2: postos da unidade -->
+  <section id="tela-postos" class="oculto" aria-labelledby="nome-unidade">
+    <div class="unidade-atual">
+      <div>
+        <h2 id="nome-unidade"></h2>
+        <p id="qtd-unidade"></p>
+      </div>
+      <button type="button" class="btn-trocar" id="btn-trocar">Trocar unidade</button>
+    </div>
+    <div class="busca">
+      <label for="busca-unidade">Procurar nesta unidade</label>
+      <input type="search" id="busca-unidade" autocomplete="off" placeholder="Posto ou cidade">
+    </div>
+    <ul class="postos" id="lista-postos"></ul>
+    <p class="mensagem oculto" id="vazio-unidade">Nenhum posto com esse nome ou cidade nesta unidade.</p>
+  </section>
+
+  <p class="rodape">Lista atualizada pela equipe de negociação de combustível.</p>
+</main>
+
+<dialog class="entrar" id="dialog-login" aria-labelledby="titulo-login">
+  <form id="form-login" novalidate>
+    <h2 id="titulo-login">Entrar na gestão</h2>
+    <p class="explica">Acesso só para a equipe de gestão. Motorista não precisa entrar.</p>
+    <p class="erro oculto" id="erro-login" role="alert"></p>
+    <div class="campo">
+      <label for="usuario">Usuário</label>
+      <input id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    </div>
+    <div class="campo">
+      <label for="senha">Senha</label>
+      <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+    </div>
+    <div class="acoes">
+      <button type="button" class="btn btn-secundario" id="cancelar-login">Cancelar</button>
+      <button type="submit" class="btn btn-primario" id="btn-entrar">Entrar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

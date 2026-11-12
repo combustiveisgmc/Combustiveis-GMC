@@ -1,0 +1,138 @@
+/* Minha média (/motorista/): painel do motorista no design v2 (por cima do app.css) */
+.mt-pagina{max-width:960px;margin:0 auto;padding:16px 16px 48px;display:flex;flex-direction:column;gap:15px;}
+@media (min-width:760px){.mt-pagina{padding:25px 25px 64px;gap:25px;}}
+.mt-carregando, .mt-vazio{color:var(--asfalto-suave);padding:24px 0;margin:0;}
+.mt-topo{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.mt-ola{margin:0;font-size:24px;font-weight:500;}
+.mt-sub{margin:4px 0 0;color:var(--suave);font-size:14px;}
+.mt-mes{display:flex;align-items:center;gap:10px;}
+.mt-mes label{font-size:14px;font-weight:500;color:var(--asfalto-suave);}
+.mt-mes select{height:44px;padding:0 12px;border:1px solid var(--contorno);border-radius:var(--raio);background:transparent;color:var(--asfalto);font-size:14px;}
+.mt-mes select option{background:var(--branco);}
+/* indicadores */
+.mt-kpis{display:grid;grid-template-columns:1fr;gap:10px;}
+@media (min-width:640px){.mt-kpis{grid-template-columns:repeat(3,minmax(0,1fr));gap:25px;}}
+.mt-kpi{display:flex;align-items:center;gap:15px;padding:18px;background:var(--branco);border-radius:var(--raio);min-width:0;}
+.mt-kpi > div{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.mt-ic{flex-shrink:0;width:56px;height:56px;border-radius:var(--raio-icone);background:var(--ic-verde) var(--ico-local) center / 28px no-repeat;}
+.mt-ic-roxo{background-color:var(--ic-roxo);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B4B2F5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z'/%3E%3C/svg%3E");}
+.mt-ic-verde{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237FD6A2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 18a8 8 0 1 1 16 0'/%3E%3Cpath d='m12 18 4-5'/%3E%3Cpath d='M4 18h16'/%3E%3C/svg%3E");}
+.mt-ic-areia{background-color:var(--ic-areia);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E8D08C' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 6h11v10H2zM13 9h4l4 4v3h-8'/%3E%3Ccircle cx='6.5' cy='17.5' r='1.8'/%3E%3Ccircle cx='17' cy='17.5' r='1.8'/%3E%3C/svg%3E");}
+.mt-kpi-rot{font-size:14px;font-weight:500;color:var(--asfalto-suave);}
+.mt-kpi-num{font-size:24px;font-weight:500;line-height:1.2;font-variant-numeric:tabular-nums;}
+.mt-kpi-num small{font-size:14px;color:var(--suave);font-weight:500;}
+.mt-kpi-det{font-size:14px;color:var(--suave);}
+/* cartões */
+.mt-dupla{display:grid;grid-template-columns:1fr;gap:15px;}
+@media (min-width:760px){.mt-dupla{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:25px;}}
+.mt-cartao{margin:0;padding:25px;background:var(--branco);border-radius:var(--raio);display:flex;flex-direction:column;gap:12px;min-width:0;}
+.mt-cartao h2{margin:0;font-size:14px;font-weight:500;color:var(--asfalto);}
+.mt-nota{margin:0;font-size:14px;color:var(--suave);}
+.mt-centro{text-align:center;}
+/* medidor em meio círculo */
+.mt-arco{position:relative;width:100%;max-width:280px;margin:0 auto;}
+.mt-arco svg{display:block;width:100%;height:auto;overflow:visible;}
+.mt-arco-fundo{fill:none;stroke:#333;stroke-width:14;stroke-linecap:round;}
+.mt-arco-valor{fill:none;stroke:var(--suave);stroke-width:14;stroke-linecap:round;}
+.mt-arco-valor.mt-bom{stroke:#3DBF4A;} .mt-arco-valor.mt-atencao{stroke:var(--faixa);} .mt-arco-valor.mt-ruim{stroke:#F92F2F;}
+.mt-arco-centro{position:absolute;left:0;right:0;bottom:0;text-align:center;line-height:1.15;}
+.mt-arco-centro span{display:block;font-size:30px;font-weight:500;font-variant-numeric:tabular-nums;}
+.mt-arco-centro small{font-size:14px;color:var(--suave);}
+/* pílulas e cores de situação */
+.mt-bom{color:#5FD07A;} .mt-ruim{color:var(--erro);} .mt-atencao{color:var(--faixa);}
+.mt-status{align-self:flex-start;padding:2px 10px;border-radius:var(--raio-pilula);font-size:14px;font-weight:600;background:var(--superficie-2);color:var(--asfalto-suave);}
+.mt-status.mt-bom{background:#3DBF4A;color:#0B1A0D;} .mt-status.mt-atencao{background:var(--faixa);color:#3A2A00;} .mt-status.mt-ruim{background:#F92F2F;color:#fff;}
+/* mês a mês */
+.mt-evol{list-style:none;margin:0;padding:0;}
+.mt-evol li{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--linha);font-size:14px;}
+.mt-evol li:first-child{border-top:0;}
+.mt-barra{height:8px;border-radius:var(--raio-pilula);background:#333;overflow:hidden;margin:0;}
+.mt-barra i{display:block;height:100%;border-radius:var(--raio-pilula);background:var(--suave);}
+.mt-barra i.mt-bom{background:#3DBF4A;} .mt-barra i.mt-ruim{background:#F92F2F;} .mt-barra i.mt-atencao{background:var(--faixa);}
+.mt-evol b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;}
+/* abastecimentos (lista como a tabela Top Transactions) */
+.mt-abast{list-style:none;margin:0;padding:0;}
+.mt-abast li{padding:12px 0;border-top:1px solid var(--linha);}
+.mt-abast li:first-child{border-top:0;}
+.mt-abast .mt-a1{display:flex;justify-content:space-between;gap:8px;font-weight:600;font-size:14px;}
+.mt-abast .mt-a2{color:var(--asfalto-suave);font-size:14px;margin-top:2px;}
+.mt-abast .mt-a3{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin-top:6px;color:var(--asfalto);font-variant-numeric:tabular-nums;}
+.mt-selo{display:inline-block;padding:1px 9px;border-radius:var(--raio-pilula);background:var(--faixa);color:#3a2a00;font-size:14px;font-weight:600;margin-left:6px;}
+
+/* revisão de design (29/10/2026): a média é o destaque; litros e km em dois cartões; ✓/↓ em cada abastecimento */
+@media (min-width:640px){.mt-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}}
+.mt-destaque{align-items:stretch;}
+.mt-centro-pilula{align-self:center;}
+.mt-arco-centro span{font-size:36px;}
+.mt-marca{font-weight:700;margin-left:2px;}
+.mt-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+
+/* faixa 95% a 100% da meta (verde-claro): perto da meta */
+.mt-quase{color:#C3E26E;}
+.mt-arco-valor.mt-quase{stroke:#A6CF3F;}
+.mt-status.mt-quase{background:#A6CF3F;color:#1A2400;}
+.mt-barra i.mt-quase{background:#A6CF3F;}
+/* senhas dos cartões: números grandes, um cartão por cor (Ticket vermelho, TruckPag azul, Veloe roxo) */
+.mt-senhas-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.mt-senhas-botao{min-height:44px;padding:0 16px;border:1px solid var(--contorno);border-radius:var(--raio-pilula);background:transparent;color:var(--asfalto);font:inherit;font-size:14px;font-weight:500;cursor:pointer;}
+.mt-senhas-botao:focus-visible{outline:2px solid var(--asfalto);outline-offset:2px;}
+.mt-senhas-lista{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:10px;}
+@media (min-width:640px){.mt-senhas-lista{grid-template-columns:repeat(3,minmax(0,1fr));}}
+.mt-senha{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:var(--raio);background:var(--superficie-2, rgba(255,255,255,.06));border-left:6px solid var(--suave);min-width:0;}
+.mt-senha-ticket{border-left-color:#E5484D;} .mt-senha-truckpag{border-left-color:#3B82F6;} .mt-senha-veloe{border-left-color:#8B5CF6;}
+.mt-senha-cartao{font-size:15px;font-weight:600;color:var(--asfalto-suave);}
+.mt-senha-num{font-size:34px;font-weight:600;line-height:1.1;letter-spacing:.12em;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;}
+.mt-senha-pontos{display:none;}
+.mt-senhas-ocultas .mt-senha-valor{display:none;} .mt-senhas-ocultas .mt-senha-pontos{display:inline;}
+
+/* Programa PRIME: nota/estrelas e aviso dos abastecimentos que ficaram fora */
+.mt-prime{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;}
+.mt-estrelas{font-size:24px;letter-spacing:2px;color:#F6C25E;}
+.mt-prime-nota{font-size:15px;}
+.mt-prime-nota b{font-size:20px;}
+.mt-fora-prime{margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(246,194,94,.14);font-size:14px;line-height:1.4;}
+.mt-selo-fora{margin:0 8px 0 0;background:#F6C25E;color:#3A2A00;}
+
+/* acesso de teste (MOTORISTA TESTE): faixa avisando que os abastecimentos são de outro motorista */
+.mt-teste{margin:0;padding:10px 14px;border-radius:var(--raio);background:rgba(246,194,94,.16);border:1px solid rgba(246,194,94,.5);font-size:14px;}
+
+/* postos autorizados (design-system/MOTORISTA.md): mesmos itens da tela inicial, dentro de um cartão */
+.mt-postos-cab{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;}
+.mt-postos-cab h2{margin:0;font-size:14px;font-weight:500;color:var(--asfalto);}
+.mt-postos-cartoes{margin:0;font-size:14px;color:var(--asfalto);}
+.mt-postos-cartoes:empty{display:none;}
+.mt-postos-cartoes span{color:var(--asfalto-suave);font-weight:500;}
+.mt-postos .posto{background:var(--superficie-2);}
+.mt-postos .postos .mensagem{grid-column:1 / -1;padding:20px 12px;}
+.mt-postos-ver{width:100%;}
+@media (max-width:759px){.mt-postos-cab .mt-mes{width:100%;}.mt-postos-cab .mt-mes select{flex:1;min-width:0;}}
+
+/* menu da página do motorista (design-system/MOTORISTA.md): 4 abas; no celular fixo embaixo, no computador abaixo da saudação */
+.mt-aba{display:flex;flex-direction:column;gap:15px;}
+.mt-aba[hidden]{display:none;}
+.mt-aba:focus{outline:none;}
+.mt-pagina[data-aba="postos"] .mt-mes-geral, .mt-pagina[data-aba="senhas"] .mt-mes-geral{display:none;}
+/* Postos e Senhas: topo baixo (só "Olá, …" menor), para o conteúdo aparecer logo na primeira tela */
+.mt-pagina[data-aba="postos"] .mt-sub, .mt-pagina[data-aba="senhas"] .mt-sub{display:none;}
+.mt-pagina[data-aba="postos"] .mt-ola, .mt-pagina[data-aba="senhas"] .mt-ola{font-size:18px;}
+.mt-pagina[data-aba="postos"] .mt-teste, .mt-pagina[data-aba="senhas"] .mt-teste{padding:6px 12px;}
+.mt-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));}
+.mt-nav a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:64px;padding:6px 4px;
+  color:var(--suave);font-size:14px;font-weight:600;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+.mt-nav a svg{width:24px;height:24px;flex-shrink:0;}
+.mt-nav a[aria-current="page"]{color:var(--placa);}
+.mt-nav a[aria-current="page"]::before{content:"";position:absolute;left:22%;right:22%;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--placa);}
+.mt-nav a:focus-visible{outline:2px solid var(--foco);outline-offset:-4px;border-radius:var(--raio);}
+@media (max-width:759px){
+  .mt-pagina{padding-bottom:calc(64px + env(safe-area-inset-bottom, 0px) + 24px);}
+  .mt-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding-bottom:env(safe-area-inset-bottom, 0px);background:var(--topo);border-top:1px solid var(--linha);}
+}
+@media (min-width:760px){
+  .mt-aba{gap:25px;}
+  .mt-teste{order:-3;} .mt-topo{order:-2;}
+  .mt-nav{order:-1;display:flex;gap:6px;border-bottom:1px solid var(--linha);}
+  .mt-nav a{flex-direction:row;gap:8px;min-height:48px;padding:0 16px;}
+  .mt-nav a:hover{color:var(--asfalto);}
+  .mt-nav a[aria-current="page"]{color:var(--placa);}
+  .mt-nav a[aria-current="page"]::before{top:auto;bottom:-1px;left:10px;right:10px;border-radius:3px 3px 0 0;}
+}

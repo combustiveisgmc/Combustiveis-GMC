@@ -1,0 +1,17 @@
+# Projeto NOVO no Cloudflare Pages (o site antigo dos motoristas continua separado).
+# Endereço: https://gestao-combustivel.pages.dev
+name = "gestao-combustivel"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gestao-combustivel"
+database_id = "78b29ea7-f90c-478a-8398-b001fcfa66fb"
+migrations_dir = "migrations"
+
+# Dados dos dashboards (abastecimentos). Hoje quem grava é o sincronizador da Base
+# (scripts/sincronizar.mjs); no futuro, as APIs dos cartões gravam aqui também.
+[[kv_namespaces]]
+binding = "DADOS"
+id = "c1e0aea8033e47bdbec6baab123067a6"

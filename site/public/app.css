@@ -1,0 +1,222 @@
+:root{
+  --placa:#0E5A3A;
+  --placa-escura:#0A4029;
+  --asfalto:#22282B;
+  --asfalto-suave:#566064;
+  --faixa:#F2B233;
+  --faixa-fundo:#FFF4D6;
+  --pista:#EDF0ED;
+  --branco:#FFFFFF;
+  --linha:#D3D9D4;
+  --erro:#B3261E;
+  --erro-fundo:#FCE8E6;
+  --foco:#1D63D8;
+  --fonte:"Overpass", "Segoe UI", Roboto, Arial, sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--pista);
+  color:var(--asfalto);
+  font-family:var(--fonte);
+  font-size:17px;
+  line-height:1.45;
+  -webkit-text-size-adjust:100%;
+  min-height:100vh;
+}
+button,input{font:inherit;color:inherit;}
+button{cursor:pointer;}
+:focus-visible{outline:3px solid var(--foco);outline-offset:2px;}
+.oculto{display:none !important;}
+
+/* cabeçalho */
+.topo{
+  background:var(--branco);
+  border-bottom:1px solid var(--linha);
+  position:sticky;top:0;z-index:10;
+}
+.topo-in{
+  max-width:640px;margin:0 auto;
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+}
+.topo img{width:40px;height:40px;flex-shrink:0;}
+.topo h1{
+  flex:1 1 auto;min-width:0;
+  margin:0;font-size:19px;font-weight:800;line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.link-gestao{
+  flex-shrink:0;
+  background:none;border:none;
+  color:var(--asfalto-suave);
+  font-size:14px;font-weight:600;
+  padding:10px 4px;
+  text-decoration:underline;text-underline-offset:3px;
+}
+
+main{max-width:640px;margin:0 auto;padding:20px 16px 56px;}
+
+/* placa de rodovia com as unidades */
+.placa{
+  background:var(--placa);
+  color:var(--branco);
+  border-radius:10px;
+  padding:6px;
+  box-shadow:0 0 0 2px var(--placa), inset 0 0 0 2px var(--branco);
+}
+.placa-titulo{
+  margin:0;
+  padding:16px 16px 12px;
+  font-size:24px;font-weight:800;line-height:1.15;
+}
+.placa ul{list-style:none;margin:0;padding:0 6px 6px;}
+.placa li + li{border-top:2px solid rgba(255,255,255,.9);}
+.unidade{
+  width:100%;
+  display:flex;align-items:center;gap:12px;
+  background:none;border:none;color:inherit;
+  padding:15px 10px;
+  text-align:left;
+  font-size:21px;font-weight:700;line-height:1.2;
+}
+.unidade:active{background:var(--placa-escura);}
+.unidade .nome{flex:1 1 auto;}
+.unidade .qtd{font-size:15px;font-weight:600;opacity:.85;white-space:nowrap;}
+.unidade .seta{font-size:26px;font-weight:800;line-height:1;}
+
+.busca{margin:0 0 16px;}
+.busca label{display:block;font-size:15px;font-weight:600;margin-bottom:6px;}
+.busca input{
+  width:100%;
+  font-size:17px;
+  padding:14px 14px;
+  border:2px solid var(--linha);
+  border-radius:8px;
+  background:var(--branco);
+}
+.busca input:focus{border-color:var(--placa);outline:none;}
+
+/* cabeçalho da unidade escolhida */
+.unidade-atual{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:0 0 16px;
+}
+.unidade-atual h2{margin:0;font-size:26px;font-weight:800;line-height:1.1;}
+.unidade-atual p{margin:2px 0 0;font-size:15px;color:var(--asfalto-suave);}
+.btn-trocar{
+  flex-shrink:0;
+  background:var(--branco);
+  border:2px solid var(--placa);
+  color:var(--placa);
+  font-weight:700;font-size:15px;
+  padding:10px 14px;border-radius:8px;
+}
+.btn-trocar:active{background:var(--pista);}
+
+/* postos */
+.postos{list-style:none;margin:0;padding:0;}
+.posto{
+  background:var(--branco);
+  border:1px solid var(--linha);
+  border-left:6px solid var(--placa);
+  border-radius:4px 8px 8px 4px;
+  padding:14px 16px 16px;
+  margin-bottom:12px;
+}
+.posto h3{margin:0;font-size:18px;font-weight:800;line-height:1.25;}
+.posto .cidade{margin:2px 0 0;font-size:15.5px;color:var(--asfalto-suave);}
+.posto .unid{font-weight:700;color:var(--placa);}
+.cartao-linha{margin:12px 0 0;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.cartao{
+  display:inline-block;
+  font-size:14px;font-weight:800;
+  padding:5px 11px;border-radius:5px;
+  letter-spacing:.3px;
+}
+.aviso{
+  margin:12px 0 0;
+  padding:9px 12px;
+  background:var(--faixa-fundo);
+  border-left:5px solid var(--faixa);
+  font-size:15px;font-weight:700;line-height:1.35;
+}
+.btn-mapa{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:14px;
+  min-height:50px;
+  background:var(--placa);color:var(--branco);
+  border-radius:8px;
+  font-size:17px;font-weight:700;
+  text-decoration:none;
+}
+.btn-mapa:active{background:var(--placa-escura);}
+.btn-mapa svg{width:20px;height:20px;flex-shrink:0;}
+.sem-mapa{margin-top:12px;font-size:14px;color:var(--asfalto-suave);}
+
+.mensagem{
+  text-align:center;color:var(--asfalto-suave);
+  font-size:16px;padding:36px 12px;
+}
+.rodape{
+  text-align:center;font-size:14px;color:var(--asfalto-suave);
+  margin-top:28px;
+}
+
+/* faixa de instalação */
+.instalar{
+  background:var(--faixa);color:var(--asfalto);
+  font-size:15px;font-weight:600;
+}
+.instalar-in{max-width:640px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;}
+.instalar span{flex:1 1 auto;}
+.instalar .btn-inst{
+  background:var(--asfalto);color:var(--branco);border:none;
+  padding:9px 14px;border-radius:6px;font-weight:700;font-size:14px;flex-shrink:0;
+}
+.instalar .btn-fechar{background:none;border:none;font-size:22px;line-height:1;padding:6px;flex-shrink:0;}
+.ios-ajuda{max-width:640px;margin:0 auto;padding:12px 16px;font-size:15px;background:var(--faixa-fundo);}
+.ios-ajuda p{margin:0 0 10px;}
+
+/* login da gestão */
+dialog.entrar{
+  border:none;border-radius:12px;
+  padding:0;
+  width:min(420px, calc(100vw - 32px));
+  color:var(--asfalto);
+  box-shadow:0 18px 48px rgba(20,30,25,.28);
+}
+dialog.entrar::backdrop{background:rgba(20,30,25,.55);}
+.entrar form{padding:22px 20px 20px;}
+.entrar h2{margin:0;font-size:22px;font-weight:800;}
+.entrar .explica{margin:4px 0 18px;font-size:15px;color:var(--asfalto-suave);}
+.campo{margin-bottom:14px;}
+.campo label{display:block;font-size:15px;font-weight:700;margin-bottom:5px;}
+.campo input{
+  width:100%;font-size:17px;padding:12px 12px;
+  border:2px solid var(--linha);border-radius:8px;background:var(--branco);
+}
+.campo input:focus{border-color:var(--placa);outline:none;}
+.erro{
+  margin:0 0 14px;padding:10px 12px;
+  background:var(--erro-fundo);color:var(--erro);
+  border-radius:6px;font-size:15px;font-weight:600;
+}
+.acoes{display:flex;gap:10px;margin-top:6px;}
+.btn{
+  flex:1 1 0;min-height:48px;border-radius:8px;
+  font-weight:700;font-size:16px;
+}
+.btn-primario{background:var(--placa);color:var(--branco);border:2px solid var(--placa);}
+.btn-primario:disabled{opacity:.6;cursor:wait;}
+.btn-secundario{background:var(--branco);color:var(--asfalto);border:2px solid var(--linha);}
+
+@media (prefers-reduced-motion:no-preference){
+  .placa li{animation:acende .35s ease-out both;}
+  .placa li:nth-child(2){animation-delay:.03s}
+  .placa li:nth-child(3){animation-delay:.06s}
+  .placa li:nth-child(4){animation-delay:.09s}
+  .placa li:nth-child(5){animation-delay:.12s}
+  .placa li:nth-child(n+6){animation-delay:.15s}
+  @keyframes acende{from{opacity:0}to{opacity:1}}
+}
