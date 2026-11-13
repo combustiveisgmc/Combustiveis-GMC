@@ -271,6 +271,9 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   - `public/postos.csv` só é usado se o KV estiver vazio.
 - **Rodada de preços (pelo portal):** Gestão → Postos → Rodada de preços. Para cada posto da lista, pega a última
   transação de diesel feita depois da transação usada na negociação anterior (coluna K) e propõe esse preço.
+  As bombas internas ficam fora (13/11/2026: POSTO INT RAJA BELEM/JEQUIE/SALVADOR/SAO PAULO, CAANA, CALAN, CABET,
+  CAAPE): o preço delas não vem por aí e, sem o rateio pronto, sairia errado. Lista `FORA_DA_RODADA` na tela e no
+  `POST /api/postos/rodada` (que recusa esses postos).
   Variação acima do limite da planilha (U1, hoje 10%) só entra se a pessoa marcar o posto. "Gravar rodada" manda
   tudo junto (`POST /api/postos/rodada`); o vigia grava uma linha por posto com contato
   "ATUALIZAÇÃO AUTOMÁTICA (BASE DE TRANSAÇÕES)" (ou "... - CONFIRMADO PELO USUÁRIO (VARIAÇÃO >10%)"),

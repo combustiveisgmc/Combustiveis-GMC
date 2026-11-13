@@ -7,6 +7,11 @@ import { pode } from '../../../lib/permissoes.js';
 // com o contato no mesmo texto que a rodada feita fora do portal usa.
 const CONTATO = 'ATUALIZAÇÃO AUTOMÁTICA (BASE DE TRANSAÇÕES)';
 const MAX_ITENS = 300;
+// bombas internas fora da rodada (13/11/2026): o preço delas não vem da última transação (sem o rateio sairia errado).
+// Mesma lista em public/gestao/paginas/rodada-precos.js
+const FORA_DA_RODADA = new Set(['POSTO INT RAJA BELEM', 'POSTO INT RAJA JEQUIE', 'POSTO INT RAJA SALVADOR', 'POSTO INT RAJA SAO PAULO',
+  'CAANA', 'CALAN', 'CABET', 'CAAPE']);
+const chave = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
 
 export async function onRequestPost({ request, env }) {
   const origem = request.headers.get('Origin');
@@ -26,6 +31,7 @@ export async function onRequestPost({ request, env }) {
     const { dados, erros } = validar('editar', { ...it, rodada: true });
     if (!dados.transacao) erros.push('Falta a data da transação.');
     if (dados.valor === null) erros.push('Falta o valor.');
+    if (FORA_DA_RODADA.has(chave(dados.posto))) erros.push('Bomba interna não entra na rodada de preços.');
     if (erros.length) return json({ erro: 'Posto ' + (i + 1) + ' (' + (dados.posto || '?') + '): ' + erros.join(' ') }, 400);
     // variação acima do limite só entra quando a pessoa confirmou na tela
     dados.contato = texto(it.confirmado ? CONTATO + ' - CONFIRMADO PELO USUÁRIO (VARIAÇÃO >' + limitePct + '%)' : CONTATO, 100);

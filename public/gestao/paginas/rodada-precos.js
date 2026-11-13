@@ -8,6 +8,10 @@ import { htmlApoio, botoesMaisMenos } from '../lib/filtros.js';
 
 const DIESEL = { has: ehDiesel };   // todo tipo de diesel (lib/dados.js)
 const DATA_CORTE = isoParaDia('2026-09-15');   // mesma regra da lista dos motoristas (scripts/planilha_negociacao.py)
+// bombas internas ficam fora da rodada (13/11/2026): o preço delas não vem da última transação e, sem o rateio pronto,
+// sairia errado. Mesma lista em functions/api/postos/rodada.js
+const FORA_DA_RODADA = new Set(['POSTO INT RAJA BELEM', 'POSTO INT RAJA JEQUIE', 'POSTO INT RAJA SALVADOR', 'POSTO INT RAJA SAO PAULO',
+  'CAANA', 'CALAN', 'CABET', 'CAAPE']);
 const emAberto = (a) => a.estado === 'pendente' || a.estado === 'aguardando';
 const hora = (seg) => (seg === null || seg === undefined ? '' : String(Math.floor(seg / 3600)).padStart(2, '0') + ':' + String(Math.floor(seg / 60) % 60).padStart(2, '0'));
 // valor no campo: pelo menos 2 casas (7,40) e até 4 quando a transação tem (6,0909)
@@ -65,7 +69,7 @@ export async function montar(ctx) {
 
     linhas = [];
     for (const [k, n] of ult) {
-      if (n.dia < DATA_CORTE) continue;
+      if (n.dia < DATA_CORTE || FORA_DA_RODADA.has(chaveNome(n.posto))) continue;
       const desde = n.transDia !== null ? momento(n.transDia, n.transSeg) : -Infinity;
       const txs = porPosto.get(chaveNome(n.posto)) || [];
       let nova = null, ultimaQualquer = null;
