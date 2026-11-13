@@ -208,7 +208,7 @@ export async function montar(ctx) {
       'Preço médio = valor ÷ litros de todos os abastecimentos de diesel do mês com o centro de custo da unidade. Economia em R$ = litros economizados × preço médio da unidade. ' +
       'Premiação = prêmio de telemetria e de combustível dos motoristas + o do encarregado, dividido entre as unidades dele pela quantidade de motoristas de cada uma. ' +
       '"Economia de quem bateu a meta" soma só os motoristas que gastaram menos que a meta (a economia geral desconta os que gastaram mais).' +
-      (info.parametros && info.parametros.pagamento ? ' Neste mês a premiação dos motoristas é a que foi paga (relatório de premiados, com deflatores): ' + fmt.int(info.parametros.pagamento.naoRecebeu || 0) +
+      (info.parametros && info.parametros.pagamento ? ' Neste mês a premiação dos motoristas é a que foi paga (lista de premiados sem deflatores): ' + fmt.int(info.parametros.pagamento.naoRecebeu || 0) +
         ' motoristas premiados na conta não receberam e saíram também da economia.' : '') +
       (premioEncSemUni ? ' ' + rsInt(premioEncSemUni) + ' de encarregados sem motoristas no ranking entram só no total.' : '');
   }
