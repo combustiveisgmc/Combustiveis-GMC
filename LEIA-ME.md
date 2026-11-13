@@ -380,6 +380,10 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 - **Preço postos externos:** os postos autorizados da lista dos motoristas aparecem na tabela mesmo sem abastecimento no
   período ("Sem abastecimento neste período"), já com a negociação e o botão "Atualizar preço". Bombas internas e cais
   ficam fora. Abastecimento com o tipo do estabelecimento em branco na Base conta como posto externo.
+  Posto bloqueado (13/11/2026): se a negociação que valia no dia é "POSTO BLOQUEADO", o abastecimento não é comparado
+  com aquele preço (era o de quando foi bloqueado, ex.: AUTO POSTO BATISTELLA R$ 5,84 em 20/08/2025, e o posto não
+  entra na rodada): não soma em "Pago acima", entra em "Abastecido em posto bloqueado" e a tabela mostra "Bloqueado
+  desde …". Mesma regra no resumo da Início; bloqueado também não conta como negociação desatualizada.
   Posto sem negociação tem o botão "Incluir negociação": o formulário vem preenchido com os abastecimentos dele (unidade,
   cidade, cartão, combustível, coordenada); informe o preço negociado e grave. Vira a primeira negociação na planilha e,
   como autorizado, o posto entra na lista dos motoristas (o mesmo que o "Adicionar posto").

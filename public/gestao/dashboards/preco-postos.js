@@ -7,6 +7,9 @@
 //  - Pago acima do negociado = soma de (preço pago − negociado) × litros, só quando pagou mais
 //  - Situação da negociação: mesmas fórmulas da planilha (dias entre a negociação e a transação usada para o preço;
 //    acima de S1 = desatualizada, acima de W1 = renegociação obrigatória)
+//  - posto bloqueado (13/11/2026): o preço da última linha é o de quando foi bloqueado (ex.: AUTO POSTO BATISTELLA,
+//    R$ 5,84 em 20/08/2025) e não entra na rodada; abastecimento com a negociação do dia bloqueada não é comparado
+//    (não conta em "pago acima"), aparece como "abastecido em posto bloqueado"
 import { carregarDados, fmt, esc, fmtDia, fmtMes, mesDoDia, chaveNome, ehDiesel } from '../lib/dados.js';
 import { criarFiltros, htmlBomba, htmlApoio, agendador, botoesMaisMenos, statusHtml } from '../lib/filtros.js';
 import { graficoPeriodo, emAndamento } from '../lib/graficos.js';
@@ -24,8 +27,9 @@ const DIMENSOES = [
   { id: 'cidade', rotulo: 'Cidade', valor: (t) => t.cidade },
   { id: 'cartao', rotulo: 'Cartão', valor: (t) => t.cartao },
   { id: 'combustivel', rotulo: 'Combustível', valor: (t) => t.combustivel },
-  { id: 'negociacao', rotulo: 'Negociação', valor: (t) => (t.negociado !== null ? 'Com preço negociado' : 'Sem negociação') },
+  { id: 'negociacao', rotulo: 'Negociação', valor: (t) => (t.bloqueado ? 'Posto bloqueado' : t.negociado !== null ? 'Com preço negociado' : 'Sem negociação') },
 ];
+const bloqueada = (n) => !!n && /BLOQUE/.test(n.status || '');
 
 function situacaoNeg(n, lim) {
   if (!n || n.transDia === null) return { txt: 'Sem transação de referência', nivel: 0 };
@@ -88,12 +92,12 @@ export async function montar(ctx) {
       const k = chaveNome(l.fornecedor);
       const negs = negPorPosto.get(k);
       let vigente = null;
-      if (negs) for (const n of negs) { if (n.dia > l.dia) break; if (n.valor) vigente = n; }
+      if (negs) for (const n of negs) { if (n.dia > l.dia) break; if (n.valor || bloqueada(n)) vigente = n; }
       const ultima = negs ? negs[negs.length - 1] : null;
       base.push({
         dia: l.dia, seg: l.seg, k, posto: l.fornecedor, cidade: l.cidade, combustivel: l.combustivel, placa: l.placa,
         litros: l.litros, despesa: l.despesa, vlLitro: l.vlLitro,
-        negociado: vigente ? vigente.valor : null,
+        negociado: vigente && !bloqueada(vigente) ? vigente.valor : null, bloqueado: bloqueada(vigente),
         unidade: ultima ? ultima.unidade : '(sem negociação)',
         cartao: ultima ? ultima.plataforma : '(sem negociação)',
       });
@@ -397,12 +401,13 @@ export async function montar(ctx) {
         det: a.qtdNeg ? '<span class="medidor-meta">' + fmt.int(a.qtdAcima) + ' de ' + fmt.int(a.qtdNeg) + '</span>' : '' },
     ]);
     const postos = new Set(filtradas.map((t) => t.k));
-    const litrosSem = filtradas.reduce((s, t) => s + (t.negociado === null ? t.litros : 0), 0);
+    const litrosSem = filtradas.reduce((s, t) => s + (t.negociado === null && !t.bloqueado ? t.litros : 0), 0);
+    const bloq = filtradas.filter((t) => t.bloqueado);
     const lim = dados.limitesNeg;
     let desat = 0, reneg = 0;
     postos.forEach((k) => {
       const negs = negPorPosto.get(k);
-      if (!negs) return;
+      if (!negs || bloqueada(negs[negs.length - 1])) return;   // bloqueado não é negociação desatualizada
       const s = situacaoNeg(negs[negs.length - 1], lim);
       if (s.nivel === 1) desat++; else if (s.nivel === 2) reneg++;
     });
@@ -412,7 +417,8 @@ export async function montar(ctx) {
       { rot: 'Postos', val: fmt.int(postos.size) },
       { rot: 'Litros sem negociação', val: a.litros ? fmt.pct(litrosSem / a.litros) : '—' },
       { rot: 'Negociações desatualizadas', val: fmt.int(desat + reneg), det: reneg ? '<span class="status ruim">' + reneg + ' com renegociação obrigatória</span>' : '' },
-    ]);
+    ].concat(bloq.length ? [{ rot: 'Abastecido em posto bloqueado', val: fmt.int(bloq.length),
+      det: '<span class="status ruim">' + fmt.int(new Set(bloq.map((t) => t.k)).size) + ' postos · ' + fmt.int(bloq.reduce((s, t) => s + t.litros, 0)) + ' L</span>' }] : []));
   }
 
   function desenharGrafico() {
@@ -446,7 +452,7 @@ export async function montar(ctx) {
 
   const COLUNAS = [
     { id: 'posto', rot: 'Posto', v: (a) => a.posto },
-    { id: 'negociado', rot: 'Negociado atual', n: true, v: (a) => (a.neg ? a.neg.valor : null) },
+    { id: 'negociado', rot: 'Negociado atual', n: true, v: (a) => (a.neg && !bloqueada(a.neg) ? a.neg.valor : null) },
     { id: 'situacao', rot: 'Situação da negociação', v: (a) => (a.sit ? a.sit.nivel : null) },
     { id: 'ultimo', rot: 'Último pago', n: true, v: (a) => (a.ultimo ? a.ultimo.vlLitro : null) },
     { id: 'preco', rot: 'Preço médio pago', n: true, v: (a) => a.tot.preco },
@@ -466,7 +472,7 @@ export async function montar(ctx) {
       const neg = negs ? negs[negs.length - 1] : null;
       let ultimo = g.ts[0];
       for (const t of g.ts) if (t.dia > ultimo.dia || (t.dia === ultimo.dia && (t.seg || 0) > (ultimo.seg || 0))) ultimo = t;
-      return { ...g, neg, sit: neg ? situacaoNeg(neg, lim) : null, ultimo, tot: somar(g.ts) };
+      return { ...g, neg, sit: !neg ? null : bloqueada(neg) ? { txt: 'Posto bloqueado', nivel: 2 } : situacaoNeg(neg, lim), ultimo, tot: somar(g.ts) };
     });
     // autorizados na lista dos motoristas sem abastecimento neste recorte (os filtros valem, menos o período)
     const vistos = new Set(lista.map((a) => a.k));
@@ -510,7 +516,8 @@ export async function montar(ctx) {
         return '<tr class="' + (sel.has(a.posto) ? 'selecionado' : '') + '" data-posto="' + esc(a.posto) + '">' +
           '<td class="trunc"><button type="button" class="link-botao nome-clicavel" data-posto="' + esc(a.posto) + '" aria-pressed="' + sel.has(a.posto) + '">' + esc(a.posto) + '</button>' +
             '<small class="cidade-linha">' + esc(a.cidade + (a.neg ? ' · ' + a.neg.unidade : '')) + '</small></td>' +
-          '<td class="n">' + (a.neg ? '<span class="num">' + esc(fmt.moeda(a.neg.valor)) + '</span><small class="cidade-linha">' + esc(fmtDia(a.neg.dia)) + '</small>' : '<span class="sem-dado">Sem negociação</span>') + '</td>' +
+          '<td class="n">' + (a.neg && bloqueada(a.neg) ? '<span class="sem-dado">Bloqueado</span><small class="cidade-linha">desde ' + esc(fmtDia(a.neg.dia)) + '</small>'
+            : a.neg ? '<span class="num">' + esc(fmt.moeda(a.neg.valor)) + '</span><small class="cidade-linha">' + esc(fmtDia(a.neg.dia)) + '</small>' : '<span class="sem-dado">Sem negociação</span>') + '</td>' +
           '<td>' + (a.sit ? '<span class="sit ' + CLS[a.sit.nivel] + '">' + esc(a.sit.txt) + '</span>' +
             (a.sit.dias !== undefined ? '<small class="cidade-linha">' + a.sit.dias + (a.sit.dias === 1 ? ' dia' : ' dias') + ' desde a transação usada</small>' : '') : '<span class="sem-dado">—</span>') + '</td>' +
           (a.ultimo

@@ -110,8 +110,9 @@ function resumir(d, quer) {
         r.pp.postos.add(k);
         const negs = negPorPosto.get(k);
         let vigente = null;
-        if (negs) for (const n of negs) { if (n.dia > l.dia) break; if (n.valor) vigente = n; }
-        if (vigente) {
+        if (negs) for (const n of negs) { if (n.dia > l.dia) break; if (n.valor || /BLOQUE/.test(n.status || '')) vigente = n; }
+        // posto bloqueado: o preço da planilha é o de quando foi bloqueado, não serve de negociado (13/11/2026)
+        if (vigente && !/BLOQUE/.test(vigente.status || '')) {
           r.pp.qtdNeg++;
           const dif = l.vlLitro - vigente.valor;
           if (dif > TOLERANCIA) { r.pp.acima += dif * l.litros; r.pp.qtdAcima++; }
@@ -135,7 +136,7 @@ function resumir(d, quer) {
   if (negPorPosto) {
     r.pp.postos.forEach((k) => {
       const negs = negPorPosto.get(k);
-      if (!negs) return;
+      if (!negs || /BLOQUE/.test(negs[negs.length - 1].status || '')) return;   // bloqueado não é negociação desatualizada
       const s = situacaoNeg(negs[negs.length - 1], d.limitesNeg);
       if (s === 1) r.pp.desat++; else if (s === 2) r.pp.reneg++;
     });
