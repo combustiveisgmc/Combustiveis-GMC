@@ -378,11 +378,21 @@ def gravar(arquivo_json):
     for a in alteracoes:
         d = dict(a.get('dados') or {})
         placa = placa_da(a)
+        nova = placa
         if a['acao'] == 'editar':
             r = linhas.get(placa)
             if not r:
                 itens.append({'id': a['id'], 'estado': 'erro', 'mensagem': f'A placa {placa} não está mais na aba {ABA} (foi apagada ou alterada à mão).'})
                 continue
+            # troca do nome da placa na mesma linha (ex.: placa antiga -> Mercosul, 13/11/2026); os cartões ficam como estão
+            if d.get('placa') and norm_placa(d['placa']) != placa:
+                nova = norm_placa(d['placa'])
+                if nova in linhas:
+                    itens.append({'id': a['id'], 'estado': 'erro', 'mensagem': f'A placa {nova} já está em outra linha da aba {ABA}.'})
+                    continue
+                d['placa'] = nova
+            else:
+                d.pop('placa', None)
         else:
             if placa in linhas:
                 itens.append({'id': a['id'], 'estado': 'erro', 'mensagem': f'A placa {placa} já está na aba {ABA}.'})
@@ -400,7 +410,10 @@ def gravar(arquivo_json):
         xml = xml[:ini] + novo + xml[fim:]   # a próxima linha é procurada de novo no XML já alterado
         if a['acao'] != 'editar':
             ultima = linhas[placa] = r
-        esperado.setdefault(placa, {}).update({c: (d[c] or None) for _, _, c in COLUNAS[1:] if c in d})
+        elif nova != placa:
+            linhas[nova] = linhas.pop(placa)
+            esperado.pop(placa, None)
+        esperado.setdefault(nova, {}).update({c: (d[c] or None) for _, _, c in COLUNAS[1:] if c in d})
         itens.append({'id': a['id'], 'estado': 'aplicada', 'linha': r})
 
     if not esperado:

@@ -525,7 +525,9 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   passa a contar do anterior). Corrija também o
   hodômetro e o V/litro, e escolha na lista as informações adicionais 1 e 3: o KM
   rodado e o KM/litro são recalculados nesta linha e no próximo abastecimento da mesma placa e combustível, e o valor total
-  (litros × V/litro) também. "Só os KM para conferir" mostra os hodômetros estranhos. O selo do cartão fica embaixo da
+  (litros × V/litro) também. Desde 13/11/2026 o **valor total também é editável**: digitando o valor cobrado no cartão, o
+  V/litro vira valor ÷ litros (até 4 casas). Litros ou V/litro digitados sempre refazem o valor total (antes, digitar de
+  volta o V/litro da planilha voltava o valor total errado da planilha); diferença de menos de 1 centavo é ignorada. "Só os KM para conferir" mostra os hodômetros estranhos. O selo do cartão fica embaixo da
   placa; em tela estreita a tabela rola para o lado. "Salvar alterações" (no cabeçalho da tabela, ao lado de "Só os
   alterados") manda para o
   vigia, que grava nas células da Base_copia (formato mantido; planilha aberta no Excel: espera fechar; cópia antes em
@@ -586,6 +588,9 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   - **ID TruckPag dos motoristas antigos:** em 27/10/2026 os 162 motoristas do cadastro receberam o ID pela exportação
     "Motoristas" da TruckPag. O script que fazia isso (`importar_ids_truckpag.mjs`, ligava pelo CPF) saiu em 12/11/2026;
     motorista que entrar na TruckPag por fora do portal: copie o ID dele (portal da TruckPag) para a coluna ID TRUCKPAG.
+- **Cartões frota: troca do nome da placa** (13/11/2026): uma alteração "editar" com `dados.placa` troca a placa da linha
+  na aba CARTÕES sem mexer nos cartões (`planilha_cartoes.py gravar`); o histórico mostra "Placa: antiga → nova". Usado
+  para passar NZP7708, PKB9742, PPB6233, PVS3551, PYX0319 e QXD7057 para o formato Mercosul (as transações já vinham assim).
 - **Cadastros (Placas e Motoristas):**
   - **Placa desabilitada:** some das listas e escolhas do portal (filtro Placa dos painéis, bomba interna, Consulta de KM,
     Editar abastecimentos, aviso de cartão faltando e Cartões frota); os totais históricos continuam contando os abastecimentos dela.

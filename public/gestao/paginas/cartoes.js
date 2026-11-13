@@ -339,7 +339,9 @@ export async function montar(ctx) {
       ? '<thead><tr><th><span>Quando</span></th><th><span>Quem</span></th><th><span>Placa</span></th><th><span>Alteração</span></th><th><span>Gravação na planilha</span></th></tr></thead><tbody>' +
         alt.map((a) => {
           const cls = a.estado === 'aplicada' ? 'selo-ok' : a.estado === 'erro' ? 'selo-bloq' : 'selo-espera';
-          const txt = (a.acao === 'adicionar' ? 'Placa nova. ' : '') + Object.entries(a.dados).filter(([k]) => rotuloCartao[k])
+          // troca do nome da placa (ex.: antiga -> Mercosul, 13/11/2026) + mudanças de situação dos cartões
+          const trocaPlaca = a.acao === 'editar' && a.dados.placa ? 'Placa: ' + a.chave + ' → ' + a.dados.placa + (Object.keys(a.dados).length > 1 ? '; ' : '') : '';
+          const txt = (a.acao === 'adicionar' ? 'Placa nova. ' : '') + trocaPlaca + Object.entries(a.dados).filter(([k]) => rotuloCartao[k])
             .map(([k, v]) => rotuloCartao[k] + ': ' + (a.acao === 'editar' ? ((a.antes || {})[k] || 'sem cartão') + ' → ' : '') + (v || 'sem cartão')).join('; ');
           return '<tr><td>' + esc(quando(a.criado_em)) + '</td><td>' + esc(a.usuario_nome) + '</td><td><strong>' + esc(a.chave) + '</strong></td>' +
             '<td class="trunc">' + esc(txt || '—') + '</td>' +

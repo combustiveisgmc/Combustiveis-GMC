@@ -1,13 +1,14 @@
 // Operacional > Editar abastecimentos: todos os abastecimentos da CONTROLES\Base_copia.xlsx, para corrigir o que veio
-// errado das plataformas (principalmente o hodômetro). Editáveis: placa, motorista, hodômetro, vl/litro, informação
-// adicional 1 e 3; e dá para excluir o abastecimento.
+// errado das plataformas (principalmente o hodômetro). Editáveis: placa, motorista, hodômetro, litros, vl/litro, valor
+// total, informação adicional 1 e 3; e dá para excluir o abastecimento.
 //  - hodômetro novo: o km rodado e o km/litro são recalculados nesta linha e na próxima da mesma placa e combustível
 //    (a Base calcula o km pela diferença para o abastecimento anterior da mesma placa e combustível);
 //  - placa nova: o abastecimento passa para a sequência da placa nova; recalcula km/km por litro dele (pelo anterior da
 //    placa nova), do próximo da placa nova e do próximo da placa antiga (que agora conta do anterior dele);
 //  - excluir: sai da sequência (o próximo passa a contar do anterior) e o vigia apaga a linha da Base_copia (as de
 //    baixo sobem);
-//  - vl/litro novo: o valor total (litros × vl/litro) é recalculado;
+//  - vl/litro ou litros digitados: o valor total (litros × vl/litro) é recalculado (mesmo voltando ao número da planilha);
+//  - valor total digitado (o do cartão): o vl/litro vira valor ÷ litros (até 4 casas);
 //  - "Salvar alterações" grava no banco e o computador da sincronização escreve na Base_copia (cópia de segurança antes).
 //    Até a lista ser publicada de novo, a página mostra as correções por cima dos valores da planilha.
 import { fmt, esc, fmtDia, carregarDesabilitadas, placaDesabilitada } from '../lib/dados.js';
@@ -200,11 +201,21 @@ export async function montar(ctx) {
     definir(l, 'R', km);
     definir(l, 'S', litros > 0 ? r6(km / litros) : null);
   }
-  // valor total = litros × V/litro (só quando um dos dois foi mexido; senão fica o da planilha)
+  // valor total = litros × V/litro, sempre que litros ou V/litro são digitados. Antes, digitar de volta o V/litro da planilha
+  // era tratado como "desfazer" e o valor total voltava ao da planilha, mesmo quando ele não batia com litros × V/litro
+  // (linhas "valor diferente" da revisão de 12/11/2026). definir() já descarta o valor igual ao gravado.
   function recalcularValor(l) {
-    if (!mexido(l, 'P') && !mexido(l, 'O')) { tirar(l, ['T']); return; }
     const e = ef(l);
-    definir(l, 'T', typeof e.vl === 'number' && typeof e.litros === 'number' ? r6(e.litros * e.vl) : null);
+    if (typeof e.vl !== 'number' || typeof e.litros !== 'number') return;
+    const novo = r6(e.litros * e.vl), gravado = doServidor(l).valor;
+    // diferença de arredondamento (menos de 1 centavo) não é correção: fica o valor cobrado
+    if (typeof gravado === 'number' && Math.abs(novo - gravado) < 0.01) { tirar(l, ['T']); return; }
+    definir(l, 'T', novo);
+  }
+  // valor total digitado (o cobrado no cartão): o V/litro passa a ser valor ÷ litros (até 4 casas, como a bomba interna)
+  function valorDigitado(l) {
+    const e = ef(l);
+    if (typeof e.valor === 'number' && e.litros > 0) definir(l, 'P', Math.round((e.valor / e.litros) * 10000) / 10000);
   }
   // troca de placa ou exclusão: refaz as sequências e recalcula quem mudou de anterior. Devolve as linhas mexidas.
   function mudarSequencia(l, fazer) {
@@ -221,6 +232,7 @@ export async function montar(ctx) {
     if (col === 'Q') { recalcularKm(l); recalcularKm(l.prox); }
     if (col === 'P') recalcularValor(l);
     if (col === 'O') { recalcularValor(l); recalcularKm(l); }   // litros novos: valor total e km/litro desta linha
+    if (col === 'T') valorDigitado(l);
     return [l, l.ant, l.prox];
   }
   function alternarExclusao(l) {
@@ -369,9 +381,10 @@ export async function montar(ctx) {
         ' autocomplete="off" spellcheck="false" maxlength="' + (tipo === 'p' ? 8 : 80) + '" data-linha="' + l.linha + '" data-col="' + col +
         '" value="' + esc(valor ?? '') + '" title="' + esc(valor ?? '') + '" aria-label="' + rotulo + '">';
     }
-    const mostrado = valor === null || valor === undefined ? '' : tipo === 'h' ? String(valor) : tipo === 'v' ? fVl.format(valor) : String(valor);
+    // valor total aparece com 2 casas (a Base guarda sem arredondar, como litros × V/litro)
+    const mostrado = valor === null || valor === undefined ? '' : tipo === 'h' ? String(valor) : col === 'T' ? fmt.d2(valor) : tipo === 'v' ? fVl.format(valor) : String(valor);
     // V/litro com máscara de valor (bomba interna tem preço com 4 casas)
-    const moeda = col === 'P' ? ' data-moeda="' + (l.cartao === 'BOMBA INTERNA' ? 4 : 2) + '"' : '';
+    const moeda = col === 'P' ? ' data-moeda="' + (l.cartao === 'BOMBA INTERNA' ? 4 : 2) + '"' : col === 'T' ? ' data-moeda="2"' : '';
     return '<input class="' + cls + '" ' + (tipo === 't' ? 'maxlength="200"' : 'inputmode="decimal"') + moeda + ' autocomplete="off" data-linha="' + l.linha +
       '" data-col="' + col + '" value="' + esc(mostrado) + '" aria-label="' + esc(ROTULO[col] + ' de ' + l.placa + ' em ' + fmtDia(l.dia)) + '">';
   }
@@ -408,7 +421,7 @@ export async function montar(ctx) {
       '<td class="n">' + (edita ? campo(l, 'O', e.litros, 'v') : fmt.d2(e.litros)) + '</td>' +
       '<td class="n' + marcaCalc(l, 'S') + '">' + fmt.d2(e.kml) + '</td>' +
       '<td class="n">' + (edita ? campo(l, 'P', e.vl, 'v') : (typeof e.vl === 'number' ? fVl.format(e.vl) : '—')) + '</td>' +
-      '<td class="n' + marcaCalc(l, 'T') + '">' + fmt.d2(e.valor) + '</td>' + acao + '</tr>';
+      '<td class="n' + marcaCalc(l, 'T') + '">' + (edita ? campo(l, 'T', e.valor, 'v') : fmt.d2(e.valor)) + '</td>' + acao + '</tr>';
   }
 
   function desenhar() {
@@ -504,7 +517,7 @@ export async function montar(ctx) {
       if (Number.isNaN(val) || (val !== null && val < 0) || (col === 'O' && !(val > 0))) {
         inp.classList.add('invalido');
         inp.title = col === 'Q' ? 'Hodômetro: só números inteiros (ex.: 932706).' : col === 'O' ? 'Litros: número maior que zero, com vírgula (ex.: 152,30).'
-          : 'V/litro: número com vírgula (ex.: 6,19).';
+          : col === 'T' ? 'Valor total: o valor cobrado no cartão, com vírgula (ex.: 709,00).' : 'V/litro: número com vírgula (ex.: 6,19).';
         return;
       }
     }
