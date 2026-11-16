@@ -468,6 +468,13 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   - **Início do rateio** (por tanque): antes dele o rateio ficou na planilha e o portal não mexe no preço. Diesel de Jequié
     começa no SFH1H45 de 22/10/2026 08:46:28, com 70,94 L dele na NF 175332 (última da planilha); a NF 235674 é a primeira
     do portal. O Arla ainda não tem início (defina na própria tela quando for ratear).
+    **Cais da Vibra (16/11/2026):** as planilhas `RATEIOS BOMBA INTERNA\CAIS *\CAIS * - Rateio Diesel.xlsm` foram
+    completadas até a última NF (Suape 2962521 e Viana 1712274: preço da NF em todas as linhas, `=P*O`, abastecimentos da
+    Base_copia até os 5.000 L e o total; cópias de antes em `%LOCALAPPDATA%\GestaoCombustivel\backup-rateios-cais`). O
+    portal começa em: CABET no OPP7H48 de 12/11/2026 17:14:13 (NF 5004331 já fechada, 0 L); CALAN no TDK2E30 de
+    31/10/2026 08:18:49 (160,14 L na NF 279655); CAAPE no RUZ9E75 de 11/11/2026 07:27:20 (312,65 L na NF 2962521); CAANA no
+    QRM0H08 de 12/11/2026 13:37:53 (353,82 L na NF 1712274). As notas seguintes vão em Movimentações (Viana já tem as NFs
+    1722159 e 1722862, de 22/10, na aba Base NF STOCK).
   - Abastecimentos que passam das notas lançadas ficam em "Abastecimentos sem nota" e entram na próxima nota assim que
     ela for lançada; até lá o preço deles não muda.
 - **Preço bomba interna > Fornecedores cadastrados:** tabela da aba Fornecedores da planilha, com o **CNPJ de cada unidade**
