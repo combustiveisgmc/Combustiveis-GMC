@@ -518,6 +518,10 @@ async function processarApisCartoes(forcar) {
     await mc.criarNovos({ api, log });
     await mc.editarTruckpag({ api, log });
   } catch (e) { log('Cadastro x cartões: ' + String(e.message || e).slice(0, 200)); }
+  // cadastro de placas x TruckPag (scripts/placas_truckpag.mjs, 16/11/2026): unidade nova da placa vira o centro de custo
+  // do veículo na TruckPag (se ligado: "placasUnidade" em motoristas-cartoes.json)
+  try { await (await import('./placas_truckpag.mjs')).processar({ api, log }); }
+  catch (e) { log('Placas x TruckPag: ' + String(e.message || e).slice(0, 200)); }
   // conciliação de NFs (Fiscal/Financeiro): NFS dos cartões x notas dos postos, a cada 6 horas
   try { await (await import('./conciliacao_nfs.mjs')).processar({ kvPut, log, forcar }); }
   catch (e) { log('Conciliação de NFs: ' + String(e.message || e).slice(0, 200)); }

@@ -605,6 +605,16 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   - **ID TruckPag dos motoristas antigos:** em 27/10/2026 os 162 motoristas do cadastro receberam o ID pela exportação
     "Motoristas" da TruckPag. O script que fazia isso (`importar_ids_truckpag.mjs`, ligava pelo CPF) saiu em 12/11/2026;
     motorista que entrar na TruckPag por fora do portal: copie o ID dele (portal da TruckPag) para a coluna ID TRUCKPAG.
+- **Cadastro de placas x TruckPag** (16/11/2026, `scripts/placas_truckpag.mjs`): placa editada ou adicionada no Cadastro >
+  Placas com unidade, depois de gravada na planilha, tem a unidade repetida na TruckPag como **centro de custo** do veículo
+  (`PUT /api/integracao-clientes/veiculo/{id}` só com `centro_custo_id`; os centros vêm de
+  `GET /veiculo/centro-de-custo?empresa_id=25298`, ligados pelo nome igual ao da unidade). O vigia pega as edições em
+  `/api/sync/cadastros/editados-placas` (estado `%LOCALAPPDATA%\GestaoCombustivel\placas-truckpag.json`) e escreve no log
+  "Placas x TruckPag: …". Liga com `"placasUnidade": true` em motoristas-cartoes.json (ligado em 16/11/2026). Unidade sem
+  centro de custo igual na TruckPag (VENDA, KEMIGAS DIRETORIA) e placa que não está na TruckPag: só avisa. Testado em
+  16/11/2026 com a TZV5E39 (vazio → RAJA LOG BELEM). Conferir tudo: `node scripts/placas_truckpag.mjs conferir`; alinhar:
+  `node scripts/placas_truckpag.mjs alinhar [PLACA ...] --gravar`. Ticket: sem forma documentada de alterar veículo pela
+  API; Veloe: sem API.
 - **Cartões frota: troca do nome da placa** (13/11/2026): uma alteração "editar" com `dados.placa` troca a placa da linha
   na aba CARTÕES sem mexer nos cartões (`planilha_cartoes.py gravar`); o histórico mostra "Placa: antiga → nova". Usado
   para passar NZP7708, PKB9742, PPB6233, PVS3551, PYX0319 e QXD7057 para o formato Mercosul (as transações já vinham assim).
