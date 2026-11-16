@@ -476,6 +476,12 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   planilha (ATIVO = NAO na planilha tira o fornecedor da repetição do Arla). O computador da sincronização grava na
   planilha (cópia antes; se ela estiver aberta no Excel, espera fechar) e repete todo dia o último preço do Arla de cada
   fornecedor ativo até um preço novo ser lançado. Precisa do acesso "consulta e edição". Na hora: `node scripts/sincronizar.mjs --bomba`.
+- **Mapa de calor: interação como no BI (16/11/2026):** ao trocar um filtro (unidade, período, estabelecimento) o mapa
+  enquadra sozinho os postos do recorte. Clicar num posto (na tabela "Postos no mapa" ou na bolha) deixa só ele no mapa,
+  com zoom; Ctrl/Cmd + clique soma outros postos (todos ficam no mapa, enquadrados); clicar de novo no único escolhido ou em
+  "Todos os postos" volta ao recorte todo. O tamanho da bolha continua pelo recorte todo. Na tabela de abastecimentos, Data,
+  Placa e Cartão são colunas separadas e ordenáveis (o cartão com o selo do Ticket/TruckPag/Veloe e "API" quando ainda
+  não está na Base).
 - **Mapa de calor: postos sem coordenadas:** clique no posto da lista "Postos sem coordenadas" para abrir o cadastro dele e
   inserir a coordenada (cole do Google Maps: botão direito no posto, clique nas coordenadas e cole aqui; ou digite latitude e
   longitude). O site avisa se o ponto fica a mais de 100 km da cidade. O posto já entra no mapa e o computador da
