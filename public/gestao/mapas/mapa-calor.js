@@ -5,11 +5,14 @@
 //  - "postos sem coordenadas": postos do recorte filtrado ausentes da planilha de localização (seguem os filtros);
 //    clicando num deles abre o cadastro do posto para inserir a coordenada (/api/locais): o vigia grava na LOCALIZAÇÃO
 //    DOS POSTOS (scripts/planilha_locais.py) e, enquanto isso, o posto já aparece no mapa com a coordenada nova
+//  - como o mapa do BI (16/11/2026): a cada filtro (unidade, período, estabelecimento) o mapa enquadra sozinho os postos
+//    do recorte; posto escolhido (na tabela ou na bolha, Ctrl/Cmd soma) deixa no mapa só os escolhidos, enquadrados
 //  - abastecimentos do recorte (ou do posto clicado) numa tabela ao lado dos postos, com o motorista; quem pode editar
 //    abastecimentos troca a unidade (INFORMAÇÃO ADICIONAL 3) pela fila do Editar abastecimentos (lib/base-copia.js)
 import { carregarDados, fmt, esc, fmtDia, ehDiesel } from '../lib/dados.js';
 import { criarFiltros, htmlApoio, agendador } from '../lib/filtros.js';
 import { corrigirNaBaseCopia, buscarCorrecoes, trocasPorMinuto, minutoDe, NOME_ESTADO as ESTADO_BC } from '../lib/base-copia.js';
+import { seloCartao, nomeCartao } from '../lib/cartoes.js';
 
 const hora = (seg) => (seg === null || seg === undefined ? '' : String(Math.floor(seg / 3600)).padStart(2, '0') + ':' + String(Math.floor(seg / 60) % 60).padStart(2, '0'));
 const chaveCidade = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
@@ -219,7 +222,8 @@ export async function montar(ctx) {
   const postosURL = (new URLSearchParams(location.hash.split('?')[1] || '').get('postos') || '').split('|').filter(Boolean);
   const filtros = criarFiltros({
     dimensoes: DIMENSOES, filtrosEl: el('mc-filtros'), chipsEl: el('mc-chips'), rota: '#/mapa-calor',
-    obterBase: () => base, obterLimites: () => [dados.diaMin, dados.diaMax], aoMudar: () => atualizar(), prefixo: 'mc', periodoPadrao: 'mes',
+    // filtro novo: o mapa volta a enquadrar os postos do recorte (zoom automático, como no BI)
+    obterBase: () => base, obterLimites: () => [dados.diaMin, dados.diaMax], aoMudar: () => { mexeu = false; atualizar(); }, prefixo: 'mc', periodoPadrao: 'mes',
   });
 
   // ---------- mapa ----------
@@ -266,11 +270,16 @@ export async function montar(ctx) {
     return { lista, mediana, totalLitros };
   }
 
-  function desenharMapa(r) {
+  let ultimoR = null;
+  function desenharMapa(r, animar) {
+    ultimoR = r;
     camadaBolhas.clearLayers();
     marcadores.clear();
-    const noMapa = r.lista.filter((a) => a.coord).sort((a, b) => b.litros - a.litros);   // grandes embaixo
-    const max = noMapa.length ? noMapa[0].litros : 0;
+    const comCoord = r.lista.filter((a) => a.coord).sort((a, b) => b.litros - a.litros);   // grandes embaixo
+    // postos escolhidos: só eles no mapa (como o filtro cruzado do BI); escolhidos sem coordenada: fica o recorte todo
+    const escolhidos = postosSel.size ? comCoord.filter((a) => postosSel.has(a.nome)) : [];
+    const noMapa = escolhidos.length ? escolhidos : comCoord;
+    const max = comCoord.length ? comCoord[0].litros : 0;   // tamanho da bolha pelo recorte todo (não muda ao escolher)
     const anel = corCss('var(--superficie)');
     noMapa.forEach((a) => {
       const f = faixa(a.desvio);
@@ -292,14 +301,17 @@ export async function montar(ctx) {
       marcadores.set(a.nome, c);
     });
     limites = noMapa.length ? L.latLngBounds(noMapa.map((a) => a.coord)).pad(0.08) : null;
-    enquadrar();
+    enquadrar(animar);
+    if (escolhidos.length === 1) marcadores.get(escolhidos[0].nome).openTooltip();
   }
-  // enquadra os postos quando o mapa já tem tamanho real; depois que a pessoa mexe no mapa, não mexe mais
+  // enquadra os postos quando o mapa já tem tamanho real; depois que a pessoa mexe no mapa, só volta a enquadrar
+  // quando muda o filtro ou a escolha de postos
   let limites = null, mexeu = false;
-  function enquadrar() {
+  const semAnimacao = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function enquadrar(animar) {
     if (mexeu || !limites || !el('mc-mapa').clientHeight) return;
     mapa.invalidateSize();
-    mapa.fitBounds(limites, { animate: false });
+    mapa.fitBounds(limites, { animate: !!animar && !semAnimacao(), maxZoom: 13 });   // um posto só: zoom de cidade
     enquadrado = true;
   }
   mapa.on('dragstart zoomstart', (e) => { if (enquadrado && e.originalEvent !== undefined) mexeu = true; });
@@ -398,13 +410,8 @@ export async function montar(ctx) {
   });
   // clique na linha: leva o mapa até o posto e filtra os abastecimentos dele (clicar de novo volta a todos);
   // Ctrl/Cmd + clique soma ou tira o posto da seleção (como na Operação por motorista)
+  // (o mapa passa a mostrar só os escolhidos, enquadrados: escolherPosto redesenha o mapa)
   function irAoPosto(nome, somar) {
-    const m = marcadores.get(nome);
-    if (m && !postosSel.has(nome)) {
-      mexeu = true;
-      mapa.flyTo(m.getLatLng(), Math.max(mapa.getZoom(), 11), { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.6 });
-      m.openTooltip();
-    }
     escolherPosto(nome, somar);
   }
 
@@ -415,7 +422,7 @@ export async function montar(ctx) {
   let abLista = [];                            // linhas desenhadas (o lápis aponta para o índice)
   const podeTrocarUnidade = !!correcoes.podeEditar;
   const unidadeDe = (l) => l.cc;   // a linha já vem com a troca aplicada (comTroca)
-  // ordem inicial: mais recente primeiro (sem seta em nenhuma coluna); a coluna Abastecimento ordena pela placa (e a data dentro dela)
+  // ordem inicial: mais recente primeiro (seta na coluna Data); a coluna Placa ordena pela placa (e a data dentro dela)
   // preço anterior no mesmo posto e a variação, embaixo do R$/L
   const precoAntes = (l) => {
     const a = anteriorDe.get(l);
@@ -425,8 +432,11 @@ export async function montar(ctx) {
   };
   const POR_DATA = { id: 'data', v: (l) => l.dia * 86400 + (l.seg ?? 0) };
   let abSel = null;                            // abastecimento clicado (placa|minuto|combustível), destacado na tabela
+  // placa e data em colunas separadas, cada uma ordenável (16/11/2026); cartão usado no abastecimento
   const COL_AB = [
-    { id: 'placa', rot: 'Abastecimento', v: (l) => l.placa || '' },   // placa em cima, data e hora embaixo
+    { id: 'data', rot: 'Data', n: true, v: POR_DATA.v },
+    { id: 'placa', rot: 'Placa', v: (l) => l.placa || '' },
+    { id: 'cartao', rot: 'Cartão', v: (l) => (l.cartao ? nomeCartao(l.cartao) : '') },
     { id: 'motorista', rot: 'Motorista', v: (l) => l.motorista || '' },
     { id: 'posto', rot: 'Posto', v: (l) => l.fornecedor || '', soTodos: true, opc: 1 },
     { id: 'unidade', rot: 'Unidade', v: (l) => unidadeDe(l) || '' },
@@ -438,6 +448,9 @@ export async function montar(ctx) {
     else if (somar) { if (postosSel.has(nome)) postosSel.delete(nome); else postosSel.add(nome); }
     else if (postosSel.size === 1 && postosSel.has(nome)) postosSel.clear();
     else { postosSel.clear(); postosSel.add(nome); }
+    // mapa: só os escolhidos (ou todos de novo), enquadrados
+    mexeu = false;
+    if (ultimoR) desenharMapa(ultimoR, true);
     desenharTabela();
     desenharAbastecimentos();
   }
@@ -463,7 +476,10 @@ export async function montar(ctx) {
     (abLista.length ? abLista.map((l, i) => {
       const un = unidadeDe(l);
       const celula = {
-        placa: '<td class="mc-ab-id"><strong>' + esc(l.placa || '—') + '</strong><small class="cidade-linha num">' + esc(fmtDia(l.dia).slice(0, 5)) + (l.seg !== null && l.seg !== undefined ? ' ' + esc(hora(l.seg)) : '') + '</small></td>',
+        data: '<td class="mc-ab-data num">' + esc(fmtDia(l.dia)) + (l.seg !== null && l.seg !== undefined ? '<small class="cidade-linha">' + esc(hora(l.seg)) + '</small>' : '') + '</td>',
+        placa: '<td class="mc-ab-id"><strong>' + esc(l.placa || '—') + '</strong></td>',
+        cartao: '<td class="mc-ab-cartao">' + (l.cartao ? seloCartao(l.cartao) : '<span class="sem-dado" title="Cartão não informado">—</span>') +
+          (l.tempoReal ? ' <span class="selo-tempo-real" title="Veio da API do cartão e ainda não está na planilha Base">API</span>' : '') + '</td>',
         motorista: '<td class="mc-ab-mot">' + esc(l.motorista || '—') + '</td>',
         posto: '<td class="mc-ab-posto col-opc1">' + esc(l.fornecedor || '—') + '</td>',
         unidade: '<td class="mc-ab-un"><div class="mc-un"><span>' + esc(un || '—') +
@@ -808,8 +824,8 @@ export async function montar(ctx) {
     semCoord = r.lista.filter((a) => !a.coord);   // segue os filtros (unidade, período, estabelecimento)
     desenharApoio(r, semCoord);
     desenharLegenda(r);
-    desenharMapa(r);
     for (const n of [...postosSel]) if (!postos.some((a) => a.nome === n)) postosSel.delete(n);
+    desenharMapa(r);
     desenharTabela();
     desenharAbastecimentos();
     desenharSemCoord();
