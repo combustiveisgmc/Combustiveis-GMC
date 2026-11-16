@@ -22,6 +22,7 @@ function valido(it) {
     const v = it.celulas[c];
     if (NUMEROS.has(c)) return v === null || (typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e9);
     if (TEXTOS.has(c)) return v === null || (typeof v === 'string' && v.length <= 200);
+    if (c === 'E') return typeof v === 'number' && v >= 43831 && v < 73051;   // data e hora (série do Excel, 2020 a 2099)
     if (c === 'F') return typeof v === 'string' && PLACA.test(v);
     if (c === 'L') return typeof v === 'string' && v.trim().length >= 3 && v.length <= 80;   // motorista
     return false;

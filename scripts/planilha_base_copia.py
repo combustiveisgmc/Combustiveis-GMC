@@ -568,6 +568,13 @@ def editar(arquivo_json):
                 info = ult_mot.get(chave(novas[MOTORISTA]))
                 novas[MATRICULA] = info[1] if info else None   # motorista sem matrícula conhecida: fica vazia
             por_linha.setdefault(r, {}).update(novas)
+            # data nova (E, 16/11/2026): os pedidos seguintes da mesma linha vêm com essa data (a página manda a data que a
+            # planilha terá); registra a linha também por ela, para achá-la ainda nesta passada
+            if isinstance(novas.get('E'), (int, float)) and not isinstance(novas.get('E'), bool):
+                kn = chave_abastecimento(novas.get('F') or it['placa'], novas['E'], None)[:2]
+                por_chave.setdefault(kn, []).append(r)
+                data_da_linha[r] = kn[1]
+                por_data.setdefault(kn[1], []).append(r)
             ok += 1
         resultado.append({'id': lote['id'], 'estado': ('aguardando' if sem_acao else 'erro') if erros and not ok else 'aplicada',
                           'mensagem': ' '.join(erros)[:300] if erros else None, 'gravados': ok})

@@ -926,6 +926,7 @@ table.ea-tabela tbody tr[data-linha] :is(input, select){cursor:auto;}
 .ea-mud{line-height:1.5;min-width:220px;}
 .ea-campo.ea-placa{text-transform:uppercase;font-weight:600;font-variant-numeric:tabular-nums;}
 .ea-campo.ea-mot{text-transform:uppercase;}
+.ea-campo.ea-dataHora{font-variant-numeric:tabular-nums;}
 table.ea-tabela .ea-acao{text-align:center;padding-left:2px;padding-right:2px;}
 /* lixeira padrão do site: botão quadrado só com o ícone (nome da ação no aria-label e no title) */
 .ea-excluir, .btn-lixeira{display:inline-grid;place-items:center;width:30px;height:30px;padding:0;border:1px solid var(--borda-forte);border-radius:var(--r);background:transparent;color:var(--suave);font-size:17px;line-height:1;}

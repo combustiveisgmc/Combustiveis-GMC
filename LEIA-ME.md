@@ -525,6 +525,10 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 - **Editar abastecimentos (Operacional):** todos os abastecimentos da CONTROLES\Base_copia.xlsx (começa nos últimos 30
   dias; mude o período nos filtros; 15 por vez; clique no título de uma coluna para ordenar; clique numa linha para ver
   todos os abastecimentos daquela placa com o mesmo combustível, e "Voltar ao filtro anterior" para voltar). Corrija na tabela a
+  data e hora (16/11/2026: campo "dd/mm/aaaa hh:mm:ss", segundos opcionais, de 2020 até agora; coluna E da Base_copia; o
+  abastecimento muda de lugar na sequência da placa e o KM rodado/KM por litro dele, do próximo e dos vizinhos de antes são
+  recalculados; o pedido vai com a data que a planilha terá, e o vigia registra a data nova para achar a linha nos pedidos
+  seguintes; a linha não muda de lugar na planilha: a próxima gravação de lote reordena o trecho final se for o caso), a
   placa e o motorista (com sugestões dos que já existem; placa nova recalcula o KM rodado e o KM/litro pelo abastecimento
   anterior da placa nova e acerta o próximo das duas placas; tipo de frota, modelo e ano vêm da placa nova e a matrícula vem
   do motorista), e use a lixeira no fim da linha para excluir um abastecimento (dá para desfazer até salvar; na Base_copia a

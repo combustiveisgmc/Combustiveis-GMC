@@ -1,6 +1,9 @@
 // Operacional > Editar abastecimentos: todos os abastecimentos da CONTROLES\Base_copia.xlsx, para corrigir o que veio
-// errado das plataformas (principalmente o hodômetro). Editáveis: placa, motorista, hodômetro, litros, vl/litro, valor
-// total, informação adicional 1 e 3; e dá para excluir o abastecimento.
+// errado das plataformas (principalmente o hodômetro). Editáveis: data e hora, placa, motorista, hodômetro, litros,
+// vl/litro, valor total, informação adicional 1 e 3; e dá para excluir o abastecimento.
+//  - data e hora nova (coluna E, 16/11/2026): o abastecimento muda de lugar na sequência da placa (como na troca de placa) e
+//    o km/km por litro dele, do próximo e dos vizinhos de antes são recalculados. O pedido vai com a data que a planilha
+//    tem no momento (com as correções salvas), porque o vigia acha o abastecimento por placa + data;
 //  - hodômetro novo: o km rodado e o km/litro são recalculados nesta linha e na próxima da mesma placa e combustível
 //    (a Base calcula o km pela diferença para o abastecimento anterior da mesma placa e combustível);
 //  - placa nova: o abastecimento passa para a sequência da placa nova; recalcula km/km por litro dele (pelo anterior da
@@ -17,8 +20,8 @@ import { seloCartao as selo, nomeCartao } from '../lib/cartoes.js';
 import { normFuel, normKey, chaveCadeia } from '../lib/consolidador.js';
 
 const POR_PAGINA = 60;   // linhas desenhadas por vez; a tabela tem rolagem própria e carrega o próximo lote ao chegar no fim
-const CAMPO = { F: 'placa', L: 'mot', O: 'litros', P: 'vl', Q: 'hodo', R: 'km', S: 'kml', T: 'valor', AB: 'inf1', AD: 'inf3' };
-const ROTULO = { F: 'Placa', L: 'Motorista', O: 'Litros', P: 'V/litro', Q: 'Hodômetro', R: 'KM rodados', S: 'KM/litro', T: 'Valor total', AB: 'Inf. adicional 1', AD: 'Inf. adicional 3' };
+const CAMPO = { E: 'serial', F: 'placa', L: 'mot', O: 'litros', P: 'vl', Q: 'hodo', R: 'km', S: 'kml', T: 'valor', AB: 'inf1', AD: 'inf3' };
+const ROTULO = { E: 'Data e hora', F: 'Placa', L: 'Motorista', O: 'Litros', P: 'V/litro', Q: 'Hodômetro', R: 'KM rodados', S: 'KM/litro', T: 'Valor total', AB: 'Inf. adicional 1', AD: 'Inf. adicional 3' };
 const PLACA_OK = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/;   // ABC1234 ou ABC1D23
 const limparPlaca = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const NOME_ESTADO = { pendente: 'Aguardando gravação', aguardando: 'Base_copia aberta no Excel', aplicada: 'Gravado na Base_copia', erro: 'Não gravado' };
@@ -37,6 +40,25 @@ function cartaoDe(forma, dia) {
 const seloCartao = (c) => (c ? selo(c, 'ea-cartao')
   : '<span class="sem-dado" title="Forma de pagamento vazia na Base_copia">—</span>');
 const hora = (seg) => String(Math.floor(seg / 3600)).padStart(2, '0') + ':' + String(Math.floor(seg / 60) % 60).padStart(2, '0');
+// data e hora da Base (número de série do Excel, hora local) <-> "16/11/2026 07:49:38"
+const SERIE_MIN = 43831;   // 01/01/2020
+function textoDeSerial(serial) {
+  const d = new Date(Math.round((serial - 25569) * 86400) * 1000);
+  const p = (n) => String(n).padStart(2, '0');
+  return p(d.getUTCDate()) + '/' + p(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + p(d.getUTCHours()) + ':' + p(d.getUTCMinutes()) + ':' + p(d.getUTCSeconds());
+}
+// "16/11/2026 07:49", "16/11/26 7:49:38" -> série; inválida, antes de 2020 ou no futuro -> NaN
+function serialDeTexto(s) {
+  const m = String(s ?? '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return NaN;
+  const [d, mes, a0, h, mi, se = '0'] = m.slice(1);
+  const a = a0.length === 2 ? 2000 + Number(a0) : Number(a0);
+  const t = Date.UTC(a, mes - 1, d, h, mi, se), x = new Date(t);
+  if (x.getUTCDate() !== Number(d) || x.getUTCMonth() !== mes - 1 || h > 23 || mi > 59 || se > 59) return NaN;
+  const agora = new Date(), agoraLocal = Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate(), agora.getHours(), agora.getMinutes()) + 3600e3;
+  const serial = t / 864e5 + 25569;
+  return serial < SERIE_MIN || t > agoraLocal ? NaN : serial;
+}
 const quando = (iso) => { const d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
 const igual = (a, b) => (a === null || a === undefined || a === '' ? null : a) === (b === null || b === undefined || b === '' ? null : b) ||
   (typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 1e-9);
@@ -132,7 +154,10 @@ export async function montar(ctx) {
   // (com as trocas salvas e do rascunho) e deixa de fora os excluídos; puro = como está na planilha
   function refazerCadeias(puro) {
     const ultimo = new Map();
-    for (const l of ordemData) {
+    // com data trocada (salva ou no rascunho), a sequência segue a data nova
+    const dataMexida = !puro && [...rascunho.values(), ...servidor.values()].some((c) => c.E !== undefined);
+    const ordem = dataMexida ? [...ordemData].sort((a, b) => ef(a).serial - ef(b).serial || a.linha - b.linha) : ordemData;
+    for (const l of ordem) {
       l.ant = null; l.prox = null;
       l.cadeia = normKey(String((puro ? l.placa : ef(l).placa) || '')) + '§' + l.combKey;
       if (!puro && excluida(l)) continue;
@@ -162,6 +187,10 @@ export async function montar(ctx) {
   function aplicar(l, cel) {
     const o = { ...l };
     for (const [c, v] of Object.entries(cel)) o[CAMPO[c]] = v;
+    if (cel.E !== undefined) {   // data nova: dia e hora mostrados acompanham
+      const seg = Math.round((o.serial % 1) * 86400);
+      o.dia = Math.floor(o.serial) - 25569 + (seg >= 86400 ? 1 : 0); o.seg = seg % 86400;
+    }
     return o;
   }
   function doServidor(l) { const s = servidor.get(l.linha); return s ? aplicar(l, s) : l; }
@@ -227,7 +256,7 @@ export async function montar(ctx) {
     return afetadas;
   }
   function editarCampo(l, col, v) {
-    if (col === 'F') return mudarSequencia(l, () => definir(l, col, v));
+    if (col === 'F' || col === 'E') return mudarSequencia(l, () => definir(l, col, v));
     definir(l, col, v);
     if (col === 'Q') { recalcularKm(l); recalcularKm(l.prox); }
     if (col === 'P') recalcularValor(l);
@@ -307,7 +336,7 @@ export async function montar(ctx) {
   // colunas da tabela: [id, título, largura mínima em px, numérica, valor para ordenar]. A tabela estica nas telas largas e
   // rola para o lado nas estreitas, sem cortar o conteúdo (Data e Placa ficam presas à esquerda); o cartão aparece embaixo da placa
   const COLUNAS = [
-    ['data', 'Data', 74, false, (l) => l.serial],
+    ['data', 'Data', editar ? 146 : 74, false, (l) => ef(l).serial],   // editando: campo "dd/mm/aaaa hh:mm:ss"
     ['placa', 'Placa · cartão', 108, false, (l) => ef(l).placa],
     ['mot', 'Motorista', 132, false, (l) => ef(l).mot],
     ['posto', 'Estabeleci­mento', 120, false, (l) => l.posto],   // ­: hífen só se precisar quebrar
@@ -376,6 +405,11 @@ export async function montar(ctx) {
         '<option value=""' + (atual ? '' : ' selected') + '>—</option>' +
         opcoes.map((o) => '<option' + (o === atual ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
     }
+    if (tipo === 'd') {   // data e hora: "16/11/2026 07:49:38"
+      const txt = textoDeSerial(valor);
+      return '<input class="' + cls + ' ea-texto ea-dataHora" autocomplete="off" spellcheck="false" maxlength="19" inputmode="numeric" data-linha="' + l.linha +
+        '" data-col="E" value="' + esc(txt) + '" title="Data e hora (dd/mm/aaaa hh:mm:ss)" aria-label="' + rotulo + '">';
+    }
     if (tipo === 'p' || tipo === 'm') {   // placa / motorista: texto com sugestões dos que já existem na Base_copia
       return '<input class="' + cls + ' ea-texto ea-' + (tipo === 'p' ? 'placa' : 'mot') + '" list="ea-' + (tipo === 'p' ? 'placas' : 'mots') + '"' +
         ' autocomplete="off" spellcheck="false" maxlength="' + (tipo === 'p' ? 8 : 80) + '" data-linha="' + l.linha + '" data-col="' + col +
@@ -409,8 +443,9 @@ export async function montar(ctx) {
         '" aria-label="' + esc((rasc ? 'Desfazer a exclusão do abastecimento de ' : 'Excluir o abastecimento de ') + e.placa + ' em ' + fmtDia(l.dia)) + '">' +
         (rasc ? '↶' : '<svg aria-hidden="true"><use href="#i-lixeira"/></svg>') + '</button>') + '</td>';
     return '<tr data-linha="' + l.linha + '" class="' + (rascunho.has(l.linha) ? 'ea-tr-alterada' : '') + (exc ? ' ea-tr-excluida' : '') + (estado.destaque === l.linha ? ' selecionado' : '') + '">' +
-      '<td class="ea-data" title="Linha ' + l.linha + ' da Base_copia">' + esc(fmtDia(l.dia).replace(/\/(\d{2})(\d{2})$/, '/$2')) +
-        '<small class="cidade-linha">' + esc(hora(l.seg)) + '</small></td>' +
+      (edita ? '<td class="ea-data" title="Linha ' + l.linha + ' da Base_copia">' + campo(l, 'E', e.serial, 'd') + '</td>'
+        : '<td class="ea-data" title="Linha ' + l.linha + ' da Base_copia">' + esc(fmtDia(e.dia).replace(/\/(\d{2})(\d{2})$/, '/$2')) +
+        '<small class="cidade-linha">' + esc(hora(e.seg)) + '</small></td>') +
       '<td>' + (edita ? campo(l, 'F', e.placa, 'p') : '<strong>' + esc(e.placa) + '</strong>') + '<div class="ea-placa-cartao">' + seloCartao(l.cartao) + '</div>' + estadoTxt + '</td>' +
       (edita ? '<td>' + campo(l, 'L', e.mot, 'm') + '</td>' : curto(e.mot)) + curto(l.posto) + curto(l.fuel) +
       (edita ? '<td>' + campo(l, 'AB', e.inf1, 't') + '</td><td>' + campo(l, 'AD', e.inf3, 't') + '</td>' : curto(e.inf1) + curto(e.inf3)) +
@@ -461,7 +496,7 @@ export async function montar(ctx) {
   function desenharHistorico() {
     const ls = [...alteracoes].sort((a, b) => b.id - a.id);
     el('ea-hist-conta').textContent = ls.length ? fmt.int(ls.length) + (ls.length === 1 ? ' correção' : ' correções') : '';
-    const valor = (c, x) => (x === null || x === undefined || x === '' ? '(vazio)' : c === 'Q' || c === 'R' ? fmt.int(x) : c === 'P' ? fVl.format(x)
+    const valor = (c, x) => (x === null || x === undefined || x === '' ? '(vazio)' : c === 'E' ? textoDeSerial(x) : c === 'Q' || c === 'R' ? fmt.int(x) : c === 'P' ? fVl.format(x)
       : c === 'T' ? fmt.moeda(x) : c === 'S' ? fmt.d2(x) : String(x));
     el('ea-hist').innerHTML = ls.length
       ? '<thead><tr><th><span>Quando</span></th><th><span>Quem</span></th><th><span>Abastecimento</span></th><th><span>O que mudou</span></th><th><span>Situação</span></th></tr></thead><tbody>' +
@@ -498,7 +533,14 @@ export async function montar(ctx) {
     if (!l) return;
     let val;
     if (col === 'AB' || col === 'AD') val = inp.value || null;   // lista de opções
-    else if (col === 'F') {
+    else if (col === 'E') {
+      val = serialDeTexto(inp.value);
+      if (Number.isNaN(val)) {
+        inp.classList.add('invalido');
+        inp.title = 'Data e hora: dd/mm/aaaa hh:mm (os segundos são opcionais), de 2020 até agora (ex.: 15/11/2026 14:30).';
+        return;
+      }
+    } else if (col === 'F') {
       val = limparPlaca(inp.value);
       if (!PLACA_OK.test(val)) {
         inp.classList.add('invalido');
@@ -654,13 +696,14 @@ export async function montar(ctx) {
     });
     el('ea-salvar').addEventListener('click', async () => {
       // abastecimento marcado para excluir: vai só a exclusão (as outras mudanças dele não importam)
+      // data: a que a planilha terá quando o vigia gravar (com a troca de data salva antes, se houver); o vigia acha a linha por ela
       const itens = [...rascunho.entries()].filter(([linha]) => !excluir.has(linha)).map(([linha, celulas]) => {
         const l = porLinha.get(linha), base = doServidor(l);
-        return { linha, placa: l.placa, data: l.serial, acao: 'editar', celulas, antes: Object.fromEntries(Object.keys(celulas).map((c) => [c, base[CAMPO[c]] ?? null])) };
+        return { linha, placa: l.placa, data: base.serial, acao: 'editar', celulas, antes: Object.fromEntries(Object.keys(celulas).map((c) => [c, base[CAMPO[c]] ?? null])) };
       });
       for (const linha of excluir) {
         const l = porLinha.get(linha), e = doServidor(l);
-        itens.push({ linha, placa: l.placa, data: l.serial, acao: 'excluir', celulas: {}, antes: { F: e.placa, L: e.mot, Q: e.hodo ?? null, O: l.litros ?? null } });
+        itens.push({ linha, placa: l.placa, data: e.serial, acao: 'excluir', celulas: {}, antes: { F: e.placa, L: e.mot, Q: e.hodo ?? null, O: l.litros ?? null } });
       }
       if (!itens.length) return;
       if (excluir.size && !await confirmar((excluir.size === 1 ? 'Excluir 1 abastecimento' : 'Excluir ' + excluir.size + ' abastecimentos') +
