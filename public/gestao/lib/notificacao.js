@@ -92,16 +92,19 @@ export function descreverLimite(c) {
   return c.unidade === 'pct' ? String(c.limite).replace('.', ',') + '% da capacidade' : fmtL(c.limite) + ' L';
 }
 const cartaoNome = { todos: 'qualquer cartão', ticket: 'Ticket', truckpag: 'TruckPag', veloe: 'Veloe' };
+// bases de uma regra de estoque baixo: base_ids (lista; vazia = todas). Regras antigas guardavam uma só em base_id.
+export const basesDaRegra = (c) => (Array.isArray(c && c.base_ids) ? c.base_ids
+  : c && c.base_id !== null && c.base_id !== undefined && c.base_id !== '' ? [Number(c.base_id)] : []);
 const unidadeDe = (ctx, placa) => (ctx.dados && ctx.dados.veiculos && ctx.dados.veiculos[placa] ? ctx.dados.veiculos[placa].unidade : null);
 
-// campos: {id, rotulo, tipo: 'select'|'numero'|'data', opcoes: [[valor, rótulo]] | 'bases' | 'unidades', padrao, largo}
+// campos: {id, rotulo, tipo: 'select'|'multi'|'numero'|'data', opcoes: [[valor, rótulo]] | 'bases' | 'unidades', padrao, largo}
 // avaliar(regra, ctx) -> [{chave, texto}]   ctx = {estoques, dados, contexto: {base, alertasCartao}}
 export const TIPOS = {
   'estoque-baixo': {
     rotulo: 'Estoque baixo (bomba interna)', nome: 'Estoque baixo', precisa: 'bomba-estoque', acesso: 'estoque', quem: 'Todos com acesso ao Estoque',
     acao: { rotulo: 'Ver o estoque', href: '#/bomba-estoque' }, usa: ['estoques'],
     campos: [
-      { id: 'base_id', rotulo: 'Base', tipo: 'select', opcoes: 'bases', padrao: null },
+      { id: 'base_ids', rotulo: 'Bases', tipo: 'multi', opcoes: 'bases', padrao: [], largo: true, dica: 'nenhuma marcada = todas as bases' },
       { id: 'tanque', rotulo: 'Tanque', tipo: 'select', opcoes: [['diesel', 'Diesel S10'], ['arla', 'Arla 32'], ['todos', 'Diesel e Arla']], padrao: 'diesel' },
       { id: 'limite', rotulo: 'Avisar quando ficar abaixo de', tipo: 'numero', padrao: 2000 },
       { id: 'unidade', rotulo: 'Em', tipo: 'select', opcoes: [['litros', 'litros'], ['pct', '% da capacidade do tanque']], padrao: 'litros' },
@@ -109,12 +112,12 @@ export const TIPOS = {
     variaveis: ['base', 'tanque', 'volume', 'limite', 'capacidade', 'percentual'],
     mensagem: '{tanque} da base {base} está com {volume} L ({percentual} do tanque), abaixo do limite de {limite}. Programe a compra.',
     exemplo: { base: 'RAJA JEQUIE', tanque: 'Diesel S10', volume: '1.850', limite: '2.000 L', capacidade: '15.000', percentual: '12%' },
-    resumo: (c, nomes) => (c.tanque === 'todos' ? 'Diesel e Arla' : NOME_TANQUE[c.tanque]) + ' · ' + nomes.base(c.base_id) + ' · abaixo de ' + descreverLimite(c),
+    resumo: (c, nomes) => (c.tanque === 'todos' ? 'Diesel e Arla' : NOME_TANQUE[c.tanque]) + ' · ' + (basesDaRegra(c).length ? basesDaRegra(c).map(nomes.base).join(', ') : 'todas as bases') + ' · abaixo de ' + descreverLimite(c),
     avaliar(r, ctx) {
       if (!ctx.estoques) return null;
-      const c = r.condicao, out = [];
+      const c = r.condicao, out = [], ids = basesDaRegra(c);
       for (const e of ctx.estoques) {
-        if (c.base_id !== null && c.base_id !== undefined && c.base_id !== e.base_id) continue;
+        if (ids.length && !ids.includes(e.base_id)) continue;
         if (c.tanque && c.tanque !== 'todos' && c.tanque !== e.tanque) continue;
         if (!(c.unidade === 'pct' ? e.pct !== null && e.pct * 100 < c.limite : e.volume < c.limite)) continue;
         out.push({ chave: 'r' + r.id + ':' + e.base_id + ':' + e.tanque, onde: e.base + ' · ' + NOME_TANQUE[e.tanque], texto: montarTexto(r.mensagem, {

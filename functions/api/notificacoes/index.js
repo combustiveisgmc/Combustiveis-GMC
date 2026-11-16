@@ -26,8 +26,10 @@ const data = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : n
 const TIPOS = {
   'estoque-baixo': (c) => {
     const unidade = umDe(c.unidade, ['litros', 'pct'], 'litros');
-    const base = c.base_id === null || c.base_id === undefined || c.base_id === '' ? null : Number(c.base_id);
-    return { base_id: Number.isInteger(base) ? base : null, tanque: umDe(c.tanque, ['diesel', 'arla', 'todos'], 'todos'), unidade,
+    // base_ids: lista de bases (vazia = todas). Aceita ainda o base_id antigo (uma base só).
+    const lista = Array.isArray(c.base_ids) ? c.base_ids : c.base_id === null || c.base_id === undefined || c.base_id === '' ? [] : [c.base_id];
+    const base_ids = [...new Set(lista.map(Number).filter((x) => Number.isInteger(x) && x > 0))].slice(0, 100);
+    return { base_ids, tanque: umDe(c.tanque, ['diesel', 'arla', 'todos'], 'todos'), unidade,
       limite: unidade === 'pct' ? n(c.limite, 0.1, 99.9, 'O limite em % precisa ficar entre 0 e 100.') : n(c.limite, 1, 1e6, 'Informe o limite em litros.') };
   },
   comunicado: (c) => {
@@ -86,7 +88,7 @@ function validar(d) {
     const c = TIPOS[tipo](d.condicao || {});
     if (c.erro) erros.push(c.erro);
     else {
-      for (const [k, v] of Object.entries(c)) if (v && typeof v === 'object' && v.erro) erros.push(v.erro); else if (v && typeof v === 'object') delete c[k];
+      for (const [k, v] of Object.entries(c)) if (v && typeof v === 'object' && v.erro) erros.push(v.erro); else if (v && typeof v === 'object' && !Array.isArray(v)) delete c[k];   // listas (base_ids) ficam
       condicao = c;
     }
   }

@@ -1463,6 +1463,10 @@ table.dados.nt-tabela td{white-space:normal;vertical-align:middle;}
 }
 .nt-grade-tipo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;padding:var(--e-3);border:1px solid var(--borda);border-radius:var(--r);background:var(--cartao-3);}
 .nt-grade-tipo .largo{grid-column:1 / -1;}
+.nt-multi{border:0;margin:0;padding:0;min-width:0;}
+.nt-multi legend{padding:0;margin-bottom:4px;font-size:13px;color:var(--texto-2);}
+.nt-multi legend small{font-size:12px;}
+.nt-multi-opcoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:0 14px;max-height:180px;overflow:auto;padding:4px 10px;border:1px solid var(--borda);border-radius:var(--r);background:var(--cartao);}
 .nt-grade-tipo input[type=date]{width:100%;}
 @media (max-width:600px){ .nt-grade-tipo{grid-template-columns:minmax(0,1fr);} }
 .nt-grade-tipo .campo-form{display:flex;flex-direction:column;justify-content:flex-end;min-width:0;}

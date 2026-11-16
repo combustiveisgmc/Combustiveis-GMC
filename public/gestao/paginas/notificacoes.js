@@ -2,7 +2,7 @@
 // Criar, editar, pausar/ativar, testar ("Ver no canto da tela") e excluir. Cada tipo (catálogo TIPOS) traz os seus campos, as
 // variáveis da mensagem e a conta; a coluna "Agora" verifica na hora e mostra se a regra está disparando e onde.
 import { esc } from '../lib/dados.js';
-import { mostrarNotificacao, htmlNotificacao, carregarContexto, montarTexto, TIPOS } from '../lib/notificacao.js';
+import { mostrarNotificacao, htmlNotificacao, carregarContexto, montarTexto, basesDaRegra, TIPOS } from '../lib/notificacao.js';
 
 const NIVEIS = [['info', 'Informação'], ['alerta', 'Atenção'], ['critico', 'Crítico']];
 const REPETIR = [['sessao', 'Volta na próxima vez que abrir o portal'], ['diaria', 'Volta no dia seguinte'], ['horas:1', 'Volta depois de 1 hora'],
@@ -149,9 +149,17 @@ export async function montar(ctx) {
   function desenharCamposTipo(cond) {
     const t = TIPOS[tipoAtual];
     el('nt-campos-tipo').innerHTML = '<div class="nt-grade-tipo">' + t.campos.map((c) => {
-      const v = cond && cond[c.id] !== undefined ? cond[c.id] : padrao(c);
+      const v = c.id === 'base_ids' && cond ? basesDaRegra(cond) : cond && cond[c.id] !== undefined ? cond[c.id] : padrao(c);
       const nome = 'c_' + c.id;
-      const campo = c.tipo === 'select' ? '<select name="' + nome + '" class="campo-sel">' + opcoesDe(c, v) + '</select>'
+      if (c.tipo === 'multi') {   // caixas de marcar (bases): as marcadas que não estão mais na lista continuam aparecendo
+        const ops = c.opcoes === 'bases' ? bases.map((b) => [b.id, b.nome]) : c.opcoes;
+        const sel = (v || []).map(String);
+        for (const x of sel) if (!ops.some(([k]) => String(k) === x)) ops.push([x, 'base ' + x + ' (inativa ou sem acesso)']);
+        return '<fieldset class="campo-form largo nt-multi"><legend>' + esc(c.rotulo) + (c.dica ? ' <small>(' + esc(c.dica) + ')</small>' : '') + '</legend>' +
+          '<div class="nt-multi-opcoes">' + (ops.length ? ops.map(([k, r]) => '<label class="nt-opcao"><input type="checkbox" name="' + nome + '" value="' + esc(String(k)) + '"' +
+            (sel.includes(String(k)) ? ' checked' : '') + '> ' + esc(r) + '</label>').join('') : '<p class="nota">Nenhuma base ativa.</p>') + '</div></fieldset>';
+      }
+      const campo =c.tipo === 'select' ? '<select name="' + nome + '" class="campo-sel">' + opcoesDe(c, v) + '</select>'
         : c.tipo === 'data' ? '<input type="date" name="' + nome + '" value="' + esc(v || '') + '">'
         : '<input name="' + nome + '" inputmode="decimal" autocomplete="off" value="' + esc(fmtNum(v)) + '">';
       return '<label class="campo-form' + (c.largo ? ' largo' : '') + '"><span>' + esc(c.rotulo) + '</span>' + campo + '</label>';
@@ -164,6 +172,11 @@ export async function montar(ctx) {
   function lerCondicao() {
     const t = TIPOS[tipoAtual], c = {};
     for (const campo of t.campos) {
+      if (campo.tipo === 'multi') {
+        const vs = [...form.querySelectorAll('input[name="c_' + campo.id + '"]:checked')].map((x) => x.value);
+        c[campo.id] = campo.opcoes === 'bases' ? vs.map(Number) : vs;
+        continue;
+      }
       const v = form.elements['c_' + campo.id].value;
       if (campo.tipo === 'numero') c[campo.id] = num(v);
       else if (campo.tipo === 'data') c[campo.id] = v;
