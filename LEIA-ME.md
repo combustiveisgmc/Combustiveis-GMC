@@ -395,6 +395,10 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
   hora da medição, preço médio opcional) e ativa/inativa. Para acertar o estoque depois de medir a régua, edite a base e
   informe o novo estoque com a data e a hora: a conta recomeça dali. Preço médio = média ponderada das compras (sem
   compra nem preço informado, vale o último preço da bomba na Base). Bases e compras ficam só no site (D1).
+- **Cais da Vibra como base (16/11/2026):** no "Adicionar base" do Estoque, o campo do posto sugere também os cais da Vibra
+  (TIPO ESTABELECIMENTO "CAIS VIBRA" na Base: CAANA, CALAN, CABET, CAAPE), que têm tanque próprio e funcionam como bomba
+  interna. O cartão da base mostra "CAIS VIBRA - …". Estoque, Movimentações, Rateio das NFs e o vigia já trabalham pelo
+  nome do posto da base, então não mudam.
 - **Bomba interna: quem vê cada base:** em Gerenciar acessos, no login da pessoa, "Bases da bomba interna": "Todas as
   bases" (padrão, inclusive as criadas depois) ou "Só as bases marcadas". Com só algumas, as telas da Bomba interna
   (Estoque, Inclusão de abastecimento, Movimentações) mostram e aceitam lançamentos só dessas bases, e a pessoa não cria

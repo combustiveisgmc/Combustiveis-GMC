@@ -31,8 +31,11 @@ export async function montar(ctx) {
     if (e.message !== 'sessão') pagina.innerHTML = '<div class="vazio">' + esc(e.message) + ' Recarregue a página para tentar de novo.</div>';
     return {};
   }
-  // postos internos que aparecem na Base (sugestões do campo "posto")
-  const postosInternos = [...new Set(dados.linhas.filter((l) => /INTERNO/i.test(l.tipoEstab || '')).map((l) => String(l.fornecedor || '').trim().toUpperCase()).filter(Boolean))].sort();
+  // postos internos que aparecem na Base (sugestões do campo "posto"): bombas internas e, desde 16/11/2026, os cais da Vibra
+  // (CAANA, CALAN, CABET, CAAPE: tanques próprios que funcionam como bomba interna)
+  const ehCais = (l) => /CAIS VIBRA/i.test(l.tipoEstab || '');
+  const postosInternos = [...new Set(dados.linhas.filter((l) => /INTERNO/i.test(l.tipoEstab || '') || ehCais(l)).map((l) => String(l.fornecedor || '').trim().toUpperCase()).filter(Boolean))].sort();
+  const postosCais = new Set(dados.linhas.filter(ehCais).map((l) => String(l.fornecedor || '').trim().toUpperCase()));
 
   pagina.innerHTML = `
     <div class="be-cab">
@@ -45,11 +48,11 @@ export async function montar(ctx) {
     <dialog class="dialogo" id="be-dialogo" aria-labelledby="be-dlg-titulo">
       <form id="be-form" novalidate>
         <h2 id="be-dlg-titulo">Adicionar base</h2>
-        <p class="dialogo-explica">A base é a bomba interna. O posto é como ela aparece nos abastecimentos da Base (ex.: POSTO INT RAJA JEQUIE): é por ele que o estoque acha as saídas.</p>
+        <p class="dialogo-explica">A base é a bomba interna (ou o cais da Vibra). O posto é como ela aparece nos abastecimentos da Base (ex.: POSTO INT RAJA JEQUIE ou CALAN): é por ele que o estoque acha as saídas.</p>
         <p class="erro-form oculto" id="be-erro" role="alert"></p>
         <div class="grade-form">
           <label class="campo-form largo"><span>Nome da base</span><input name="nome" required autocomplete="off" placeholder="Ex.: RAJA LOG JEQUIE…"></label>
-          <label class="campo-form largo"><span>Posto nos abastecimentos da Base</span><input name="posto" list="be-postos" required autocomplete="off" spellcheck="false" placeholder="Ex.: POSTO INT RAJA JEQUIE…"></label>
+          <label class="campo-form largo"><span>Posto nos abastecimentos da Base</span><input name="posto" list="be-postos" required autocomplete="off" spellcheck="false" placeholder="Ex.: POSTO INT RAJA JEQUIE ou CALAN…"></label>
         </div>
         ${['diesel', 'arla'].map((t) => `
         <fieldset class="be-tanque" data-tanque="${t}">
@@ -96,7 +99,7 @@ export async function montar(ctx) {
       </div>`;
     }).join('');
     return `<section class="painel be-cartao" data-base="${b.id}">
-      <div class="painel-cab"><h2>BOMBA INTERNA - ${esc(b.nome)}</h2>${podeEditar ? '<button type="button" class="btn-linha" data-editar="' + b.id + '">Editar</button>' : ''}</div>
+      <div class="painel-cab"><h2>${postosCais.has(String(b.posto || '').toUpperCase()) ? 'CAIS VIBRA' : 'BOMBA INTERNA'} - ${esc(b.nome)}</h2>${podeEditar ? '<button type="button" class="btn-linha" data-editar="' + b.id + '">Editar</button>' : ''}</div>
       <p class="nota be-posto">${esc(b.posto)}</p>
       <div class="be-tanques">${barras}</div>
     </section>`;
