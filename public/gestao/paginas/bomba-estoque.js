@@ -99,7 +99,7 @@ export async function montar(ctx) {
       </div>`;
     }).join('');
     return `<section class="painel be-cartao" data-base="${b.id}">
-      <div class="painel-cab"><h2>${postosCais.has(String(b.posto || '').toUpperCase()) ? 'CAIS VIBRA' : 'BOMBA INTERNA'} - ${esc(b.nome)}</h2>${podeEditar ? '<button type="button" class="btn-linha" data-editar="' + b.id + '">Editar</button>' : ''}</div>
+      <div class="painel-cab"><h2 title="${esc(b.nome)}">${postosCais.has(String(b.posto || '').toUpperCase()) ? 'CAIS VIBRA' : 'BOMBA INTERNA'} - ${esc(b.nome)}</h2>${podeEditar ? '<button type="button" class="btn-linha" data-editar="' + b.id + '">Editar</button>' : ''}</div>
       <p class="nota be-posto">${esc(b.posto)}</p>
       <div class="be-tanques">${barras}</div>
     </section>`;
