@@ -1,0 +1,92 @@
+# CHECKLIST
+
+Toda demanda pedida para o portal, quebrada em seções. `[x]` = feito e conferido; `[ ]` = falta.
+Cada demanda nova entra na seção dela (ou numa seção nova) no mesmo dia em que for pedida; quando terminar, é marcada
+e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar` (lint + testes) e criar os testes do que mudou.
+
+## 0. Regras permanentes
+
+- [x] Responder em português.
+- [x] Nunca editar a `Base.xlsx` nem o `.pbix` (só leitura); nunca mexer no site antigo dos motoristas.
+- [x] Nunca mostrar tokens, senhas ou credenciais; nenhum CPF, nascimento ou CNH de motorista guardado.
+- [x] Testes só locais (usuário de teste apagado depois) ou em cópia das planilhas.
+- [x] Atualizar `briefing.md`, `LEIA-ME.md`, `CHANGELOG.md` e este checklist a cada alteração.
+- [x] Enviar toda alteração para o GitHub (`combustiveisgmc/Combustiveis-GMC`), sem dados nem segredos.
+- [x] Toda alteração: lint (`npm run lint`), testes novos e `npm test` (16/11/2026).
+
+## 1. Banco de dados: sair das planilhas
+
+### 1.1 Estrutura (16/11/2026)
+- [x] Espelho das planilhas e do D1 no Supabase (`public`, 12/11/2026).
+- [x] Modelo relacional `gestao`: cadastros (empresas, unidades + apelidos, veículos, placas por sistema, metas, cartões, motoristas,
+      postos + códigos por emissora, rotas, fornecedores, bases, tanques, medições) e dados (abastecimentos, correções, compras/NFs,
+      rateio, preços negociados, preços das bombas, ANP, contratos, orçamento, transações negadas, km viradas, PRIME, acessos,
+      notificações, avisos de cartão).
+- [x] Carga do espelho para o modelo (`scripts/gestao_carga.py`) numa transação, com conferência dos totais e lista de pendências.
+- [x] Regras de normalização testadas (`scripts/gestao_normalizar.py`, `tests/py/test_gestao.py`).
+- [x] Relatório do que não está alinhado (`docs/BANCO.md` > Desalinhamentos).
+- [ ] Vigia rodar a carga do modelo depois de cada sincronização do espelho (hoje é à mão: `npm run banco:carga`).
+
+### 1.2 Corrigir os dados desalinhados (ver docs/BANCO.md)
+- [ ] Tirar as senhas dos portais dos cartões da planilha de motoristas (e do espelho `public.motoristas`).
+- [ ] Unificar os nomes das unidades nas planilhas (ou passar a usar só o cadastro `gestao.unidades`).
+- [ ] Cadastrar as placas que só aparecem nos abastecimentos (ou marcar como terceiros/vendidas).
+- [ ] Cadastrar (ou marcar como desligados) os motoristas que só aparecem nos abastecimentos.
+- [ ] Corrigir as coordenadas sem vírgula da LOCALIZAÇÃO DOS POSTOS e localizar os postos sem coordenada.
+- [ ] Preencher a SITUACAO das placas (vazia em quase todas) e tirar "VENDA" da unidade/categoria.
+- [ ] Corrigir as placas divergentes entre Base, Ticket, TruckPag e Veloe (aba Placas MERCOSUL).
+- [ ] Lançamentos que não são abastecimento com placa (VAZAMENTO, LAVAGEM, LIMPEZA NO TANQUE...) virarem ajuste de estoque.
+- [ ] Compras das bombas de Belém, Salvador, São Paulo, GV e Ilhéus de jul a out/2026 (a planilha para em jun/2026 e o site só tem Jequié e os cais).
+
+### 1.3 Trocar as fontes do site e do vigia (próximas fases)
+- [ ] Site ler os dashboards do modelo (`gestao.abastecimentos` e cadastros) em vez do JSON gerado das planilhas.
+- [ ] Cadastros (placas, motoristas, cartões, postos) gravarem direto no modelo, sem fila para a planilha.
+- [ ] Editar abastecimentos, Consolidador e lotes D-1 gravarem direto em `gestao.abastecimentos`.
+- [ ] APIs dos cartões (Ticket/TruckPag) gravarem direto em `gestao.abastecimentos`.
+- [ ] Negociações de postos e preços das bombas gravarem direto no modelo.
+- [ ] Bomba interna (bases, tanques, movimentações, rateio) no modelo.
+- [ ] Planilhas viram só exportação (Excel gerado do banco) e deixam de ser fonte.
+- [ ] Site fora da Cloudflare (Lovable, domínio próprio), quando o banco estiver provado.
+
+## 2. Qualidade
+- [x] ESLint com regras de erro (`.eslintrc.json`), 0 erros.
+- [x] Testes: rateio, estoque, notificações, cadastros/cartões/permissões (JS); normalização, conversões e migração (Python).
+- [ ] Limpar os 4 avisos de variável sem uso (cadastros/[tipo].js, mapa-calor.js, programa-prime.js).
+- [ ] Testes das APIs (functions/) com D1 local.
+
+## 3. Bomba interna
+- [x] Estoque por base e tanque, movimentações (NFs), rateio das NFs com início por tanque.
+- [x] Cais da Vibra (CAANA, CALAN, CABET, CAAPE) como base; rateio do portal a partir das planilhas (16/11/2026).
+- [x] NFs 1722159 e 1722862 do Cais Viana lançadas sem mudar o volume (16/11/2026).
+- [x] Cartões do Estoque alinhados (16/11/2026).
+- [ ] Lançar as próximas NFs de Betim, Suape e Uberlândia (faltam ~2 notas de Uberlândia desde 31/10).
+
+## 4. Notificações
+- [x] Avisos no canto da tela (estoque baixo, comunicado, preço alto, falta cartão, base desatualizada).
+- [x] Estoque baixo com várias bases (16/11/2026).
+
+## 5. Cartões e APIs
+- [x] Integração Ticket/TruckPag em tempo real e D-1; tardios do fim de semana.
+- [x] Unidade da placa vira o centro de custo na TruckPag; 27 placas alinhadas (16/11/2026).
+- [ ] 10 placas VENDA sem centro de custo VENDA na TruckPag (decidir).
+- [ ] Ticket: edição de veículo pela API não documentada; Veloe sem API.
+
+## 6. Programa PRIME
+- [x] Fechamento, Resultado, km mínimo, deflatores e comparativo antes x depois (13/11/2026).
+- [ ] Lista de outubro/2026 quando chegar.
+
+## 7. Postos e preços
+- [x] Rodada de preços sem as bombas internas e os cais (13/11/2026).
+- [x] Preço postos externos: posto bloqueado não compara com o preço antigo (13/11/2026).
+- [ ] 9 postos com coordenada suspeita (briefing > Pendências).
+
+## 8. Cadastros e abastecimentos
+- [x] Motoristas sem dados pessoais; área do motorista com usuário de 6 números.
+- [x] Editar abastecimentos: valor, data e hora editáveis.
+- [ ] Apagar o acesso do motorista de teste 111444 (oferecido, sem resposta).
+- [ ] Aviso de senha inicial dos motoristas (opções oferecidas, sem resposta).
+
+## 9. Mapas e dashboards
+- [x] Mapa de calor como no BI (zoom automático, postos escolhidos sozinhos, colunas Data/Placa/Cartão).
+- [ ] Placa desabilitada escondida no roteirizador (a lista vem da aba Metas).
+- [ ] 41 fábricas de clientes com localização aproximada para conferir.

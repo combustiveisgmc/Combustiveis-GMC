@@ -64,6 +64,27 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Ainda não usado pelo site (continua na Cloudflare); próximo passo combinado: domínio próprio e site no Lovable usando o
   Supabase, deixando as planilhas por último.
 
+### Modelo relacional `gestao` (desde 16/11/2026)
+
+- O espelho (`public`) tem a forma das planilhas. O schema **`gestao`** é o modelo organizado: cadastros únicos (unidades,
+  veículos, motoristas, postos, combustíveis, fornecedores, bases e tanques) e os dados ligados a eles por chave
+  (abastecimentos, compras/NFs, rateio, preços, ANP, orçamento, metas, PRIME, acessos). Descrição completa e lista do que não
+  está alinhado nas planilhas: **`docs/BANCO.md`**.
+- `npm run banco:esquema` aplica a migração (`supabase/migrations/*gestao*.sql`, registrada em `schema_migrations`);
+  `npm run banco:carga` recarrega o modelo a partir do espelho (lê tudo antes e grava numa transação só; a leitura grande
+  dentro de transação longa derruba a conexão do pooler); `npm run banco:conferir` mostra totais e pendências da última carga
+  (`gestao.carga`).
+- Regras de tradução (unidade, combustível, placa, origem): `scripts/gestao_normalizar.py`. Unidade nova ou grafia nova: acrescentar
+  em `UNIDADE_CURTA` e no teste. O modelo **não guarda senhas** (a aba Motoristas tem senhas dos portais: ficam de fora).
+
+## Lint e testes (desde 16/11/2026)
+
+- Toda alteração: `npm run verificar` = lint (`npm run lint`: ESLint com `.eslintrc.json` + compilação dos scripts Python) e
+  testes (`npm test`: `tests/js/*.test.mjs` com node:test e `tests/py/test_*.py` com unittest). Cada mudança ganha o seu teste.
+- Não rodar `npm install` (o ownCloud sincronizaria o node_modules): o ESLint roda por `npx --yes eslint@8`.
+- Toda alteração também entra no **`CHANGELOG.md`** (o que foi pedido e feito, mais novo em cima) e no **`CHECKLIST.md`**
+  (demandas por seção, marcadas quando prontas).
+
 ## Código no GitHub
 
 - Repositório **privado** https://github.com/combustiveisgmc/Combustiveis-GMC (conta `combustiveisgmc`, branch `main`).

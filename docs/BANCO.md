@@ -1,0 +1,152 @@
+# Banco de dados — modelo relacional `gestao`
+
+> Criado em 16/11/2026, a pedido do usuário: reestruturar os bancos em tabelas de cadastros e de dados, que façam sentido,
+> para tirar a dependência das planilhas no controle e na gestão dos combustíveis.
+
+## 1. Como estava
+
+| Onde | O quê | Problema |
+|---|---|---|
+| Planilhas (ownCloud) | Base/Base_copia (abastecimentos), Controle de motoristas e placas, Cartões frota, Negociações, Localização dos postos, Negociação bomba interna, Orçamento, ANP, Transações negadas | Cada uma escreve o mesmo dado de um jeito (unidade, combustível, posto); fórmulas copiadas viram coluna; a linha muda quando entra um lote; o site grava por fila + vigia |
+| D1 (Cloudflare) | Acessos, filas de alteração para as planilhas, bomba interna, rateio, PRIME, notificações | Datas em texto, listas em JSON dentro de texto, ligação com os cadastros pelo nome |
+| KV (Cloudflare) | JSON publicado para o site (abastecimentos, cadastros, cartões, ANP...) | Gerado das planilhas: sem planilha, sem site |
+| Supabase `public` | Espelho 1 para 1 das planilhas e do D1 (12/11/2026) | Mesma forma das planilhas (`informacao_adicional_3` = unidade, colunas de fórmula, sem chaves entre tabelas) |
+
+## 2. Como ficou
+
+Schema **`gestao`** no Supabase (migração `supabase/migrations/20261116120000_gestao_modelo.sql`), carregado do espelho por
+`scripts/gestao_carga.py` (uma transação só: quem consulta vê a carga anterior até a nova terminar). O espelho continua sendo
+a porta de entrada enquanto as planilhas existirem; cada fase da troca está no `CHECKLIST.md` (seção 1.3).
+
+### 2.1 Cadastros
+| Tabela | Chave | O que é | Vem de |
+|---|---|---|---|
+| `empresas` | id | RAJA LOG, KEMIGAS | NOME REDUZIDO da Base |
+| `unidades` | id, `nome` único | Unidade = centro de custo (RAJA JEQUIE), nome curto (Jequié), código Protheus (0203001), empresa, operacional | Base (INF. ADICIONAL 3), orçamento (BD_UND), cadastros |
+| `unidade_apelidos` | apelido | Todos os jeitos de escrever a unidade → unidade | todas as planilhas |
+| `combustiveis` | id, `nome` único | DIESEL S10, DIESEL S10 ADITIVADO, DIESEL COMUM, ARLA 32, GASOLINA, ETANOL, GNV + grupo | Base, negociações, bomba |
+| `emissoras` | id | ticket, truckpag, veloe, vibra, bomba, manual | forma de pagamento |
+| `veiculos` | id, `placa` única (validada) | Categoria, marca, modelo, ano, unidade, situação (ativo/desabilitado/vendido), meta, ponto crítico, tanque, autonomia; `cadastrado=false` = só apareceu nos abastecimentos | aba Carros + Base |
+| `veiculo_placas_sistema` | veículo + sistema | Placa em cada sistema (Protheus, Base, Ticket, TruckPag, Veloe) | aba Placas MERCOSUL |
+| `veiculo_metas` | veículo + mês | Meta de km/L por mês | Base > Metas x mes |
+| `cartoes` | veículo + emissora | Situação do cartão (ativo, perdido, aguardando envio...) | CONTROLE CARTÕES FROTA |
+| `motoristas` | id, `usuario` único (6 números) | Nome, matrícula, unidade, situação, códigos Ticket/TruckPag. **Sem CPF, nascimento, CNH nem senhas** | aba Motoristas + Base |
+| `postos` | id, nome+cidade+UF únicos | Endereço, coordenadas, tipo (externo/interno/cais) | Base + Localização dos postos |
+| `posto_codigos` | emissora + código | Código do estabelecimento em cada cartão → posto | Base |
+| `rotas`, `rota_postos` | id / rota + posto | Rotas das unidades e postos autorizados (contato) | Negociações > ROTAS |
+| `fornecedores`, `fornecedor_atendimentos` | id / fornecedor + combustível + praça | Fornecedores das bombas internas e onde atendem (CNPJ da filial) | Negociação bomba interna > Fornecedores |
+| `bases`, `tanques`, `tanque_medicoes` | id / base + combustível / tanque + data | Bombas internas e cais, tanques (capacidade), medições da régua | D1 bomba_bases + compras da planilha (bases antigas, inativas, id ≥ 1001) |
+
+### 2.2 Dados
+| Tabela | Chave | O que é | Vem de |
+|---|---|---|---|
+| `abastecimentos` | id, `chave` única (placa\|data e hora\|combustível) | Todos os abastecimentos com veículo, motorista, unidade, empresa, posto, base, combustível, emissora (ids), litros, preço, valor, hodômetro, km, km/L; o resto do cartão em `info_adicional` (jsonb) | Base_copia |
+| `abastecimento_correcoes` | id | Histórico do Editar abastecimentos | D1 alteracoes_base_copia |
+| `compras_combustivel` | id | NFs e ajustes dos tanques (fornecedor, NF, emissão, litros, valor, vencimento); origem site ou planilha | D1 bomba_movimentacoes + Base > Bomba interna |
+| `rateio_inicio`, `rateio_centro_custo`, `rateio_validacoes` | tanque / chave / compra | Rateio das NFs | D1 |
+| `precos_negociados` | id | Negociações com os postos (data, unidade, posto, emissora, tipo mínimo/polo, valor, orientação) | Gestão de negociações |
+| `precos_fornecedores` | id | Preço das bombas internas por fornecedor, combustível e praça | Negociação bomba interna |
+| `anp_precos` | mês + UF + município + produto | Preço de revenda da ANP | Base > ANP |
+| `contratos_anp` | id | Contratos de diesel do cliente (praça, UF, data base) | D1 |
+| `orcamento` | unidade + natureza + mês | Orçamento da frota | Banco_Orçamento > Base_Metas |
+| `transacoes_negadas` | id | Transações negadas (data e hora juntas, o resto em jsonb) | Base > Transações Negadas |
+| `km_viradas`, `prime_*`, `usuarios`, `funcoes`, `usuario_bases`, `notificacoes`, `alertas_cartoes` | — | Portal (listas viram `text[]`, JSON vira `jsonb`, datas viram `timestamptz`) | D1 |
+| `carga` | id | Cada carga: linhas por tabela, conferência e pendências | `gestao_carga.py` |
+
+Regras gerais: datas em `date`/`timestamp` (nada de número serial do Excel nem texto), números em `numeric` (sem
+arredondar o que veio da planilha), ligações por chave estrangeira, `check` nos domínios (situação, tipo, grupo), RLS ligado
+em todas as tabelas (sem política: só a chave secreta acessa).
+
+### 2.3 Comandos
+| Comando | O que faz |
+|---|---|
+| `npm run banco:esquema` | Aplica as migrações `*gestao*` que faltam (e registra a versão) |
+| `npm run banco:carga` | Recarrega o modelo a partir do espelho, confere os totais e grava as pendências em `gestao.carga` |
+| `npm run banco:conferir` | Mostra a conferência e as pendências da última carga |
+
+### 2.4 Primeira carga (16/11/2026)
+
+Aplicada em produção. Conferência espelho x modelo **toda OK**: 62.824 abastecimentos (11.286.322,51 L e R$ 65.745.950,24
+iguais), 290 placas e 165 motoristas do cadastro, 2.184 negociações, 2.948 preços das bombas, 11 compras do site e 692 da
+planilha (3.304.039,94 L), orçamento R$ 129.526.758,87, 936 transações negadas, 4 notificações e 20 usuários.
+
+| Cadastro | Linhas | | Dado | Linhas |
+|---|---|---|---|---|
+| unidades | 26 (+40 apelidos) | | abastecimentos | 62.824 |
+| veículos | 347 (290 do cadastro + 57 só dos abastecimentos) | | compras/NFs | 703 (699 compras, 4 ajustes) |
+| motoristas | 385 (165 do cadastro + 220 históricos) | | preços negociados | 2.184 |
+| postos | 931 (+1.061 códigos de cartão) | | preços das bombas | 2.948 |
+| combustíveis | 8 | | ANP | 96.463 |
+| bases / tanques | 11 / 17 (5 ativas; 6 antigas inativas) | | orçamento | 2.364 |
+| cartões | 539 situações | | metas por mês | 1.121 |
+
+Origem dos abastecimentos: Ticket 47.203, TruckPag 7.191, manual 3.783, Veloe 2.004, bomba interna 2.002, Vibra (cais) 641.
+Só 9 abastecimentos ficaram sem veículo (os que não têm placa) e 1 sem posto.
+
+**Cuidado com o pooler do Supabase** (aprendido nesta carga): conexão que leu muito dado cai na consulta seguinte; COPY
+grande demais num comando só derruba a conexão; quando o computador perde a conexão, a sessão fica "parada em transação"
+no banco segurando as tabelas. Por isso a carga lê cada tabela numa conexão nova, grava em blocos de 5.000 linhas, usa
+`idle_in_transaction_session_timeout` de 60 s e `lock_timeout` de 30 s, e tenta de novo até 3 vezes. O `supabase_sync.py`
+(espelho) ganhou keepalive para não travar o vigia.
+
+## 3. O que não está alinhado (16/11/2026)
+
+Achados do levantamento do espelho e da carga. A carga não esconde nenhum: o que não casa fica com a ligação vazia
+(ex.: `veiculo_id` nulo) e entra na lista de pendências da `gestao.carga`.
+
+### 3.1 Segurança
+1. **Senhas dos portais dos cartões na planilha de motoristas.** As 165 linhas da aba Motoristas têm senha da Ticket, da
+   TruckPag e da Veloe, e o espelho `public.motoristas` copia essas colunas. O modelo novo não guarda senha nenhuma;
+   o certo é tirar essas colunas da planilha e do espelho.
+
+### 3.2 Cadastros
+2. **Unidade escrita de 4 jeitos.** Base/cadastros usam o centro de custo (RAJA JEQUIE), o orçamento usa Jequié, as
+   negociações usam JEQUIE (sem acento) e os contratos usam a praça (Betim, Olinda, GRANEL - BETIM). Resolvido no modelo pela
+   tabela `unidade_apelidos`; nas planilhas continua.
+3. **Placas fora do cadastro.** 63 "placas" dos abastecimentos não estão na aba Carros (57 placas válidas e 6 textos). Parte é veículo de verdade sem cadastro
+   (SIE2E17 com 415 abastecimentos, RMJ4H10, SJE7D27...), parte é digitação (RPW7121 x RPW7I21, NYL6778 x NYI6778, TOE3E45 x
+   TDE3E45) e parte nem é placa (VAZAMENTO, LAVAGEM, LIMPEZA NO TANQUE, PRIMEIRO ABASTECIMENTO DO TANQUE DE SP, FAZENDA, CARRO ALUGADO).
+4. **SITUACAO das placas vazia.** 274 de 290 placas sem situação; "VENDA" aparece como unidade (21) e como categoria (16).
+   No modelo: situação = ativo/desabilitado/vendido e a unidade fica vazia nos vendidos.
+5. **Motoristas fora do cadastro.** 220 nomes dos abastecimentos não estão na aba Motoristas (ex-funcionários e nomes
+   cortados em 35 letras pelos cartões). No modelo entram como `situacao = historico`, `cadastrado = false`.
+6. **Placas diferentes entre os sistemas.** 3 placas (5 divergências) da aba Placas MERCOSUL com placa diferente entre Base, Ticket,
+   TruckPag e Veloe (ex.: JQF6F82 na TruckPag, JQF6F81 na Base e JQF6582 na Ticket).
+7. **Cartões sem número.** A planilha de cartões só tem a situação (ATIVO, PERDIDO...), não o número do cartão.
+
+### 3.3 Postos
+8. **886 nomes de posto para 772 códigos** nos abastecimentos, e 51 nomes com mais de um código ou cidade (POSTO CALIFORNIA
+   em 4 cidades). No modelo o posto é nome + cidade + UF e cada código de cartão aponta para um posto.
+9. **459 postos externos com abastecimento e sem coordenada** (sem linha na LOCALIZAÇÃO DOS POSTOS ou nome diferente), e
+   **47 coordenadas gravadas sem vírgula** (ex.: POSTO SUAPE com latitude -8334332): a carga recoloca a vírgula e lista na pendência.
+   Também: 36 nomes de posto em mais de uma cidade e 19 códigos de estabelecimento apontando para mais de um posto.
+10. **27 postos negociados que não casam com nenhum posto dos abastecimentos** (nome diferente do que vem nos cartões).
+11. A coluna COD POSTO da localização está desalinhada (já registrada no briefing).
+
+### 3.4 Abastecimentos e combustíveis
+12. **Combustível com 11 grafias** (DIESEL S-10 COMUM, DIESEL, Arla 32, arla 32, Etanol, ALCOOL COMUM...) → 8 combustíveis.
+13. **5.785 abastecimentos sem forma de pagamento** (bomba interna e lançamentos manuais): no modelo a origem vem do tipo
+    do estabelecimento (bomba/vibra/manual).
+14. **18 abastecimentos sem centro de custo** e 97 com valor diferente de litros × preço (diferença > R$ 0,05; a maioria
+    é preço do cais com mais casas do que o mostrado).
+15. **Código da transação não é único** e a linha da Base_copia muda (já tratado no espelho com a `chave`).
+
+### 3.5 Bomba interna
+16. **Duas fontes de compras.** A planilha (Base > Bomba interna) vai de 08/2023 a 06/2026; o site (Movimentações) começa em
+    10/2026 e só tem Jequié e os cais. **De jul a out/2026 não há compra registrada em lugar nenhum**, e as bombas de Belém,
+    Salvador, São Paulo, GV (Raja e Kemigas) e Ilhéus não estão cadastradas como base no site (entram no modelo como bases
+    inativas, id ≥ 1001).
+17. Nomes das bombas com grafia diferente na planilha (Belem/Belém, "Ihéus"), **524 compras sem fornecedor** e 4 linhas que
+    são ajuste (estoque inicial, vazamento -88 L; no modelo `tipo = ajuste`). A bomba de Raja Valadares não aparece em
+    nenhum abastecimento como posto interno (só a da Kemigas, "KEMIGAS LTDA").
+18. Fornecedores repetidos por praça e produto na aba Fornecedores (VIBRA 3 vezes, REDUX 3 vezes): no modelo, um fornecedor
+    e os atendimentos dele.
+
+### 3.6 Outros
+19. **Transações negadas com data em dois formatos** ("01/09/2024" e "2024-09-01 00:00:00") e números em texto.
+20. **ANP com colunas calculadas da nossa base** (despesa real, litros, tipo ticket) na mesma tabela da ANP: no modelo fica só
+    o preço da ANP (o nosso gasto sai de `abastecimentos`).
+21. **Negociações sem status** (coluna STATUS ATUALIZACAO vazia em todas) e "IDENTIFICAÇÃO" como plataforma (53 linhas).
+22. **4 metas de placa sem veículo** (PKB9742, PPB6233, PVS3551, QXD7057: placas antigas de veículos que viraram Mercosul).
+23. **Orçamento e contratos por praça/cidade**, não pela unidade (Maceió, Olinda, João Pessoa não são unidades).
+24. **Filas do D1 (`alteracoes_*`) existem só para gravar nas planilhas**: quando o site gravar no banco, deixam de ser necessárias.

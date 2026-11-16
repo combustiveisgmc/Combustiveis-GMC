@@ -280,7 +280,8 @@ def conectar():
     import psycopg
     with open(CREDENCIAIS, encoding='utf-8-sig') as f:
         c = json.load(f)
-    return psycopg.connect(c['db'], connect_timeout=20)
+    # keepalive: se a rede cair no meio, a conexão dá erro em vez de travar o processo do vigia para sempre (16/11/2026)
+    return psycopg.connect(c['db'], connect_timeout=20, keepalives=1, keepalives_idle=30, keepalives_interval=10, keepalives_count=5)
 
 
 def ler_estado():

@@ -9,6 +9,14 @@
     "criar-usuario": "node scripts/criar-usuario.mjs",
     "importar-base": "py scripts/importar_base.py",
     "atualizar-dados": "node scripts/sincronizar.mjs --forcar",
-    "publicar": "npx --yes wrangler@4 pages deploy public --project-name gestao-combustivel --branch main --commit-dirty=true"
+    "publicar": "npx --yes wrangler@4 pages deploy public --project-name gestao-combustivel --branch main --commit-dirty=true",
+    "lint": "npx --yes eslint@8 --no-eslintrc -c .eslintrc.json --ext .js,.mjs public functions lib scripts tests && py -m compileall -q scripts tests/py",
+    "test": "npm run test:js && npm run test:py",
+    "test:js": "node --test \"tests/js/*.test.mjs\"",
+    "test:py": "py -m unittest discover -s tests/py -v",
+    "verificar": "npm run lint && npm test",
+    "banco:esquema": "py scripts/gestao_carga.py esquema",
+    "banco:carga": "py scripts/gestao_carga.py carregar",
+    "banco:conferir": "py scripts/gestao_carga.py conferir"
   }
 }
