@@ -790,9 +790,9 @@ function rodarSupabase(s, rotulo) {
   p.on('error', () => { clearTimeout(fim); s.rodando = false; });
 }
 // Modelo relacional `gestao` (17/11/2026): depois que o espelho (planilhas ou D1) muda, o vigia recarrega o modelo
-// (scripts/gestao_carga.py carregar, ~4 min) em segundo plano, um de cada vez e no máximo a cada 10 min. É de onde o site
+// (scripts/gestao_carga.py carregar, ~4 min) em segundo plano, um de cada vez e no máximo a cada 5 min (usuário, 17/11). É de onde o site
 // passa a ler (cadastro de placas primeiro); sem ele o site continua com a lista publicada pela planilha.
-const MODELO = { pendente: true, rodando: false, proximo: 0, intervalo: 10 * 60 * 1000, ultimoErro: '' };
+const MODELO = { pendente: true, rodando: false, proximo: 0, intervalo: 5 * 60 * 1000, ultimoErro: '' };
 function rodarModelo() {
   if (!MODELO.pendente || MODELO.rodando || Date.now() < MODELO.proximo) return;
   if (SUPABASE.planilhas.rodando || SUPABASE.d1.rodando) return;   // espera o espelho terminar de gravar

@@ -6,6 +6,10 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 17/11/2026
 
+- **Segunda rodada das decisões:** 18 veículos do ADM cadastrados pela exportação da Ticket (sem meta/tanque); desperdício só para
+  VAZAMENTO, LAVAGEM, LIMPEZA NO TANQUE e PRIMEIRO ABASTECIMENTO (FAZENDA e CARRO ALUGADO voltam a ser abastecimento); NFs do rateio só
+  das bases ativas (590; sem RMG, Kemigás e Vipgás); pendência de posto sem coordenada só dos abastecidos em 60 dias (19); motorista com
+  nome cortado no cadastro casa com o nome completo; vigia recarrega o modelo de 5 em 5 minutos.
 - **Respostas sobre o que não estava alinhado** (docs/BANCO.md 3.7): senhas dos cartões continuam na planilha; RAJA SÃO PAULO = RAJA LOG
   GRANEL (modelo + 2 motoristas na planilha); 258 placas sem situação viraram ATIVA e 21 "VENDA" viraram situação **VENDIDO** sem
   unidade/categoria (nova opção no cadastro, fora dos cartões e das listas de placas); lançamentos sem placa viram desperdício no modelo;

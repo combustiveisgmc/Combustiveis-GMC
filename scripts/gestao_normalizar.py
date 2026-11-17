@@ -155,3 +155,18 @@ def cidade_uf(texto):
     k = chave(texto)
     m = re.match(r'^(.*?)\s*[-/]\s*([A-Z]{2})$', k)
     return (m.group(1), m.group(2)) if m else (k or None, None)
+
+
+# ---------------- lançamentos sem placa ----------------
+# o que vem no campo da placa e é desperdício de combustível (usuário, 17/11/2026). FAZENDA, CARRO ALUGADO e outros textos
+# NÃO são desperdício: continuam como abastecimento (sem veículo), com o texto na descrição
+DESPERDICIOS = ('VAZAMENTO', 'LAVAGEM', 'LIMPEZA NO TANQUE', 'LIMPEZA DO TANQUE', 'PRIMEIRO ABASTECIMENTO DO TANQUE')
+
+
+def tipo_lancamento(texto_placa):
+    """('abastecimento' | 'desperdicio', descrição ou None) pelo que veio no campo da placa."""
+    p, ok = placa(texto_placa)
+    if ok:
+        return 'abastecimento', None
+    k = chave(texto_placa)
+    return ('desperdicio' if any(k.startswith(d) for d in DESPERDICIOS) else 'abastecimento'), (k or None)

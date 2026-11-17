@@ -309,7 +309,7 @@ class Carga:
                 veic[pl] = [pl, None, None, u.get('modelo_veiculo'), None, U(u['informacao_adicional_3']), 'ativo', None, None, None, None,
                             u.get('familia_veiculo'), u.get('tipo_frota'), False, None]
             elif not ok:
-                self.pend['lançamentos sem placa (desperdício)'].append(b['placa'])
+                self.pend['lançamentos sem placa'].append(b['placa'])
         self.inserir('veiculos', ['placa', 'categoria', 'marca', 'modelo', 'ano_fabricacao', 'unidade_id', 'situacao', 'meta_km_l',
                                   'ponto_critico_km_l', 'capacidade_tanque_l', 'autonomia_km', 'familia', 'tipo_frota', 'cadastrado', 'linha_planilha'],
                      list(veic.values()))
@@ -368,7 +368,9 @@ class Carga:
                 c2 = [v for kk, v in por_nome.items() if kk.startswith(k)]
                 if len(c2) == 1:
                     return c2[0]
-            return None
+            # e o cadastro às vezes tem o nome cortado (MANOEL VALDINEI MACHADO DA SIL x ... DA SILVA)
+            c2 = [v for kk, v in por_nome.items() if len(kk) >= 25 and k.startswith(kk)]
+            return c2[0] if len(c2) == 1 else None
         historicos = {}
         for b in base:
             if b['nome_motorista'] and not nome_cadastro(b['nome_motorista']):
@@ -422,8 +424,12 @@ class Carga:
         for i, n, cid, u in c.fetchall():
             pid[(n, cid, u)] = i
             pid_nome[n].append((i, cid, u))
-        self.pend['postos externos sem coordenada'] = sorted(f'{k[0]} ({k[1]}/{k[2]})' for k, p in postos.items()
-                                                             if p.get('lat') is None and p['tipo'] == 'externo')
+        # só os que abasteceram nos últimos 60 dias importam para as análises (usuário, 17/11/2026)
+        ult_dt = max((b['data_transacao'] for b in base), default=None)
+        recentes = {k_posto(b['nome_estabelecimento'], b['cidade'], b['uf']) for b in base
+                    if b['nome_estabelecimento'] and ult_dt and (ult_dt - b['data_transacao']).days <= 60}
+        self.pend['postos externos sem coordenada (abastecidos nos últimos 60 dias)'] = sorted(
+            f'{k[0]} ({k[1]}/{k[2]})' for k, p in postos.items() if p.get('lat') is None and p['tipo'] == 'externo' and k in recentes)
         repetidos = [n for n, lst in pid_nome.items() if len({(x[1], x[2]) for x in lst}) > 1]
         self.pend['postos com o mesmo nome em cidades diferentes'] = sorted(repetidos)
 
@@ -592,7 +598,7 @@ class Carga:
                 b['litros'], b['vl_litro'], b['valor_emissao'], b['hodometro_ou_horimetro'], b['km_rodados_ou_horas_trabalhadas'],
                 b['km_litro_ou_litros_hora'], b['servico'], b['forma_transacao'], b['numero_cartao'], b['responsavel'],
                 {k: b[k] for k in extras if b.get(k) not in (None, '')}, b['linha'],
-                'abastecimento' if N.placa(b['placa'])[1] else 'desperdicio', None if N.placa(b['placa'])[1] else (b['placa'] or '').strip().upper()])
+                *N.tipo_lancamento(b['placa'])])
         self.inserir('abastecimentos', ['chave', 'emissora_id', 'codigo_transacao', 'data_hora', 'placa', 'veiculo_id', 'motorista_nome',
                                         'motorista_id', 'matricula', 'unidade_id', 'empresa_id', 'codigo_cliente', 'posto_id', 'base_id',
                                         'combustivel_id', 'litros', 'preco_litro', 'valor', 'hodometro', 'km_rodados', 'km_por_litro',

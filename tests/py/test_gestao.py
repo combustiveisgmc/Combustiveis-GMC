@@ -81,6 +81,16 @@ class Normalizar(unittest.TestCase):
         self.assertFalse(N.sim_nao('NÃO'))
         self.assertIsNone(N.sim_nao(''))
 
+    def test_desperdicio(self):
+        self.assertEqual(N.tipo_lancamento('ABC1D23'), ('abastecimento', None))
+        self.assertEqual(N.tipo_lancamento('VAZAMENTO'), ('desperdicio', 'VAZAMENTO'))
+        self.assertEqual(N.tipo_lancamento('Lavagem'), ('desperdicio', 'LAVAGEM'))
+        self.assertEqual(N.tipo_lancamento('LIMPEZA NO TANQUE')[0], 'desperdicio')
+        self.assertEqual(N.tipo_lancamento('PRIMEIRO ABASTECIMENTO DO TANQUE DE SP')[0], 'desperdicio')
+        # FAZENDA e CARRO ALUGADO não são desperdício (usuário, 17/11/2026)
+        self.assertEqual(N.tipo_lancamento('FAZENDA'), ('abastecimento', 'FAZENDA'))
+        self.assertEqual(N.tipo_lancamento('CARRO ALUGADO'), ('abastecimento', 'CARRO ALUGADO'))
+
     def test_uf_e_cidade(self):
         self.assertEqual(N.uf('MARANHAO'), 'MA')
         self.assertEqual(N.uf('Espírito Santo'), 'ES')

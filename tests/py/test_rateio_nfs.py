@@ -63,6 +63,9 @@ class Rateio(unittest.TestCase):
         self.assertIsNone(n['200']['emissao'])
 
     def test_planilhas_mapeadas(self):
+        bases = {b for b, _ in R.PLANILHAS.values()}
+        self.assertTrue({'RAJA VALADARES', 'KEMIGAS GV', 'ILHEUS'}.isdisjoint(bases))   # fora (usuário, 17/11/2026)
+        self.assertTrue({'JEQUIE', 'SALVADOR', 'BELEM', 'SAO PAULO', 'CABET', 'CAAPE', 'CALAN', 'CAANA'} <= bases)
         for rel, (base, comb) in R.PLANILHAS.items():
             self.assertIn(comb, ('DIESEL S10', 'ARLA 32'), rel)
             self.assertTrue(base, rel)

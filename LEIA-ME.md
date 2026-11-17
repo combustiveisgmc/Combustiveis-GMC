@@ -74,7 +74,7 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
   `npm run banco:carga` recarrega o modelo a partir do espelho (lê tudo antes e grava numa transação só; a leitura grande
   dentro de transação longa derruba a conexão do pooler); `npm run banco:conferir` mostra totais e pendências da última carga
   (`gestao.carga`).
-- **Desde 17/11/2026:** o vigia recarrega o modelo sozinho depois que o espelho muda (no máximo a cada 10 min; log "Modelo do banco
+- **Desde 17/11/2026:** o vigia recarrega o modelo sozinho depois que o espelho muda (de 5 em 5 min; log "Modelo do banco
   recarregado"). O **cadastro de placas do site lê do banco** e grava nele na hora (além da fila para a planilha), pelas funções
   `public.gestao_placas()` e `public.gestao_salvar_placa()`; as Functions usam os segredos `SUPABASE_URL` e `SUPABASE_KEY` do Pages
   (`lib/supabase.js`). Banco fora do ar: o site usa a lista publicada da planilha. Situação de placa nova: **VENDIDO** (sai dos cartões).

@@ -23,8 +23,8 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PASTA_PADRAO = os.path.join(os.path.dirname(os.path.dirname(RAIZ)), 'RATEIOS BOMBA INTERNA')
 CACHE = os.path.join(RAIZ, '.dados', 'rateio-nfs.json')
 
-# planilha -> (apelido da base no modelo, combustível). RMG = Raja Valadares (bomba "KEMIGAS LTDA", rateio da Raja);
-# KGV = Kemigás GV (mesma bomba, rateio da Kemigás); VIPGAS = Ilhéus
+# planilha -> (apelido da base no modelo, combustível). Só as bases ativas (usuário, 17/11/2026): as cadastradas no site
+# (Jequié e os cais) e São Paulo, Salvador e Belém. Ficam de fora RMG (Raja Valadares), KGV (Kemigás GV) e VIPGAS (Ilhéus).
 PLANILHAS = {
     'RBA/Rateio Bomba Interna Jequié.xlsx': ('JEQUIE', 'DIESEL S10'),
     'RBA/Jequie - Rateio Arla.xlsx': ('JEQUIE', 'ARLA 32'),
@@ -34,10 +34,6 @@ PLANILHAS = {
     'RBE/Belem - Rateio Arla.xlsx': ('BELEM', 'ARLA 32'),
     'RSP/Rateio Combustível RSP.xlsm': ('SAO PAULO', 'DIESEL S10'),
     'RSP/São Paulo - Rateio Arla.xlsx': ('SAO PAULO', 'ARLA 32'),
-    'KGV/Kemigás - Rateio Bomba Interna rev.0.1.xlsx': ('KEMIGAS GV', 'DIESEL S10'),
-    'KGV/Kemigás - Rateio Arla.xlsx': ('KEMIGAS GV', 'ARLA 32'),
-    'VIPGAS/Vipgás - Rateio Bomba Interna rev.0.1.xlsx': ('ILHEUS', 'DIESEL S10'),
-    'RMG/Rateio Combustível RMG.xlsm': ('RAJA VALADARES', 'DIESEL S10'),
     'CAIS BETIM/CAIS BETIM - Rateio Diesel.xlsm': ('CABET', 'DIESEL S10'),
     'CAIS SUAPE/CAIS SUAPE - Rateio Diesel.xlsm': ('CAAPE', 'DIESEL S10'),
     'CAIS UBERLANDIA/CAIS UBERLANDIA - Rateio Diesel.xlsm': ('CALAN', 'DIESEL S10'),
