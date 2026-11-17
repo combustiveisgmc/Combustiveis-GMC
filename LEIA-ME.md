@@ -83,6 +83,14 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Regras de tradução (unidade, combustível, placa, origem): `scripts/gestao_normalizar.py`. Unidade nova ou grafia nova: acrescentar
   em `UNIDADE_CURTA` e no teste. O modelo **não guarda senhas** (a aba Motoristas tem senhas dos portais: ficam de fora).
 
+## Preço das bombas pelo Rateio das NFs (regra de 17/11/2026)
+
+- O vigia só troca o VL/LITRO e o VALOR EMISSAO de um abastecimento de bomba interna pelo preço da nota quando **todas as notas dele
+  estão fechadas** (litros todos rateados); até lá fica o preço do cartão. Depois de aplicado ("Rateio das NFs (nota fechada)") o preço
+  fica travado, e abastecimento corrigido à mão no Editar abastecimentos nunca é mexido pelo automático.
+- O mesmo abastecimento da API e da Base_copia é reconhecido pela placa com até 10 min e 0,5 L de diferença; o pedido leva o tanque
+  (diesel/arla) e o vigia só grava na linha desse combustível.
+
 ## Lint e testes (desde 16/11/2026)
 
 - Toda alteração: `npm run verificar` = lint (`npm run lint`: ESLint com `.eslintrc.json` + compilação dos scripts Python) e

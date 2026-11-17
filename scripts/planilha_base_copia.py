@@ -479,6 +479,29 @@ def sem_calcchain(entradas, trocas):
     return [(i, d) for i, d in entradas if i.filename != 'xl/calcChain.xml']
 
 
+def tanque_da_linha(combustivel):
+    """TIPO COMBUSTIVEL (coluna N) -> 'arla' / 'diesel' / None (mesma regra do vigia: scripts/bomba_rateio.mjs tanqueDe)."""
+    t = str(combustivel or '').upper()
+    return 'arla' if 'ARLA' in t else 'diesel' if t.strip().startswith('DIESEL') else None
+
+
+def escolher_linha(it, achadas, comb_da_linha, data_da_linha, por_data, kd):
+    """Linha da Base_copia de um pedido de correção. Com tanque no pedido (Rateio das NFs, desde 17/11/2026) só vale linha
+    daquele combustível: o diesel e o Arla do mesmo caminhão são lançados no mesmo segundo e a linha anotada no pedido pode
+    ter virado a do outro combustível (lote ou exclusão no meio da planilha)."""
+    tq = it.get('tanque')
+    ok = (lambda r: tanque_da_linha(comb_da_linha.get(r)) == tq) if tq in ('diesel', 'arla') else (lambda r: True)
+    achadas = [r for r in achadas if ok(r)]
+    r = it['linha'] if it['linha'] in achadas else (achadas[0] if len(achadas) == 1 else None)
+    if r is None and kd is not None and data_da_linha.get(it['linha']) == kd and ok(it['linha']):
+        r = it['linha']   # placa da linha já trocada por uma correção anterior: mesma linha e mesma data
+    if r is None and kd is not None:
+        mesmas = [x for x in por_data.get(kd, []) if ok(x)]
+        if len(mesmas) == 1:
+            r = mesmas[0]   # placa trocada e linha mudou de lugar (exclusão acima): único com a mesma data
+    return r
+
+
 def editar(arquivo_json):
     """Edições da página Operacional > Editar abastecimentos.
     edicoes.json = [{"id": 1, "itens": [{"linha": 60100, "placa": "ABC1D23", "data": 46299.93, "acao": "editar",
@@ -511,13 +534,14 @@ def editar(arquivo_json):
     ini_dados, fim_dados = xml.find(b'<sheetData>'), xml.find(b'</sheetData>')
     # placa + data -> linhas (para achar o abastecimento se a linha mudou de lugar); data de cada linha; último
     # abastecimento de cada placa (G a J) e de cada motorista (K), para completar a troca de placa/motorista
-    por_chave, data_da_linha, por_data, ult_placa, ult_mot = {}, {}, {}, {}, {}
-    quer = {b'E', b'F'} | {c.encode() for c in VEICULO} | {MATRICULA.encode(), MOTORISTA.encode()}
+    por_chave, data_da_linha, por_data, ult_placa, ult_mot, comb_da_linha = {}, {}, {}, {}, {}, {}
+    quer = {b'E', b'F', b'N'} | {c.encode() for c in VEICULO} | {MATRICULA.encode(), MOTORISTA.encode()}
     for m in re.finditer(rb'<row r="(\d+)"[^>]*?(?:/>|>(.*?)</row>)', xml[ini_dados:fim_dados], re.S):
         cel = {c.group(1).decode(): pc.valor_celula(c.group(3), c.group(4), textos)
                for c in pc.RE_CELULA.finditer(m.group(2) or b'') if c.group(1) in quer}
         r = int(m.group(1))
         k = chave_abastecimento(cel.get('F'), cel.get('E'), None)[:2]
+        comb_da_linha[r] = cel.get('N')
         por_chave.setdefault(k, []).append(r)
         data_da_linha[r] = k[1]
         if k[1] is not None:
@@ -546,12 +570,8 @@ def editar(arquivo_json):
                 sem_acao = True
                 continue
             achadas = por_chave.get(chave_abastecimento(it['placa'], it['data'], None)[:2], [])
-            r = it['linha'] if it['linha'] in achadas else (achadas[0] if len(achadas) == 1 else None)
             kd = chave_abastecimento(None, it['data'], None)[1]
-            if r is None and kd is not None and data_da_linha.get(it['linha']) == kd:
-                r = it['linha']   # placa da linha já trocada por uma correção anterior: mesma linha e mesma data
-            if r is None and kd is not None and len(por_data.get(kd, [])) == 1:
-                r = por_data[kd][0]   # placa trocada e linha mudou de lugar (exclusão acima): único com a mesma data
+            r = escolher_linha(it, achadas, comb_da_linha, data_da_linha, por_data, kd)
             if r is None:
                 erros.append(f'{it["placa"]} (linha {it["linha"]}): não encontrei o abastecimento na planilha.')
                 continue

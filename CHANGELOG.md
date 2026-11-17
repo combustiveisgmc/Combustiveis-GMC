@@ -6,6 +6,7 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 17/11/2026
 
+- **Preço das bombas internas pelo Rateio das NFs: só com a nota fechada e uma vez só** (pedido do usuário; o preço ia e voltava entre duas notas, ex.: R$ 6,72 x R$ 6,87 em Jequié, 294 abastecimentos corrigidos mais de uma vez). Causas: o mesmo abastecimento da API e da Base contava em dobro quando a hora caía em outro minuto (empurrava a fila das notas), a correção era refeita a cada ciclo e achava a linha só por placa + hora (diesel e Arla do mesmo caminhão no mesmo segundo). Agora: preço só quando todas as notas do abastecimento fecharam; travado depois ("Rateio das NFs (nota fechada)") e o corrigido à mão no Editar abastecimentos nunca é mexido; API x Base casados por placa, ±10 min e ±0,5 L; o pedido leva o tanque e o vigia só grava na linha do combustível certo (migrations/0026, coluna alteracoes_base_copia.tanque). Arquivos: scripts/bomba_rateio.mjs, scripts/planilha_base_copia.py, functions/api/sync/bomba-rateio/{precos,estado}.js, functions/api/sync/base-copia/pendentes.js. Testes: tests/js/rateio_preco.test.mjs, tests/py/test_base_copia_linha.py.
 - **Segunda rodada das decisões:** 18 veículos do ADM cadastrados pela exportação da Ticket (sem meta/tanque); desperdício só para
   VAZAMENTO, LAVAGEM, LIMPEZA NO TANQUE e PRIMEIRO ABASTECIMENTO (FAZENDA e CARRO ALUGADO voltam a ser abastecimento); NFs do rateio só
   das bases ativas (590; sem RMG, Kemigás e Vipgás); pendência de posto sem coordenada só dos abastecidos em 60 dias (19); motorista com

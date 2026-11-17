@@ -541,7 +541,7 @@ async function processarEdicaoBase() {
   const { pendentes } = await api('GET', '/api/sync/base-copia/pendentes');
   if (pendentes && pendentes.length) {
     const tmp = path.join(PROJETO, '.dados', 'base-copia-edicoes.json');
-    fs.writeFileSync(tmp, JSON.stringify(pendentes.map((p) => ({ id: p.id, itens: [{ linha: p.linha, placa: p.placa, data: p.data, acao: p.acao || 'editar', celulas: p.celulas }] }))));
+    fs.writeFileSync(tmp, JSON.stringify(pendentes.map((p) => ({ id: p.id, itens: [{ linha: p.linha, placa: p.placa, data: p.data, acao: p.acao || 'editar', celulas: p.celulas, tanque: p.tanque || null }] }))));
     let r;
     try { r = JSON.parse(rodar('py', ['scripts/planilha_base_copia.py', 'editar', `"${tmp}"`]).trim().split(/\r?\n/).pop()); }
     finally { try { fs.unlinkSync(tmp); } catch {} }

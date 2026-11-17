@@ -65,6 +65,8 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Cartões do Estoque alinhados (16/11/2026).
 - [ ] Lançar as próximas NFs de Betim, Suape e Uberlândia (faltam ~2 notas de Uberlândia desde 31/10).
 
+- [x] Preço do Rateio das NFs só com a nota fechada, travado depois, sem contar API e Base em dobro e no combustível certo (17/11).
+
 ## 4. Notificações
 - [x] Avisos no canto da tela (estoque baixo, comunicado, preço alto, falta cartão, base desatualizada).
 - [x] Estoque baixo com várias bases (16/11/2026).
