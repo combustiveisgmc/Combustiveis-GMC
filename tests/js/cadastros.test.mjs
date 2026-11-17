@@ -1,7 +1,7 @@
 // Cadastros e cartões (lib/cadastros.js, lib/cartoes.js, lib/permissoes.js): validação usada pelas APIs. Dados fictícios.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizarChave, CHAVE } from '../../lib/cadastros.js';
+import { normalizarChave, CHAVE, CAMPOS, validar } from '../../lib/cadastros.js';
 import { normPlaca, placaValida, situacao, SITUACOES } from '../../lib/cartoes.js';
 import { pode, TODAS } from '../../lib/permissoes.js';
 
@@ -32,4 +32,12 @@ test('permissões: admin pode tudo; gestor só o que tem (lista em JSON, como no
   assert.equal(pode(admin, TODAS[0]), true);
   assert.equal(pode(gestor, 'roteirizador'), true);
   assert.equal(pode(gestor, 'acessos'), false);
+});
+
+test('placa vendida: situação VENDIDO (17/11/2026) e sem unidade/categoria na edição', () => {
+  assert.deepEqual(CAMPOS.placas.find((c) => c.id === 'situacao').opcoes, ['ATIVA', 'DESABILITADA', 'VENDIDO']);
+  const v = validar('placas', 'editar', { situacao: 'vendido' });
+  assert.deepEqual(v.erros, []);
+  assert.equal(v.dados.situacao, 'VENDIDO');
+  assert.ok(validar('placas', 'editar', { situacao: 'SUMIDA' }).erros.length);
 });

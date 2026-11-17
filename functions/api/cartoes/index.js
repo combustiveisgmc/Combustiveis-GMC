@@ -79,7 +79,7 @@ export async function onRequestPost({ request, env }) {
     const merc = (v) => { const p = normPlaca(v); return /^[A-Z]{3}\d{4}$/.test(p) ? p.slice(0, 4) + 'ABCDEFGHIJ'[Number(p[4])] + p.slice(5) : p; };
     const p = cad && Array.isArray(cad.placas) ? cad.placas.find((x) => merc(x.placa) === merc(placa)) : null;
     if (p) {
-      const ativa = (p.situacao || 'ATIVA') !== 'DESABILITADA', comMotor = CATEGORIAS_COM_CARTAO.includes(String(p.categoria || '').toUpperCase());
+      const ativa = !['DESABILITADA', 'VENDIDO'].includes(p.situacao || 'ATIVA'), comMotor = CATEGORIAS_COM_CARTAO.includes(String(p.categoria || '').toUpperCase());
       return json({ erro: ativa && comMotor
         ? 'A placa ' + placa + ' já está no cadastro de placas e entra sozinha no controle dos cartões em instantes.'
         : 'A placa ' + placa + ' está no cadastro como ' + (ativa ? (p.categoria || 'sem categoria') : 'desabilitada') +

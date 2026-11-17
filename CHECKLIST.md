@@ -25,22 +25,25 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Carga do espelho para o modelo (`scripts/gestao_carga.py`) numa transação, com conferência dos totais e lista de pendências.
 - [x] Regras de normalização testadas (`scripts/gestao_normalizar.py`, `tests/py/test_gestao.py`).
 - [x] Relatório do que não está alinhado (`docs/BANCO.md` > Desalinhamentos).
-- [ ] Vigia rodar a carga do modelo depois de cada sincronização do espelho (hoje é à mão: `npm run banco:carga`).
+- [x] Vigia rodar a carga do modelo depois de cada sincronização do espelho (17/11/2026; no máximo a cada 10 min).
 
 ### 1.2 Corrigir os dados desalinhados (ver docs/BANCO.md)
-- [ ] Tirar as senhas dos portais dos cartões da planilha de motoristas (e do espelho `public.motoristas`).
-- [ ] Unificar os nomes das unidades nas planilhas (ou passar a usar só o cadastro `gestao.unidades`).
-- [ ] Cadastrar as placas que só aparecem nos abastecimentos (ou marcar como terceiros/vendidas).
-- [ ] Cadastrar (ou marcar como desligados) os motoristas que só aparecem nos abastecimentos.
-- [ ] Corrigir as coordenadas sem vírgula da LOCALIZAÇÃO DOS POSTOS e localizar os postos sem coordenada.
-- [ ] Preencher a SITUACAO das placas (vazia em quase todas) e tirar "VENDA" da unidade/categoria.
+- [x] Senhas dos portais dos cartões: decisão do usuário (17/11) = manter na planilha (cartão físico é necessário); o modelo não guarda.
+- [x] Unidades padronizadas no modelo (apelidos); RAJA SÃO PAULO = RAJA LOG GRANEL (modelo + 2 motoristas na planilha, 17/11).
+- [ ] Placas dos últimos 60 dias fora do cadastro: lista enviada ao usuário (17/11); aguardando a decisão dele de cada uma.
+- [ ] Motoristas dos últimos 60 dias fora do cadastro: lista enviada (17/11); os do ADM não entram no cadastro (usuário).
+- [x] Coordenadas "sem vírgula" = formato da planilha (não erro); 187 postos localizados pelo endereço (17/11).
+- [ ] 269 postos sem coordenada sem resultado confiável: cadastro manual no Mapa de calor.
+- [x] Situação das placas: 258 ATIVA e 21 VENDIDO (sem unidade/categoria), 17/11. Usuário vai revisar ativas x vendidas.
 - [ ] Corrigir as placas divergentes entre Base, Ticket, TruckPag e Veloe (aba Placas MERCOSUL).
-- [ ] Lançamentos que não são abastecimento com placa (VAZAMENTO, LAVAGEM, LIMPEZA NO TANQUE...) virarem ajuste de estoque.
-- [ ] Compras das bombas de Belém, Salvador, São Paulo, GV e Ilhéus de jul a out/2026 (a planilha para em jun/2026 e o site só tem Jequié e os cais).
+- [x] Lançamentos sem placa (VAZAMENTO, LAVAGEM...) = desperdício (`abastecimentos.tipo`), 17/11.
+- [x] Compras das bombas pelas planilhas de rateio no modelo: 918 NFs novas (17/11).
+- [ ] Bases de Belém, Salvador, São Paulo, GV e Ilhéus no site (Bomba interna) para as compras aparecerem em Movimentações.
 
 ### 1.3 Trocar as fontes do site e do vigia (próximas fases)
 - [ ] Site ler os dashboards do modelo (`gestao.abastecimentos` e cadastros) em vez do JSON gerado das planilhas.
-- [ ] Cadastros (placas, motoristas, cartões, postos) gravarem direto no modelo, sem fila para a planilha.
+- [x] Cadastro de placas lido do banco e gravado nele na hora (a fila para a planilha continua), 17/11.
+- [ ] Motoristas, cartões e postos no banco; depois tirar a fila para a planilha.
 - [ ] Editar abastecimentos, Consolidador e lotes D-1 gravarem direto em `gestao.abastecimentos`.
 - [ ] APIs dos cartões (Ticket/TruckPag) gravarem direto em `gestao.abastecimentos`.
 - [ ] Negociações de postos e preços das bombas gravarem direto no modelo.

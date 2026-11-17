@@ -140,7 +140,8 @@ export async function montar(ctx, tipo) {
   // Alteração gravada na planilha mas que a lista publicada ainda não traz: o vigia marca "aplicada" e só depois
   // gera e publica a lista de novo (e o KV leva até ~1 min para mostrar a nova). Sem isso o motorista recém-adicionado
   // sumia da tabela nesse intervalo e, como não havia mais pendência, a tela parava de conferir e ele não voltava.
-  const semListaNova = (a) => a.estado === 'aplicada' && a.aplicada_em &&
+  // lista vinda do banco (placas, desde 17/11/2026): a alteração é gravada nele na hora, não há lista nova para esperar
+  const semListaNova = (a) => info.fonte !== 'banco' && a.estado === 'aplicada' && a.aplicada_em &&
     (!info.atualizadoEm || Date.parse(info.atualizadoEm) < Date.parse(a.aplicada_em));
   const naSobreposicao = (a) => emAberto(a) || semListaNova(a);
   // linhas da planilha com as alterações ainda não publicadas por cima (aparecem com o selo)
@@ -187,8 +188,8 @@ export async function montar(ctx, tipo) {
       ['Unidades', fmt.int(new Set(todas.map((r) => r.unidade).filter(Boolean)).size)],
       tipo === 'placas' ? ['Sem meta', fmt.int(todas.filter((r) => !r.meta).length)] : ['Já entraram na área', fmt.int(todas.filter((r) => r._ultimo).length) + ' de ' + fmt.int(todas.length)],
       ...(ehMot ? [['Entraram nos últimos 30 dias', fmt.int(todas.filter((r) => r._ultimo && Date.now() - Date.parse(r._ultimo) < 30 * 864e5).length)]] : []),
-      tipo === 'placas' ? ['Desabilitadas', fmt.int(todas.filter((r) => r.situacao === 'DESABILITADA').length)] : ['Sem senha Ticket', fmt.int(todas.filter((r) => !r.senhaTicket).length)],
-      ['Lista lida da planilha em', at ? at.toLocaleDateString('pt-BR') + ' ' + at.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'],
+      tipo === 'placas' ? ['Desabilitadas / vendidas', fmt.int(todas.filter((r) => r.situacao === 'DESABILITADA').length) + ' / ' + fmt.int(todas.filter((r) => r.situacao === 'VENDIDO').length)] : ['Sem senha Ticket', fmt.int(todas.filter((r) => !r.senhaTicket).length)],
+      [info.fonte === 'banco' ? 'Lista do banco de dados, atualizada em' : 'Lista lida da planilha em', at ? at.toLocaleDateString('pt-BR') + ' ' + at.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—'],
     ];
     $('cd-resumo').innerHTML = resumo.map(([d, v]) => '<div><dt>' + esc(d) + '</dt><dd><span class="num">' + esc(v) + '</span></dd></div>').join('');
 
@@ -234,7 +235,7 @@ export async function montar(ctx, tipo) {
         const p = r._pendente;
         const selo = p ? '<span class="selo-pendente" title="' + esc(p.estado === 'aplicada' ? 'Gravada na planilha; a lista é atualizada em instantes' : NOME_ESTADO[p.estado]) + '">' +
           (p.estado === 'aguardando' ? 'planilha aberta' : p.estado === 'aplicada' ? 'gravada, atualizando lista' : 'aguardando gravação') + '</span>' : '';
-        const apagada = tipo === 'placas' && r.situacao === 'DESABILITADA';
+        const apagada = tipo === 'placas' && (r.situacao === 'DESABILITADA' || r.situacao === 'VENDIDO');
         return '<tr' + (apagada ? ' class="linha-apagada"' : '') + '>' + colunas.map((col, j) => '<td' + (numerico(col) ? ' class="n"' : col.id === 'nome' ? ' class="trunc"' : col.id === 'usuario' ? ' class="num"' : '') + '>' +
           (j === 0 ? '<strong>' + celula(col, r[col.id], r) + '</strong>' + selo : celula(col, r[col.id], r)) + '</td>').join('') +
           (editar ? '<td class="acoes-linha">' + (r._novo ? '<span class="sem-dado">aguardando</span>'

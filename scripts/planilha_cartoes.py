@@ -475,7 +475,7 @@ def placas_do_cadastro():
 
 
 def com_cartao(p):
-    return (p.get('situacao') or 'ATIVA') != 'DESABILITADA' and chave(p.get('categoria')) in CATEGORIAS_COM_CARTAO
+    return (p.get('situacao') or 'ATIVA') not in ('DESABILITADA', 'VENDIDO') and chave(p.get('categoria')) in CATEGORIAS_COM_CARTAO
 
 
 RE_LINHA = re.compile(rb'<row r="(\d+)"[^>]*?(?:/>|>.*?</row>)', re.S)

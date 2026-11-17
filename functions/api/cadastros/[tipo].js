@@ -2,17 +2,22 @@ import { usuarioDaSessao, json } from '../../../lib/auth.js';
 import { pode } from '../../../lib/permissoes.js';
 import { CAMPOS, CHAVE, TIPOS, NOME, PESSOAIS, normalizarChave, validar, validarPessoais } from '../../../lib/cadastros.js';
 import { chaveNome } from '../../../lib/motoristas.js';
+import { rpc } from '../../../lib/supabase.js';
 
 // GET  /api/cadastros/placas|motoristas   lista publicada pelo vigia + alterações do portal
 // POST /api/cadastros/placas|motoristas   {acao: 'editar'|'adicionar', chave, dados, pessoais?}  -> fica pendente até o vigia gravar
 // POST /api/cadastros/motoristas            {acao: 'redefinir-senha', usuario}  -> a senha da área do motorista volta a ser o usuário
 // Motoristas: CPF, nascimento e CNH ("pessoais") não vão para a planilha nem para a lista; só ficam na alteração até o
 // vigia mandar à Ticket/TruckPag (functions/api/sync/cadastros/cartoes.js apaga). Nunca voltam no GET.
-const emAberto = (e) => e === 'pendente' || e === 'aguardando';
-
-async function lista(env, tipo) {
+// Placas, desde 17/11/2026: a lista vem do banco (modelo `gestao`, lib/supabase.js) e cada alteração também é gravada nele na
+// hora; a fila para a planilha continua (outros sistemas ainda leem a planilha). Banco fora do ar: lista publicada da planilha.
+export async function lista(env, tipo) {
+  if (tipo === 'placas') {
+    const b = await rpc(env, 'gestao_placas');
+    if (b && Array.isArray(b.placas) && b.placas.length) return { itens: b.placas, atualizadoEm: b.atualizadoEm, fonte: 'banco' };
+  }
   const c = await env.DADOS.get('cadastros', 'json');
-  return { itens: c && Array.isArray(c[tipo]) ? c[tipo] : null, atualizadoEm: c ? c.atualizadoEm : null };
+  return { itens: c && Array.isArray(c[tipo]) ? c[tipo] : null, atualizadoEm: c ? c.atualizadoEm : null, fonte: 'planilha' };
 }
 
 export async function onRequestGet({ request, env, params }) {
@@ -21,7 +26,7 @@ export async function onRequestGet({ request, env, params }) {
   const u = await usuarioDaSessao(env.DB, request);
   if (!u) return json({ erro: 'Não conectado.' }, 401);
   if (!pode(u, 'cadastro-' + tipo)) return json({ erro: 'Seu acesso não inclui este cadastro.' }, 403);
-  const { itens, atualizadoEm } = await lista(env, tipo);
+  const { itens, atualizadoEm, fonte } = await lista(env, tipo);
   const { results } = await env.DB.prepare(
     `SELECT id, criado_em, usuario_nome, acao, chave, dados, antes, estado, mensagem, aplicada_em, linha
        FROM alteracoes_cadastros WHERE tipo = ? ORDER BY id DESC LIMIT 80`).bind(tipo).all();
@@ -41,7 +46,7 @@ export async function onRequestGet({ request, env, params }) {
       senhaPropria: r.senha_propria === 1, redefinidaEm: r.redefinida_em }]));
   }
   return json({
-    campos: CAMPOS[tipo], chave: CHAVE[tipo], lista: itens, atualizadoEm, sugestoes, ...(tipo === 'motoristas' ? { pessoais: PESSOAIS, acessos } : {}),
+    campos: CAMPOS[tipo], chave: CHAVE[tipo], lista: itens, atualizadoEm, fonte, sugestoes, ...(tipo === 'motoristas' ? { pessoais: PESSOAIS, acessos } : {}),
     podeEditar: pode(u, 'cadastro-' + tipo + '-editar'),
     alteracoes: results.map((r) => {
       // senhas dos cartões vão como estão (decisão do usuário em 10/11/2026: não são sensíveis; mascarar gerava erro nos cartões)
@@ -134,6 +139,9 @@ export async function onRequestPost({ request, env, params }) {
     `INSERT INTO alteracoes_cadastros (usuario_id, usuario_nome, tipo, acao, chave, dados, antes, sem_cartoes, pessoais)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, criado_em, estado`)
     .bind(u.id, u.nome, tipo, acao, String(chave), JSON.stringify(dados), JSON.stringify(antes), semCartoes, guardar ? JSON.stringify(guardar) : null).first();
+  // placas: grava também no banco na hora (a planilha continua recebendo pela fila). Falha no banco não desfaz a alteração:
+  // a próxima carga do modelo (vigia) traz da planilha
+  if (tipo === 'placas') await rpc(env, 'gestao_salvar_placa', { p_acao: acao, p_chave: String(chave), p_dados: dados });
   return json({ ok: true, aviso, alteracao: { ...r, acao, chave, dados, antes, usuario_nome: u.nome, tipo, nome: NOME[tipo] } }, 201);
 }
 

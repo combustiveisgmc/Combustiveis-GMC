@@ -23,6 +23,7 @@ from psycopg.types.json import Jsonb
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gestao_normalizar as N  # noqa: E402
+import rateio_nfs  # noqa: E402
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MIGRACOES = os.path.join(RAIZ, 'supabase', 'migrations')
@@ -36,7 +37,7 @@ BASES_HISTORICAS = {   # apelido na planilha -> (unidade, posto nos abasteciment
     'KEMIGAS GV': ('KEMIGAS GV', 'KEMIGAS LTDA', 'BOMBA KEMIGAS GV'),
     'RAJA VALADARES': ('RAJA GOVERNADOR VALADARES', None, 'BOMBA RAJA VALADARES'),
     'SALVADOR': ('RAJA SALVADOR', 'POSTO INT RAJA SALVADOR', 'BOMBA SALVADOR'),
-    'SAO PAULO': ('RAJA SAO PAULO', 'POSTO INT RAJA SAO PAULO', 'BOMBA SAO PAULO'),
+    'SAO PAULO': ('RAJA LOG GRANEL', 'POSTO INT RAJA SAO PAULO', 'BOMBA SAO PAULO'),
 }
 TANQUE_D1 = {'diesel': 'DIESEL S10', 'arla': 'ARLA 32'}
 BLOCO = 5000   # linhas por COPY
@@ -204,7 +205,7 @@ class Carga:
             return r
         e = {
             'base': P('select * from public.base_transacoes'),
-            'placas': P('select placa, categoria, unidade, marca, modelo, ano, meta, ponto_critico, cap_tanque, auton_margem_de_seg, situacao from public.placas'),
+            'placas': P('select linha, placa, categoria, unidade, marca, modelo, ano, meta, ponto_critico, cap_tanque, auton_margem_de_seg, situacao from public.placas'),
             'motoristas': P('select motorista, unidade, usuario, situacao, matricula, codigo_ticket, id_truckpag from public.motoristas'),  # sem as senhas
             'orc_und': P('select unidade, inf_adicional, centro_de_custo from public.orcamento_unidades'),
             'orc': P('select unidade, natureza, data, valor from public.orcamento_metas'),
@@ -225,6 +226,7 @@ class Carga:
             'bomba_bases', 'bomba_movimentacoes', 'bomba_rateio_inicio', 'bomba_rateio_cc', 'bomba_rateio_validacoes',
             'contratos_anp', 'km_viradas', 'prime_meses', 'prime_notas', 'prime_abastecimentos', 'funcoes', 'usuarios',
             'notificacoes', 'alertas_cartoes', 'alteracoes_base_copia')}
+        e['rateio'] = rateio_nfs.ler_todas(log=log)   # NFs das planilhas de rateio (cópias; cache em .dados)
         self.esp = e
         return e
 
@@ -299,21 +301,21 @@ class Carga:
             u = ultima.get(pl) or {}
             veic[pl] = [pl, p['categoria'] if N.chave(p['categoria']) != 'VENDA' else None, p['marca'], p['modelo'], p['ano'],
                         U(p['unidade']), N.situacao_veiculo(p['situacao'], p['unidade'], p['categoria']), p['meta'], p['ponto_critico'],
-                        p['cap_tanque'], p['auton_margem_de_seg'], u.get('familia_veiculo'), u.get('tipo_frota'), True]
+                        p['cap_tanque'], p['auton_margem_de_seg'], u.get('familia_veiculo'), u.get('tipo_frota'), True, p['linha']]
         for b in base:
             pl, ok = placa_ref(b['placa'])
             if ok and pl not in veic:
                 u = ultima[pl]
                 veic[pl] = [pl, None, None, u.get('modelo_veiculo'), None, U(u['informacao_adicional_3']), 'ativo', None, None, None, None,
-                            u.get('familia_veiculo'), u.get('tipo_frota'), False]
+                            u.get('familia_veiculo'), u.get('tipo_frota'), False, None]
             elif not ok:
-                self.pend['abastecimentos com placa inválida'].append(b['placa'])
+                self.pend['lançamentos sem placa (desperdício)'].append(b['placa'])
         self.inserir('veiculos', ['placa', 'categoria', 'marca', 'modelo', 'ano_fabricacao', 'unidade_id', 'situacao', 'meta_km_l',
-                                  'ponto_critico_km_l', 'capacidade_tanque_l', 'autonomia_km', 'familia', 'tipo_frota', 'cadastrado'],
+                                  'ponto_critico_km_l', 'capacidade_tanque_l', 'autonomia_km', 'familia', 'tipo_frota', 'cadastrado', 'linha_planilha'],
                      list(veic.values()))
         vid = self.mapa('select id, placa from gestao.veiculos')
         V = lambda t: vid.get(placa_ref(t)[0])  # noqa: E731
-        self.pend['placas só nos abastecimentos (sem cadastro)'] = sorted(p for p, v in veic.items() if not v[-1])
+        self.pend['placas só nos abastecimentos (sem cadastro)'] = sorted(p for p, v in veic.items() if not v[13])
         sist = {'placa_protheus_referencia': 'protheus', 'placa_base': 'base', 'placa_ticketlog': 'ticket',
                 'placa_truckpag': 'truckpag', 'placa_veloego': 'veloe'}
         rows = {}
@@ -393,10 +395,12 @@ class Carga:
                                   {'end': b['endereco'], 'bairro': b['bairro'], 'tipo': N.tipo_posto(b['tipo_estabelecimento'], b['nome_estabelecimento'])})
         loc_por_nome = defaultdict(list)
         for x in loc:
-            la, c1 = coordenada(x['latitude'], -34, 6)        # faixa do Brasil
-            lo, c2 = coordenada(x['longitude'], -74, -28)
-            if c1 or c2:
-                self.pend['coordenadas sem vírgula ou fora do Brasil na LOCALIZAÇÃO DOS POSTOS'].append(
+            # a planilha guarda algumas coordenadas como inteiro sem a vírgula (-19883025 = -19,883025): é o formato dela
+            # (o Mapa de calor grava assim), não erro. Pendência só para a que não dá para converter
+            la, _ = coordenada(x['latitude'], -34, 6)        # faixa do Brasil
+            lo, _ = coordenada(x['longitude'], -74, -28)
+            if (la is None) != (x['latitude'] is None) or (lo is None) != (x['longitude'] is None):
+                self.pend['coordenadas que não são do Brasil na LOCALIZAÇÃO DOS POSTOS'].append(
                     f"{x['nome_estabelecimento']} ({x['latitude']}, {x['longitude']})")
             x = dict(x, latitude=la, longitude=lo)
             loc_por_nome[N.chave(x['nome_estabelecimento'])].append(x)
@@ -504,10 +508,12 @@ class Carga:
                 ja[0][6].append(a)
                 apel_base[a] = ja[0][0]
                 continue
-            brows.append([prox, nome, posto_por_nome(posto, mais_usado=True) if posto else None, und.get(u), 'interna', False, [a]])
+            outros = [k for k, v in BASES_HISTORICAS.items() if v[2] == nome and k != a]   # ILHEUS e "IHEUS" = a mesma base
+            brows.append([prox, nome, posto_por_nome(posto, mais_usado=True) if posto else None, und.get(u), 'interna', False, [a] + outros])
             if posto:
                 bases_posto[N.chave(posto)] = prox
-            apel_base[a] = prox
+            for k in [a] + outros:
+                apel_base[k] = prox
             prox += 1
         self.pend['bases sem posto nos abastecimentos'] = [r[1] for r in brows if r[2] is None]
         self.inserir('bases', ['id', 'nome', 'posto_id', 'unidade_id', 'tipo', 'ativa', 'apelidos'], brows)
@@ -520,6 +526,13 @@ class Carga:
             bi = apel_base.get(N.chave(x['bomba']))
             if bi and C(x['produto']):
                 tq.setdefault((bi, C(x['produto'])), {})
+        rateio = (getattr(self, 'esp', None) or {}).get('rateio') or {}
+        for arq, v in rateio.items():
+            bi = apel_base.get(v['base'])
+            if bi and v['notas']:
+                tq.setdefault((bi, comb[v['combustivel']]), {})
+            elif not bi:
+                self.pend['planilha de rateio sem base no modelo'].append(arq)
         self.inserir('tanques', ['base_id', 'combustivel_id', 'capacidade_l'], [[b, cb, num(cfg.get('capacidade'))] for (b, cb), cfg in tq.items()])
         c.execute('select id, base_id, combustivel_id from gestao.tanques')
         tid = {(b, cb): i for i, b, cb in c.fetchall()}
@@ -534,7 +547,7 @@ class Carga:
             if x['excluida']:
                 continue
             rows.append([T(x['base_id'], x['tanque']), 'compra', F(x['fornecedor']), x['fornecedor'], cnpj(x['cnpj']), x['nf'],
-                         x['emissao'], x['quando'], None, x['litros'], x['valor'], x['obs'], 'site', x['id'], x['usuario_nome']])
+                         x['emissao'], x['quando'], None, x['litros'], x['valor'], x['obs'], 'site', x['id'], x['usuario_nome'], None])
         for x in bcomp:
             t = tid.get((apel_base.get(N.chave(x['bomba'])), C(x['produto'])))
             if not t:
@@ -543,11 +556,12 @@ class Carga:
             ajuste = not compra_real(x)
             rows.append([t, 'ajuste' if ajuste else 'compra', F(x['fornecedor']), x['fornecedor'], None,
                          str(x['nf']) if x['nf'] is not None else None, x['data_compra'], x['data_compra'], x['vencimento_boleto'],
-                         num(x['quantidade']) or 0, None, x['afericao_da_bomba'], 'planilha', x['id'], None])
+                         num(x['quantidade']) or 0, None, x['afericao_da_bomba'], 'planilha', x['id'], None, None])
             if not ajuste and not x['fornecedor']:
                 self.pend['compras da planilha sem fornecedor'].append(f"{x['bomba']} {x['produto']} {x['data_compra']}")
+        self.juntar_rateio(rows, rateio, apel_base, tid, comb, F)
         self.inserir('compras_combustivel', ['tanque_id', 'tipo', 'fornecedor_id', 'fornecedor_nome', 'cnpj', 'nf', 'emissao', 'recebido_em',
-                                             'vencimento', 'litros', 'valor', 'observacao', 'origem', 'origem_id', 'usuario'], rows)
+                                             'vencimento', 'litros', 'valor', 'observacao', 'origem', 'origem_id', 'usuario', 'arquivo'], rows)
         c.execute("select id, origem_id from gestao.compras_combustivel where origem = 'site'")
         compra_site = {o: i for i, o in c.fetchall()}
         self.inserir('rateio_inicio', ['tanque_id', 'desde', 'placa', 'ja_rateado_l', 'usuario', 'atualizado_em'],
@@ -577,11 +591,13 @@ class Carga:
                 b['codigo_cliente'], pid.get(pk) if pk else None, bases_posto.get(pk[0]) if pk else None, C(b['tipo_combustivel']),
                 b['litros'], b['vl_litro'], b['valor_emissao'], b['hodometro_ou_horimetro'], b['km_rodados_ou_horas_trabalhadas'],
                 b['km_litro_ou_litros_hora'], b['servico'], b['forma_transacao'], b['numero_cartao'], b['responsavel'],
-                {k: b[k] for k in extras if b.get(k) not in (None, '')}, b['linha']])
+                {k: b[k] for k in extras if b.get(k) not in (None, '')}, b['linha'],
+                'abastecimento' if N.placa(b['placa'])[1] else 'desperdicio', None if N.placa(b['placa'])[1] else (b['placa'] or '').strip().upper()])
         self.inserir('abastecimentos', ['chave', 'emissora_id', 'codigo_transacao', 'data_hora', 'placa', 'veiculo_id', 'motorista_nome',
                                         'motorista_id', 'matricula', 'unidade_id', 'empresa_id', 'codigo_cliente', 'posto_id', 'base_id',
                                         'combustivel_id', 'litros', 'preco_litro', 'valor', 'hodometro', 'km_rodados', 'km_por_litro',
-                                        'servico', 'forma_transacao', 'numero_cartao', 'responsavel', 'info_adicional', 'linha_planilha'], rows)
+                                        'servico', 'forma_transacao', 'numero_cartao', 'responsavel', 'info_adicional', 'linha_planilha',
+                                        'tipo', 'descricao'], rows)
         self.inserir('abastecimento_correcoes', ['id', 'placa', 'data_hora', 'acao', 'campos', 'antes', 'usuario', 'criado_em', 'estado', 'aplicada_em'],
                      [[x['id'], x['placa'], serial_para_data(x['data']), x['acao'], js(x['celulas'], {}), js(x['antes'], {}), x['usuario_nome'],
                        x['criado_em'], x['estado'], x['aplicada_em']] for x in d1['alteracoes_base_copia']])
@@ -655,6 +671,43 @@ class Carga:
                                          'resolvido_em', 'resolvido_por', 'nota'],
                      [[x['id'], x['criado_em'], x['placa'], V(x['placa']), js(x['cartoes'], []) or [], x['motorista'], x['observacao'], x['estado'],
                        x['resolvido_em'], x['resolvido_por'], x['nota']] for x in d1['alertas_cartoes']])
+
+    def juntar_rateio(self, rows, rateio, apel_base, tid, comb, F):
+        """NFs das planilhas de rateio nas compras. A nota que já está (mesmo tanque e número) ganha o que faltava (valor, CNPJ,
+        fornecedor, emissão); a que não está entra com origem 'rateio'. rows = linhas de compras_combustivel (listas)."""
+        hoje = dt.date.today().isoformat()
+        por_nota = {}
+        for i, r in enumerate(rows):
+            if r[5]:
+                por_nota.setdefault((r[0], str(r[5]).lstrip('0')), i)
+        novas = completadas = 0
+        for arq, v in rateio.items():
+            t = tid.get((apel_base.get(v['base']), comb.get(v['combustivel'])))
+            if not t:
+                continue
+            for n in v['notas']:
+                chave_nf = (t, str(n['nf']).lstrip('0'))
+                data = n['emissao'] or (n['primeiro'] or '')[:10] or None
+                if data and data > hoje:
+                    self.pend['NF do rateio com data no futuro'].append(f"{arq} NF {n['nf']} {data}")
+                i = por_nota.get(chave_nf)
+                if i is not None:
+                    r = rows[i]
+                    antes = list(r)
+                    r[2] = r[2] or F(n['fornecedor'])
+                    r[3] = r[3] or n['fornecedor']
+                    r[4] = r[4] or n['cnpj']
+                    r[6] = r[6] or n['emissao']
+                    r[10] = r[10] if r[10] is not None else n['valor']
+                    completadas += r != antes
+                    continue
+                rows.append([t, 'compra', F(n['fornecedor']), n['fornecedor'], n['cnpj'], n['nf'], n['emissao'],
+                             n['primeiro'] or n['emissao'], None, n['litros'], n['valor'],
+                             None if n['fonte'] == 'stock' else 'NF lida das abas do rateio (sem a Base NF STOCK)', 'rateio', None, None, arq])
+                por_nota[chave_nf] = len(rows) - 1
+                novas += 1
+        log(f'rateio: {novas} NF(s) novas nas compras, {completadas} completada(s)')
+        self.rateio_resumo = {'novas': novas, 'completadas': completadas}
 
     def carregar_anp(self):
         """ANP (96 mil linhas) numa conexão e transação próprias: depois dos abastecimentos, a mesma conexão do pooler cai.
@@ -810,7 +863,15 @@ if __name__ == '__main__':
             esquema(con)
         elif acao == 'carregar':
             con.close()
-            mostrar(*carregar())
+            if '--json' in sys.argv:   # o vigia lê só a última linha
+                try:
+                    linhas, conf, pend = carregar()
+                    print(json.dumps({'ok': True, 'abastecimentos': linhas.get('abastecimentos', 0),
+                                      'diferencas': sum(1 for v in conf.values() if not v['ok']), 'pendencias': len(pend)}))
+                except Exception as e:   # noqa: BLE001 (o vigia registra e tenta de novo)
+                    print(json.dumps({'ok': False, 'erro': str(e).splitlines()[0][:300] if str(e) else type(e).__name__}))
+            else:
+                mostrar(*carregar())
         elif acao == 'conferir':
             with con.cursor() as cur:
                 cur.execute('select linhas, pendencias from gestao.carga where terminada_em is not null order by id desc limit 1')

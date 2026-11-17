@@ -4,6 +4,20 @@ Toda alteração pedida e feita no portal Gestão de Combustível, da mais nova 
 Cada alteração nova entra no topo, com a data, o que foi pedido e o que mudou. O detalhe técnico de cada item continua
 no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
+## 17/11/2026
+
+- **Respostas sobre o que não estava alinhado** (docs/BANCO.md 3.7): senhas dos cartões continuam na planilha; RAJA SÃO PAULO = RAJA LOG
+  GRANEL (modelo + 2 motoristas na planilha); 258 placas sem situação viraram ATIVA e 21 "VENDA" viraram situação **VENDIDO** sem
+  unidade/categoria (nova opção no cadastro, fora dos cartões e das listas de placas); lançamentos sem placa viram desperdício no modelo;
+  listas de placas e motoristas dos últimos 60 dias fora do cadastro enviadas ao usuário.
+- **Coordenadas dos postos:** as "sem vírgula" são o formato da planilha (não erro); 187 postos sem coordenada ganharam a do endereço
+  dos abastecimentos (OpenStreetMap), gravadas na LOCALIZAÇÃO pela fila do Mapa de calor; 269 ficam para o cadastro manual.
+- **Compras das bombas pelas planilhas de rateio:** `scripts/rateio_nfs.py` (17 planilhas, 1.578 NFs, cache em .dados); 918 NFs novas nas
+  compras do modelo e 12 completadas (migração `20261117100000_gestao_ajustes.sql`).
+- **Site começou a usar o banco:** cadastro de placas lido do Supabase e gravado nele na hora (`lib/supabase.js`, migração
+  `20261117110000_gestao_site_placas.sql`, segredos SUPABASE_URL/SUPABASE_KEY no Pages), com a planilha de reserva; o vigia recarrega o
+  modelo depois de cada mudança do espelho. Testes novos: `tests/js/supabase.test.mjs`, `tests/py/test_rateio_nfs.py`.
+
 ## 16/11/2026
 
 - **Reestruturação do banco de dados (modelo relacional `gestao` no Supabase).** Pedido: reestruturar os bancos em tabelas de

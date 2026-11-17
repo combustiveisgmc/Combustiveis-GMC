@@ -33,7 +33,8 @@ class Normalizar(unittest.TestCase):
         self.assertEqual(N.unidade('Teixeira'), 'RAJA LOG TEIXEIRA DE FREITAS')
         self.assertEqual(N.unidade('VALADARES'), 'RAJA GOVERNADOR VALADARES')
         self.assertEqual(N.unidade('GRANEL - RIO (DUQUE)'), 'RAJA LOG GRANEL')
-        self.assertEqual(N.unidade('RAJA SÃO PAULO'), 'RAJA SAO PAULO')
+        self.assertEqual(N.unidade('RAJA SÃO PAULO'), 'RAJA LOG GRANEL')   # mesma unidade (usuário, 17/11)
+        self.assertEqual(N.unidade('SAO PAULO'), 'RAJA LOG GRANEL')
         self.assertEqual(N.unidade('KEMIGAS GV'), 'KEMIGAS GV')   # Kemigas não é a Raja de Valadares
         self.assertEqual(N.unidade('NANUQUE'), 'KEMIGAS NANUQUE')   # rotas
         self.assertIsNone(N.unidade('VENDA'))
@@ -75,6 +76,7 @@ class Normalizar(unittest.TestCase):
         self.assertEqual(N.situacao_veiculo(None, 'VENDA', 'CAVALO'), 'vendido')
         self.assertEqual(N.situacao_veiculo('DESABILITADA', 'RAJA RECIFE'), 'desabilitado')
         self.assertEqual(N.situacao_veiculo(None, 'RAJA RECIFE'), 'ativo')
+        self.assertEqual(N.situacao_veiculo('VENDIDO', None, None), 'vendido')   # situação nova (17/11)
         self.assertTrue(N.sim_nao('Sim'))
         self.assertFalse(N.sim_nao('NÃO'))
         self.assertIsNone(N.sim_nao(''))

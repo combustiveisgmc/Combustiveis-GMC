@@ -778,16 +778,54 @@ function rodarSupabase(s, rotulo) {
     let r = null;
     try { r = JSON.parse(out.trim().split(/\r?\n/).pop()); } catch {}
     if (!r) { const m = 'Supabase (' + rotulo + '): falhou (' + out.trim().slice(-200) + ')'; if (m !== s.ultimoErro) log(m); s.ultimoErro = m; return; }
-    if (r.tabelas && r.tabelas.length) log('Supabase (' + rotulo + '): ' + r.tabelas.map((t) => t.tabela + ' (' + t.linhas + ' linhas)').join(', ') + ' atualizada(s).');
+    if (r.tabelas && r.tabelas.length) {
+      log('Supabase (' + rotulo + '): ' + r.tabelas.map((t) => t.tabela + ' (' + t.linhas + ' linhas)').join(', ') + ' atualizada(s).');
+      // tabelas que só registram o revezamento do vigia não mudam o modelo
+      if (r.tabelas.some((t) => !['vigias', 'plantao'].includes(t.tabela))) MODELO.pendente = true;
+    }
     const m = (r.erros || []).map((e) => e.tabela + ': ' + e.erro).join('; ');
     if (m && m !== s.ultimoErro) log('Supabase (' + rotulo + '): erro em ' + m);
     s.ultimoErro = m;
   });
   p.on('error', () => { clearTimeout(fim); s.rodando = false; });
 }
+// Modelo relacional `gestao` (17/11/2026): depois que o espelho (planilhas ou D1) muda, o vigia recarrega o modelo
+// (scripts/gestao_carga.py carregar, ~4 min) em segundo plano, um de cada vez e no máximo a cada 10 min. É de onde o site
+// passa a ler (cadastro de placas primeiro); sem ele o site continua com a lista publicada pela planilha.
+const MODELO = { pendente: true, rodando: false, proximo: 0, intervalo: 10 * 60 * 1000, ultimoErro: '' };
+function rodarModelo() {
+  if (!MODELO.pendente || MODELO.rodando || Date.now() < MODELO.proximo) return;
+  if (SUPABASE.planilhas.rodando || SUPABASE.d1.rodando) return;   // espera o espelho terminar de gravar
+  MODELO.rodando = true;
+  MODELO.pendente = false;
+  MODELO.proximo = Date.now() + MODELO.intervalo;
+  let out = '';
+  const p = spawn('py', ['scripts/gestao_carga.py', 'carregar', '--json'], { cwd: PROJETO, windowsHide: true, shell: process.platform === 'win32',
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  const fim = setTimeout(() => { try { p.kill(); } catch {} }, 20 * 60 * 1000);
+  p.stdout.on('data', (d) => { out += d; });
+  p.stderr.on('data', (d) => { out += d; });
+  p.on('close', () => {
+    clearTimeout(fim);
+    MODELO.rodando = false;
+    let r = null;
+    try { r = JSON.parse(out.trim().split(/\r?\n/).pop()); } catch {}
+    if (!r || !r.ok) {
+      MODELO.pendente = true;   // tenta de novo na próxima janela
+      const m = 'Modelo do banco: falhou (' + (r && r.erro ? r.erro : out.trim().slice(-200)) + ')';
+      if (m !== MODELO.ultimoErro) log(m);
+      MODELO.ultimoErro = m;
+      return;
+    }
+    MODELO.ultimoErro = '';
+    log('Modelo do banco recarregado: ' + r.abastecimentos + ' abastecimentos' + (r.diferencas ? ', ATENÇÃO: ' + r.diferencas + ' total(is) diferente(s) do espelho' : ', totais iguais ao espelho') + '.');
+  });
+  p.on('error', () => { clearTimeout(fim); MODELO.rodando = false; MODELO.pendente = true; });
+}
 function processarSupabase() {
   rodarSupabase(SUPABASE.planilhas, 'planilhas');
   rodarSupabase(SUPABASE.d1, 'banco da Cloudflare');
+  rodarModelo();
 }
 
 // --vigiar: fica rodando e confere a cada 10 s (a tarefa agendada inicia no logon e religa se cair)

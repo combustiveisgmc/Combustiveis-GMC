@@ -32,7 +32,7 @@
     {
       "files": ["functions/**/*.js", "lib/**/*.js"],
       "env": { "worker": true },
-      "globals": { "crypto": "readonly", "fetch": "readonly", "Response": "readonly", "Request": "readonly", "URL": "readonly", "console": "readonly" }
+      "globals": { "crypto": "readonly", "fetch": "readonly", "Response": "readonly", "Request": "readonly", "URL": "readonly", "console": "readonly", "AbortSignal": "readonly" }
     },
     {
       "files": ["scripts/**/*.mjs", "scripts/**/*.js", "tests/**/*.mjs"],

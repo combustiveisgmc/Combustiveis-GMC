@@ -13,5 +13,6 @@ export async function onRequestGet({ request, env }) {
 export async function placasDesabilitadas(env) {
   const c = await env.DADOS.get('cadastros', 'json').catch(() => null);
   const ls = c && Array.isArray(c.placas) ? c.placas : [];
-  return new Set(ls.filter((p) => String(p.situacao || '').toUpperCase() === 'DESABILITADA').map((p) => normPlaca(p.placa)).filter(Boolean));
+  // vendida (situação VENDIDO, desde 17/11/2026) também sai, como a desabilitada
+  return new Set(ls.filter((p) => ['DESABILITADA', 'VENDIDO'].includes(String(p.situacao || '').toUpperCase())).map((p) => normPlaca(p.placa)).filter(Boolean));
 }

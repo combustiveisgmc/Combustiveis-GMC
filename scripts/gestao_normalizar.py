@@ -32,7 +32,8 @@ UNIDADE_CURTA = {
     'SAO LUIS': 'RAJA MARANHAO', 'RECIFE': 'RAJA RECIFE', 'SALVADOR': 'RAJA SALVADOR', 'SERRA': 'RAJA SERRA',
     'TEIXEIRA': 'RAJA LOG TEIXEIRA DE FREITAS', 'TEIXEIRA DE FREITAS': 'RAJA LOG TEIXEIRA DE FREITAS',
     'VALADARES': 'RAJA GOVERNADOR VALADARES', 'GOVERNADOR VALADARES': 'RAJA GOVERNADOR VALADARES', 'GOIANIA': 'RAJA GOIANIA',
-    'SAO PAULO': 'RAJA SAO PAULO', 'RAJA SAO PAULO': 'RAJA SAO PAULO', 'ADM': 'RAJA ADM',
+    # RAJA SÃO PAULO é a mesma unidade que o Granel (usuário, 17/11/2026)
+    'SAO PAULO': 'RAJA LOG GRANEL', 'RAJA SAO PAULO': 'RAJA LOG GRANEL', 'RAJA LOG SAO PAULO': 'RAJA LOG GRANEL', 'ADM': 'RAJA ADM',
     'NANUQUE': 'KEMIGAS NANUQUE',
 }
 # o que aparece no campo de unidade mas não é unidade (situação do veículo)
@@ -121,7 +122,7 @@ def situacao_cartao(texto):
 
 def situacao_veiculo(situacao, unidade_txt=None, categoria=None):
     """ativo / desabilitado / vendido. VENDA na unidade ou na categoria = vendido."""
-    if 'VENDA' in (chave(unidade_txt), chave(categoria)):
+    if 'VENDA' in (chave(unidade_txt), chave(categoria)) or chave(situacao) in ('VENDIDO', 'VENDIDA'):
         return 'vendido'
     return 'desabilitado' if chave(situacao) == 'DESABILITADA' else 'ativo'
 

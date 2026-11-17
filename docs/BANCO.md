@@ -150,3 +150,23 @@ Achados do levantamento do espelho e da carga. A carga não esconde nenhum: o qu
 22. **4 metas de placa sem veículo** (PKB9742, PPB6233, PVS3551, QXD7057: placas antigas de veículos que viraram Mercosul).
 23. **Orçamento e contratos por praça/cidade**, não pela unidade (Maceió, Olinda, João Pessoa não são unidades).
 24. **Filas do D1 (`alteracoes_*`) existem só para gravar nas planilhas**: quando o site gravar no banco, deixam de ser necessárias.
+
+### 3.7 Decisões do usuário (17/11/2026) e o que foi feito
+
+| Item | Decisão | Feito |
+|---|---|---|
+| 1. Senhas dos cartões na planilha de motoristas | Manter (o cartão físico é necessário para abastecer) | Continuam só na planilha e no espelho; o modelo `gestao` não guarda senha |
+| 2. Unidade escrita de vários jeitos | Padronizar; RAJA SÃO PAULO = RAJA LOG GRANEL | Modelo: SÃO PAULO e RAJA SÃO PAULO viram RAJA LOG GRANEL; os 2 motoristas com RAJA SÃO PAULO passaram para RAJA LOG GRANEL na planilha (pela fila). As planilhas de negociações e orçamento seguem com o nome curto (o site depende dele) e o modelo traduz pelos apelidos |
+| 3. Placas fora do cadastro | Ver as dos últimos 60 dias; textos (VAZAMENTO, LAVAGEM...) são desperdício | Lista enviada ao usuário (18 placas, 12 delas da RAJA ADM); no modelo os lançamentos sem placa viram `abastecimentos.tipo = 'desperdicio'` com a descrição |
+| 4. Motoristas fora do cadastro | Mesma lógica; os do ADM não ficam no cadastro | Lista enviada ao usuário (33 nomes nos últimos 60 dias, 14 da RAJA ADM) |
+| 5. Situação das placas | Vazia = ATIVA; VENDA sai da unidade e da categoria e vira situação VENDIDO | 258 placas ATIVA e 21 VENDIDO (unidade e categoria vazias) gravadas na planilha pela fila; VENDIDO entrou no cadastro do site, nos cartões (fora do controle) e na lista de placas fora de uso |
+| 6. Postos sem coordenada | Resolver | As "sem vírgula" eram o formato da planilha (o site já converte), não erro. 187 postos ganharam coordenada pelo endereço dos abastecimentos (OpenStreetMap, até 30 km da sede da cidade), gravadas na LOCALIZAÇÃO pela fila do Mapa de calor; 269 sem resultado confiável ficam para o cadastro manual no Mapa de calor |
+| 7. Compras das bombas sem registro (jul–out/2026) | Usar o histórico das planilhas de rateio | `scripts/rateio_nfs.py` lê as 17 planilhas de rateio (abas de NF e Base NF STOCK): 1.578 NFs; 918 entraram nas compras do modelo (origem `rateio`) e 12 compras antigas ganharam valor/CNPJ/emissão |
+
+### 3.8 Site lendo do banco (começo, 17/11/2026)
+
+- **Cadastro de placas** lê do banco (`public.gestao_placas()`, pela API do Supabase com a chave secreta nos segredos do Pages
+  `SUPABASE_URL`/`SUPABASE_KEY`) e cada alteração feita no site é gravada no banco na hora (`public.gestao_salvar_placa()`),
+  além da fila para a planilha. Banco fora do ar: o site usa a lista publicada da planilha (`lib/supabase.js`).
+- **Vigia** recarrega o modelo sozinho depois que o espelho muda (no máximo a cada 10 min, ~4 min por carga): log "Modelo do banco recarregado".
+- Próximos: motoristas (as senhas continuam vindo da planilha), cartões, postos/negociações, bomba interna, abastecimentos.

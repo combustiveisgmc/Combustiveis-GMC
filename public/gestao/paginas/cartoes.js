@@ -35,7 +35,7 @@ export async function montar(ctx) {
   const CART = info.cartoes, SIT = info.situacoes, editar = info.podeEditar;
   // placas do cadastro que ficam no controle: ativas e com motor (categorias de lib/cartoes.js)
   const CATS_CARTAO = new Set(info.categoriasComCartao || []);
-  const comCartao = (p) => (p.situacao || 'ATIVA') !== 'DESABILITADA' && CATS_CARTAO.has(String(p.categoria || '').toUpperCase());
+  const comCartao = (p) => !['DESABILITADA', 'VENDIDO'].includes(p.situacao || 'ATIVA') && CATS_CARTAO.has(String(p.categoria || '').toUpperCase());
   const rotuloCartao = Object.fromEntries(CART.map((c) => [c.id, c.rotulo]));
   ctx.definirSub(editar
     ? 'Planilha CONTROLE CARTÕES FROTA, ligada ao cadastro de placas (placas ativas de cavalo, truck, toco, bitruck e 3/4). ' +
