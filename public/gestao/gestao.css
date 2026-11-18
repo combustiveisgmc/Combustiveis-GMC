@@ -616,6 +616,23 @@ tr.sem-coord td{color:var(--suave);}
 .opc-vazia{font-size:13px;color:var(--suave);}
 .opc-novo{display:flex;gap:8px;margin-top:10px;}
 .opc-novo input{flex:1;min-width:0;}
+/* cadastros como tabelas (18/11/2026): uma linha por item, com Editar e Desativar/Reativar */
+.opcoes-dlg{width:min(640px,calc(100vw - 32px));}
+.opc-conta{font-size:12px;font-weight:500;color:var(--suave);}
+.opc-itens{list-style:none;margin:0;padding:0;border:1px solid var(--borda);border-radius:var(--r);}
+.opc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 10px;border-top:1px solid var(--borda);}
+.opc-item:first-child{border-top:0;}
+.opc-item.opc-inativo .opc-nome{color:var(--suave);}
+.opc-nome{min-width:0;font-size:13.5px;font-weight:500;overflow-wrap:anywhere;}
+.opc-nome small{display:block;font-size:12px;font-weight:400;color:var(--suave);}
+.opc-acoes{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.opc-acoes .opc-ativar{height:30px;padding:0 10px;font-size:12.5px;}
+.opc-item.opc-editando{display:block;background:var(--cartao-3);}
+.opc-form-item{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;align-items:end;}
+.opc-form-item .nt-opcao{grid-column:1 / -1;}
+.opc-form-acoes{grid-column:1 / -1;display:flex;justify-content:flex-end;gap:8px;}
+.opcoes-dlg .carregando{padding:30px;}
+@media (max-width:600px){ .opc-item{flex-wrap:wrap;} .opc-acoes .opc-ativar{height:40px;} }
 .dialogo-acoes{display:flex;justify-content:flex-end;gap:var(--e-2);margin-top:var(--e-4);flex-wrap:wrap;}
 /* janela longa: os botões ficam presos no rodapé (sempre à vista) e o X no canto de cima */
 .dialogo .dialogo-acoes{position:sticky;bottom:calc(-1 * var(--e-5));z-index:3;background:var(--cartao);margin:var(--e-4) calc(-1 * var(--e-5)) calc(-1 * var(--e-5));padding:12px var(--e-5) var(--e-5);border-top:1px solid var(--borda);}

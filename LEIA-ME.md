@@ -752,9 +752,12 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 - Variação = ANP do estado na semana escolhida ÷ ANP do estado na semana da data do contrato − 1. Passou de ±5%: fora da variação.
 
 ## Engrenagem dos cadastros (18/11/2026)
-- Dentro do formulário de cada cadastro (Adicionar/editar placa, motorista, posto, contrato x ANP, fornecedor; cartões só consulta) a
-  engrenagem abre as **opções das listas**: categoria, unidade e marca da placa; unidade do motorista; aviso do posto; produto e unidade do
-  contrato; unidade do fornecedor. Adicione ou tire opções e clique em "Salvar opções".
-- Sem lista própria o formulário sugere o que já existe no cadastro; tirar todas as opções de um campo volta a esse comportamento.
-- Situação, plataforma, combustível e tipo aparecem como **fixos** (são usados nas contas do site).
-- Quem só consulta a tela vê as opções mas não grava. Ficam no banco do portal (D1 `opcoes_cadastro`, espelhado no Supabase) por `/api/opcoes`.
+- Dentro do formulário de cada cadastro (placa, motorista, posto, contrato x ANP, fornecedor; cartões só consulta) a engrenagem abre
+  os **cadastros do portal**: unidades, categorias de veículo, marcas, avisos de posto e produtos de contrato. São tabelas no banco
+  (Supabase, esquema `cadastro`), as mesmas em todo o portal: a unidade da placa, do motorista e dos abastecimentos é o mesmo cadastro.
+- Cada item tem **Editar** (renomear; na unidade também nome curto, centro de custo, empresa e operacional) e **Desativar/Reativar**
+  (desativado some das listas dos formulários; quem já usa continua com ele). "Adicionar" cria um novo. Grava na hora.
+- Renomear uma unidade guarda o nome antigo como apelido: planilhas e abastecimentos antigos continuam achando a unidade.
+- Placa e motorista só gravam com unidade (e, na placa, categoria e marca) cadastradas; o aviso diz para cadastrar na engrenagem.
+- Situação, plataforma, combustível e tipo continuam **fixos** (são usados nas contas do site).
+

@@ -177,3 +177,20 @@ Achados do levantamento do espelho e da carga. A carga não esconde nenhum: o qu
   corrigida; o `importar_base.py` usa a mesma lista na aba Metas. Placa errada nova nas planilhas: acrescentar ali (e no teste).
 - Placa VENDIDO não some mais dos filtros do site (só DESABILITADA).
 - Postos sem coordenada ficam sem; o usuário cadastra pelo Mapa de calor.
+
+## Esquema `cadastro` (origem dos cadastros, desde 18/11/2026)
+O esquema `gestao` é refeito pela carga a cada 5 min a partir das planilhas; o `cadastro` é a ORIGEM, editado pelo portal (engrenagem
+dos formulários) e nunca apagado pela carga. A carga lê daqui: `gestao.unidades` sai com o mesmo id de `cadastro.unidades`.
+
+| Tabela | Chave | O que guarda |
+|---|---|---|
+| `unidades` | id | nome (centro de custo), nome curto, código do centro de custo, empresa (RAJA LOG/KEMIGAS), operacional, ativa |
+| `unidade_apelidos` | apelido | outros jeitos de escrever a unidade e nomes antigos (renomear) -> unidade |
+| `categorias_veiculo` | id | categorias do veículo (CAVALO, TRUCK...) |
+| `marcas_veiculo` | id | marcas do veículo |
+| `avisos_posto` | id | avisos que aparecem no posto para o motorista |
+| `produtos_contrato` | id | produtos dos contratos x ANP |
+
+Funções (só a chave secreta): `gestao_cadastro_listas()`, `gestao_cadastro_salvar(tipo, acao, id, dados)`,
+`gestao_validar_placa(dados)`; `gestao.unidade_id(nome)` acha a unidade pelo nome ou apelido do cadastro (não cria mais).
+

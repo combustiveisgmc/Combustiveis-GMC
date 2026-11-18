@@ -258,10 +258,39 @@ class Carga:
                                      (metas, 'unidade', 'metas')):
             for x in lista:
                 ver(x[campo], origem)
+        # cadastro.unidades é a ORIGEM desde 18/11/2026 (editado no portal; migração 20261118210000_gestao_cadastro_tabelas.sql):
+        # as unidades do cadastro entram com o MESMO id e os dados do cadastro; nome das planilhas acha a unidade pelo nome ou pelo
+        # apelido do cadastro (nome antigo de uma unidade renomeada continua valendo). Unidade que só existe nas planilhas e não está
+        # no cadastro entra como antes (id novo), e fica na lista de pendências.
+        c.execute('select id, nome, nome_curto, centro_custo, empresa, operacional, ativa from cadastro.unidades order by id')
+        cad = c.fetchall()
+        c.execute('select apelido, unidade_id from cadastro.unidade_apelidos')
+        apel_cad = dict(c.fetchall())
+        cad_por_chave = {N.chave(r[1]): r[0] for r in cad}
+        id_cad = lambda n: cad_por_chave.get(N.chave(n)) or apel_cad.get(N.chave(n))  # noqa: E731
+        for r in cad:
+            i, nome, curto, cc, empresa, operacional, ativa = r
+            dados = next((v for n, v in info_und.items() if id_cad(n) == i), {})
+            c.execute('insert into gestao.unidades (id, nome, nome_curto, centro_custo, empresa_id, operacional, ativa) overriding system value '
+                      'values (%s, %s, %s, %s, %s, %s, %s)', (i, nome, curto or dados.get('curto'), cc or dados.get('cc'),
+                                                              emp.get(empresa, emp['RAJA LOG']), operacional, ativa))
+        if cad:
+            c.execute("select setval(pg_get_serial_sequence('gestao.unidades', 'id'), (select max(id) from gestao.unidades))")
+        so_planilha = sorted((n, v) for n, v in info_und.items() if not id_cad(n))
         self.inserir('unidades', ['nome', 'nome_curto', 'centro_custo', 'empresa_id', 'operacional'],
-                     [[n, v.get('curto'), v.get('cc'), emp[N.empresa_da_unidade(n)], not NAO_OPERACIONAL.match(n)] for n, v in sorted(info_und.items())])
+                     [[n, v.get('curto'), v.get('cc'), emp[N.empresa_da_unidade(n)], not NAO_OPERACIONAL.match(n)] for n, v in so_planilha])
+        self.unidades_fora_do_cadastro = [n for n, _ in so_planilha]
         und = self.mapa('select id, nome from gestao.unidades')
-        self.inserir('unidade_apelidos', ['apelido', 'unidade_id', 'origem'], [[a, und[n], o] for a, (n, o) in sorted(apel.items())])
+        for n in info_und:   # nome das planilhas -> id do cadastro
+            if id_cad(n):
+                und[n] = id_cad(n)
+        apelidos = {a: i for a, i in apel_cad.items() if i in und.values()}
+        origem_ap = {a: 'cadastro' for a in apelidos}
+        for a, (n, o) in apel.items():
+            if a not in apelidos and und.get(n):
+                apelidos[a] = und[n]
+                origem_ap[a] = o
+        self.inserir('unidade_apelidos', ['apelido', 'unidade_id', 'origem'], [[a, i, origem_ap[a]] for a, i in sorted(apelidos.items())])
         U = lambda t: und.get(N.unidade(t))  # noqa: E731
 
         # ---------- combustíveis e emissoras ----------

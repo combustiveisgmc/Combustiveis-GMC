@@ -6,6 +6,18 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Cadastros como tabelas no banco** (pedido do usuário: as listas da engrenagem eram "tags"; a unidade tem de ser uma
+  característica de cadastro em todo o portal). Novo esquema `cadastro` no Supabase (origem, editado pelo portal e nunca apagado pela
+  carga): `unidades` (nome, nome curto, centro de custo, empresa, operacional, ativa) + `unidade_apelidos`, `categorias_veiculo`,
+  `marcas_veiculo`, `avisos_posto`, `produtos_contrato` (preenchidos com o que já existia: 24 unidades com os mesmos ids, 39 apelidos,
+  8 categorias, 12 marcas, 13 avisos, 1 produto). Migrações `20261118210000_gestao_cadastro_tabelas.sql` e `..211000_..._unidade_id.sql`.
+  - A carga do modelo (`gestao_carga.py`) monta `gestao.unidades` a partir do cadastro com os mesmos ids: veículos, motoristas e
+    abastecimentos apontam para a unidade do cadastro; renomear guarda o nome antigo como apelido (planilhas antigas continuam achando).
+  - Engrenagem dos formulários = manutenção do cadastro: uma linha por item com Editar (na unidade também nome curto, centro de custo,
+    empresa e operacional) e Desativar/Reativar; grava na hora. `/api/opcoes` lê e grava no banco (`gestao_cadastro_listas`,
+    `gestao_cadastro_salvar`); a tabela D1 `opcoes_cadastro` deixou de ser usada.
+  - Placa e motorista só gravam com unidade (e, na placa, categoria e marca) do cadastro: validação no banco antes da fila da planilha
+    (`gestao_validar_placa`); antes o banco criava unidade nova para qualquer nome digitado. Teste `tests/js/opcoes.test.mjs` reescrito.
 - **Migração 100% nuvem decidida** (pedido do usuário): banco principal Supabase, Base.xlsx atualizada à mão pela exportação,
   Consolidador gravando no banco e o vigia desligado só no fim. Plano por etapas no CHECKLIST (§15).
 - **Editar abastecimentos > Exportar**: planilha igual à Base_copia > Transações (48 colunas A..AV, mesmas larguras, Arial 8,

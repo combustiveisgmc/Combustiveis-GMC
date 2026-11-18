@@ -1,10 +1,18 @@
 import { usuarioDaSessao, json } from '../../lib/auth.js';
 import { pode } from '../../lib/permissoes.js';
-import { TELAS, limparValores } from '../../lib/opcoes-cadastro.js';
+import { rpc, temBanco } from '../../lib/supabase.js';
+import { TELAS, pedidoValido, listasDaTela } from '../../lib/opcoes-cadastro.js';
 
-// Opções configuráveis dos cadastros (engrenagem dentro do formulário de cada cadastro; 18/11/2026).
-// GET  /api/opcoes?tela=cadastro-placas     {opcoes: {campo: [valores]}, podeEditar}   (quem vê a tela)
-// POST /api/opcoes {tela, campo, valores[]}  grava a lista do campo; valores vazios = volta às opções de antes (apaga a linha)
+// Cadastros auxiliares da engrenagem dos formulários. Desde 18/11/2026 são tabelas no banco (Supabase, esquema `cadastro`:
+// unidades, categorias de veículo, marcas, avisos de posto, produtos de contrato), as mesmas em todo o portal.
+// GET  /api/opcoes?tela=cadastro-placas  -> {opcoes: {campo: [nomes ativos]}, registros: {campo: [{id, nome, ativa, ...}]}, podeEditar}
+// POST /api/opcoes {tela, campo, acao: adicionar|renomear|ativar|desativar|editar, id?, dados: {nome?, nome_curto?, centro_custo?,
+//      empresa?, operacional?}}  -> o mesmo do GET, já com a mudança
+async function listar(env, tela) {
+  const listas = await rpc(env, 'gestao_cadastro_listas', {}, { ms: 10000 });
+  return listas && typeof listas === 'object' ? listasDaTela(tela, listas) : null;
+}
+
 export async function onRequestGet({ request, env }) {
   const u = await usuarioDaSessao(env.DB, request);
   if (!u) return json({ erro: 'Não conectado.' }, 401);
@@ -12,13 +20,10 @@ export async function onRequestGet({ request, env }) {
   const t = TELAS[tela];
   if (!t) return json({ erro: 'Tela desconhecida.' }, 404);
   if (!pode(u, ...t.ver, t.editar)) return json({ erro: 'Seu acesso não inclui esta tela.' }, 403);
-  const { results } = await env.DB.prepare('SELECT campo, valores FROM opcoes_cadastro WHERE tela = ?').bind(tela).all();
-  const opcoes = {};
-  for (const r of results) {
-    if (!t.campos.includes(r.campo)) continue;
-    try { const v = JSON.parse(r.valores); if (Array.isArray(v)) opcoes[r.campo] = v; } catch { /* linha estragada: ignora */ }
-  }
-  return json({ opcoes, podeEditar: pode(u, t.editar) });
+  if (!temBanco(env)) return json({ erro: 'O banco de dados não está configurado no portal.' }, 503);
+  const l = await listar(env, tela);
+  if (!l) return json({ erro: 'O banco de dados não respondeu. Tente de novo em instantes.' }, 502);
+  return json({ ...l, podeEditar: pode(u, t.editar) });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -28,18 +33,13 @@ export async function onRequestPost({ request, env }) {
   if (!u) return json({ erro: 'Sua sessão terminou. Entre de novo.' }, 401);
   let d;
   try { d = await request.json(); } catch { return json({ erro: 'Dados inválidos.' }, 400); }
-  const t = TELAS[d.tela];
-  if (!t) return json({ erro: 'Tela desconhecida.' }, 404);
-  if (!pode(u, t.editar)) return json({ erro: 'Seu acesso a esta tela é só de consulta.' }, 403);
-  if (!t.campos.includes(d.campo)) return json({ erro: 'Este campo não tem opções configuráveis.' }, 400);
-  const r = limparValores(d.valores);
-  if (r.erro) return json({ erro: r.erro }, 400);
-  if (!r.valores.length) {
-    await env.DB.prepare('DELETE FROM opcoes_cadastro WHERE tela = ? AND campo = ?').bind(d.tela, d.campo).run();
-  } else {
-    await env.DB.prepare(`INSERT INTO opcoes_cadastro (tela, campo, valores, atualizado_por) VALUES (?1, ?2, ?3, ?4)
-      ON CONFLICT (tela, campo) DO UPDATE SET valores = ?3, atualizado_por = ?4, atualizado_em = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')`)
-      .bind(d.tela, d.campo, JSON.stringify(r.valores), u.nome).run();
-  }
-  return json({ ok: true, campo: d.campo, valores: r.valores });
+  const p = pedidoValido(d, (perm) => pode(u, perm));
+  if (p.erro) return json({ erro: p.erro }, p.status);
+  if (!temBanco(env)) return json({ erro: 'O banco de dados não está configurado no portal.' }, 503);
+  const v = p.valor;
+  const r = await rpc(env, 'gestao_cadastro_salvar', { p_tipo: v.tipo, p_acao: v.acao, p_id: v.id, p_dados: v.dados }, { ms: 10000 });
+  if (!r) return json({ erro: 'O banco de dados não respondeu. Tente de novo em instantes.' }, 502);
+  if (!r.ok) return json({ erro: r.erro || 'Não foi possível gravar.' }, 400);
+  const l = await listar(env, d.tela);
+  return json({ ok: true, id: r.id, ...(l || {}), podeEditar: true });
 }

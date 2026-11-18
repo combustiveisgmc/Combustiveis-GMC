@@ -129,6 +129,13 @@ export async function onRequestPost({ request, env, params }) {
       return json({ erro: qual + chave + ' já está cadastrado' + (achar(chave) ? '.' : ' (alteração aguardando gravação).') }, 409);
     }
   }
+  // unidade, categoria e marca têm de estar nos cadastros do portal (banco, esquema cadastro; 18/11/2026). Antes da fila da
+  // planilha: o que não está cadastrado nem chega à planilha. Motorista: só a unidade.
+  const validarNoCadastro = tipo === 'placas' ? dados : 'unidade' in dados ? { unidade: dados.unidade } : null;
+  if (validarNoCadastro) {
+    const invalido = await rpc(env, 'gestao_validar_placa', { p_dados: validarNoCadastro });
+    if (typeof invalido === 'string' && invalido) return json({ erro: invalido }, 400);
+  }
   // motorista novo com a caixa "cadastrar nos sites dos cartões frota" desmarcada: o vigia não cria na Ticket/TruckPag
   const semCartoes = tipo === 'motoristas' && acao === 'adicionar' && corpo.cartoes === false ? 1 : 0;
   // o que vai aos cartões: cadastro novo (se for criar lá) ou edição de nome/senha TruckPag com CPF e nascimento informados
