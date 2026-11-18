@@ -1,11 +1,14 @@
 import { usuarioDaSessao, json } from '../../../lib/auth.js';
-import { pode, USAM_DADOS } from '../../../lib/permissoes.js';
+import { pode, permissoesDe, USAM_DADOS, CATALOGO } from '../../../lib/permissoes.js';
+// quem recebe cada regra: o mesmo código da tela Configurar notificações (18/11/2026)
+import { recebe, limparDestinatarios } from '../../../public/gestao/lib/destino-notificacao.js';
 import { DE_USUARIOS, CAMPOS_USUARIO } from '../../../lib/usuarios.js';
 
 // Operacional > Notificações: regras dos avisos no canto da tela. A conta é feita no navegador (public/gestao/lib/notificacao.js,
 // catálogo TIPOS); aqui ficam as regras, a validação dos campos de cada tipo e os dados do servidor que alguns tipos usam.
 // GET  ?minhas=1 -> {regras, contexto}: as ativas que valem para quem está logado (qualquer login)
-// GET            -> {regras, contexto, usuarios: [{id, nome, acessos: {estoque, cartoes, dados}}]} (permissão "notificacoes")
+// GET            -> {regras, contexto, usuarios: [{id, nome, permissoes, acessos}], telas: [{grupo, itens: [{id, rotulo}]}], usamDados}
+//                   (permissão "notificacoes"). destinatarios: {modo: 'todos' | 'telas' (telas: [...]) | 'usuarios' (ids: [...])}
 // POST {acao: 'salvar', id?, nome, tipo, ativa, condicao, mensagem, nivel, destinatarios, repetir}
 //      {acao: 'ativar', id, ativa} · {acao: 'excluir', id}                      (permissão "notificacoes")
 // contexto: {base: {baseSalvaEm, geradoEm, copiaEm}, alertasCartao: [{id, criado_em, placa, cartoes, motorista}] (quem vê os Cartões frota)}
@@ -23,6 +26,9 @@ const n = (v, min, max, nome) => { const x = Number(v); return Number.isFinite(x
 const umDe = (v, lista, padrao) => (lista.includes(v) ? v : padrao);
 const txt = (v) => (v === null || v === undefined || String(v).trim() === '' ? null : String(v).trim().slice(0, 80));
 const data = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : null);
+// telas que podem ser escolhidas em "quem tem acesso a estas telas": as do menu (sem as permissões de edição)
+const TELAS = CATALOGO.map((g) => ({ grupo: g.grupo, itens: g.itens.filter((i) => !i.requer).map((i) => ({ id: i.id, rotulo: i.rotulo })) })).filter((g) => g.itens.length);
+const TELAS_IDS = TELAS.flatMap((g) => g.itens.map((i) => i.id));
 const TIPOS = {
   'estoque-baixo': (c) => {
     const unidade = umDe(c.unidade, ['litros', 'pct'], 'litros');
@@ -67,14 +73,16 @@ export async function onRequestGet({ request, env }) {
   const { results } = await env.DB.prepare('SELECT * FROM notificacoes ORDER BY nome COLLATE NOCASE, id').all();
   const todas = results.map(regra);
   if (new URL(request.url).searchParams.get('minhas')) {
-    const minhas = todas.filter((r) => r.ativa && (r.destinatarios.modo !== 'usuarios' || (r.destinatarios.ids || []).includes(u.id)));
+    const perms = permissoesDe(u);
+    const minhas = todas.filter((r) => r.ativa && recebe(perms, u.id, r, USAM_DADOS));
     return json({ regras: minhas, contexto: minhas.length ? await contexto(env, u, minhas) : {} });
   }
   if (!pode(u, 'notificacoes')) return json({ erro: 'Seu acesso não inclui as Notificações.' }, 403);
   const us = await env.DB.prepare(`SELECT ${CAMPOS_USUARIO} ${DE_USUARIOS} WHERE u.ativo = 1 AND u.excluido = 0 ORDER BY u.nome COLLATE NOCASE`).all();
   // o que cada login enxerga (sem acesso à tela de origem, o aviso daquele tipo não aparece para ele)
-  return json({ regras: todas, contexto: await contexto(env, u, [{ tipo: 'falta-cartao' }]), usuarios: us.results.map((x) => ({ id: x.id, nome: x.nome,
-    acessos: { estoque: pode(x, 'bomba-estoque'), cartoes: pode(x, 'cartoes-frota'), dados: pode(x, ...USAM_DADOS) } })) });
+  return json({ regras: todas, contexto: await contexto(env, u, [{ tipo: 'falta-cartao' }]), telas: TELAS, usamDados: USAM_DADOS,
+    usuarios: us.results.map((x) => ({ id: x.id, nome: x.nome, permissoes: permissoesDe(x),
+      acessos: { estoque: pode(x, 'bomba-estoque'), cartoes: pode(x, 'cartoes-frota'), dados: pode(x, ...USAM_DADOS) } })) });
 }
 
 function validar(d) {
@@ -95,10 +103,9 @@ function validar(d) {
   const mensagem = String(d.mensagem || '').trim().slice(0, 600);
   if (!mensagem) erros.push('Escreva a mensagem do aviso.');
   const nivel = NIVEIS.includes(d.nivel) ? d.nivel : 'alerta';
-  const dst = d.destinatarios || {};
-  const ids = Array.isArray(dst.ids) ? [...new Set(dst.ids.map(Number).filter(Number.isInteger))] : [];
-  const destinatarios = dst.modo === 'usuarios' ? { modo: 'usuarios', ids } : { modo: 'todos' };
-  if (destinatarios.modo === 'usuarios' && !ids.length) erros.push('Escolha pelo menos um usuário (ou "Todos").');
+  const dst = limparDestinatarios(d.destinatarios, TELAS_IDS);
+  if (dst.erro) erros.push(dst.erro);
+  const destinatarios = dst.valor || { modo: 'todos' };
   const repetir = /^(sessao|diaria|horas:([1-9]|1\d|2[0-3]))$/.test(String(d.repetir || '')) ? d.repetir : 'diaria';
   return { erros, valor: { nome, tipo, ativa: d.ativa === false ? 0 : 1, condicao, mensagem, nivel, destinatarios, repetir } };
 }

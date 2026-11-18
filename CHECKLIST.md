@@ -126,3 +126,8 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Principal de cada painel acima da dobra em 1440×900 (conferido nas 29 telas do menu, sem rolagem lateral nem erro).
 - [x] Grupos de filtro lado a lado em tela larga.
 - [x] Divisão por cartão: % no gráfico Dia a dia (18/11/2026).
+
+## 14. Notificações por tela (18/11/2026)
+- [x] Quem só tem a Consulta de KM não recebe mais o preço alto (padrão do tipo = painéis de preço).
+- [x] "Para quem" com "Quem tem acesso a estas telas" e a contagem de quem recebe agora.
+- [ ] Usuário ajustar as telas do aviso "Preço alto no posto" (hoje 4 logins; a equipe das bases deixou de receber).

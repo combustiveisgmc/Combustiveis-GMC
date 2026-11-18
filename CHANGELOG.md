@@ -6,6 +6,13 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Notificações: "Quem tem acesso a estas telas"** (pedido do usuário: quem só vê a Consulta de KM recebia o aviso de preço alto).
+  Em Configurar notificações > Para quem há agora três opções: o padrão do tipo, **quem tem acesso a alguma das telas marcadas**
+  (as telas do menu, por grupo) e só estes usuários; a linha "Recebem agora" mostra quantos e quem recebe. O servidor filtra as
+  regras de cada login com o mesmo código da tela (`public/gestao/lib/destino-notificacao.js`, usado por `functions/api/notificacoes`).
+  Padrão do **Preço alto** mudou de "qualquer tela com dados de abastecimento" para **quem tem acesso aos painéis de preço**
+  (Preço postos externos, Mapa de calor, Rodada de preços, Preço x ANP, Preço x Refinaria, Preço bomba interna): a regra em produção
+  passa de 18 para 4 logins; o usuário vai ajustar as telas pela configuração. Teste `tests/js/destino-notificacao.test.mjs`.
 - **Divisão por cartão > Dia a dia com %** (pedido do usuário): cada dia mostra o % dos litros de cada cartão, inteiro (ex.: 63%) e em
   fonte menor para caber nas colunas estreitas (aparece em fatias a partir de 10%; coluna com pelo menos ~28 px, no celular o gráfico
   rola para o lado). `pctCurto` em `dashboards/divisao-cartoes.js`; teste em `tests/js/layout.test.mjs`.

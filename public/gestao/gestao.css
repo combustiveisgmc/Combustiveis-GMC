@@ -1679,3 +1679,11 @@ table.dados.prr-tabela td:first-child{min-width:150px;}
   .prr-par{grid-template-columns:96px minmax(0,1fr);}
   .prr-legenda .prr-leg-saldo{margin-left:0;}
 }
+
+/* Notificações > Para quem > "Quem tem acesso a estas telas" (18/11/2026) */
+.nt-telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 18px;margin:6px 0 10px 26px;padding:12px 14px;border-radius:var(--r);background:var(--cartao-3);}
+.nt-telas-grupo{margin:0;padding:0;border:0;min-width:0;}
+.nt-telas-grupo legend{padding:0;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--suave);}
+.nt-telas-grupo .nt-opcao{font-size:13px;}
+.nt-recebem{margin:8px 0 0;}
+@media (max-width:600px){ .nt-telas{margin-left:0;grid-template-columns:minmax(0,1fr);} }

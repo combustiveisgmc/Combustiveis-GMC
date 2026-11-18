@@ -147,7 +147,7 @@ export const TIPOS = {
     },
   },
   'preco-alto': {
-    rotulo: 'Preço alto em posto externo', nome: 'Preço alto no posto', precisa: 'dados', acesso: 'dados', quem: 'Todos com acesso aos painéis de abastecimento',
+    rotulo: 'Preço alto em posto externo', nome: 'Preço alto no posto', precisa: 'dados', acesso: 'dados', quem: 'Quem tem acesso aos painéis de preço',
     acao: { rotulo: 'Ver no mapa de calor', href: '#/mapa-calor' }, usa: ['dados'],
     campos: [
       { id: 'combustivel', rotulo: 'Combustível', tipo: 'select', opcoes: [['diesel', 'Diesel'], ['arla', 'Arla 32'], ['todos', 'Diesel e Arla']], padrao: 'diesel' },
