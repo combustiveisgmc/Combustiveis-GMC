@@ -18,7 +18,7 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 | Região | Medida | Regra |
 |---|---|---|
 | Menu lateral (Drawer) | 249 px; recolhido 76 px | `--lateral`, respiro 25 px, blocos separados por 25 px: logotipo → cartão de perfil → grupos → rodapé fixo (tema, sair) |
-| Barra superior (Header_Navigation) | altura 88 px, respiro 25 px | título 20/600 à esquerda (grupo do menu acima, 12/500 verde); à direita, 25 px entre itens: **Buscar página**, botão Atualizar (só ícone 38 px), ação verde |
+| Barra superior (Header_Navigation) | altura 88 px, respiro 25 px | título 20/600 à esquerda (grupo do menu acima, 12/500 laranja); à direita, 25 px entre itens: **Buscar página**, botão Atualizar (só ícone 38 px), ação laranja |
 | Conteúdo | grade de **12 colunas**, espaço 25 px, respiro 25 px | cada filho direto da página é uma faixa; os cartões ocupam colunas (ver "Composição") |
 | Celular (< 820 px) | 1 coluna, respiros 16 px | menu vira gaveta; busca vira linha própria; tabelas largas rolam dentro do cartão |
 
@@ -31,22 +31,38 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 | Gráfico + lateral | `.grade-paineis`: gráfico + ranking/lista | 8 + 4 |
 | Tabela | `.painel-tabela` | 12 |
 
+### Identidade visual (Grupo Miranda Coelho, desde 18/11/2026)
+- Cores da marca: **laranja `#F6A42B`** (`--gmc-laranja`, cor principal; o código recebido era F6542B e o usuário confirmou o F6A42B,
+  igual ao laranja da logo), **preto `#4B4B4D`** (`--gmc-preto`) e **cinza `#97989A`** (`--gmc-cinza`). Os tokens de uso abaixo
+  apontam para eles; trocar a cor da marca = mudar só os três `--gmc-*` em `gestao.css` e `app.css`.
+- Logos em `public/`: `logo-grupo.png` (com o nome, para fundo claro), `logo-grupo-negativo.png` (o cinza vira claro, para fundo
+  escuro), `logo-simbolo.png` / `logo-simbolo-negativo.png` (só o símbolo: menu recolhido). Ícone do aplicativo e do site:
+  `icon-192.png` / `icon-512.png` (símbolo em fundo branco). No tema escuro usar a negativa: classes `.so-escuro` / `.so-claro`.
+- Menu aberto: logo com o nome, 34 px de altura. Menu recolhido: só o símbolo, 40 px. Barra das páginas dos motoristas e da troca
+  de senha: logo negativa com 30 px (24 px até 420 px de largura), separada do título por uma linha.
+- Texto sobre o laranja é escuro (`#161616`, 8,8:1): o branco sobre o laranja tem só 2:1.
+- Verde e vermelho continuam com o significado de bom/ruim (pílulas, medidor, variação, economia do PRIME); o laranja não é "bom".
+
 ### Design Tokens
 | Token | Escuro | Claro | Uso |
 |---|---|---|---|
-| `--fundo` | `#161616` | `#F4F5F4` | fundo do conteúdo e da barra (Black 2) |
+| `--gmc-laranja` / `--gmc-preto` / `--gmc-cinza` | `#F6A42B` / `#4B4B4D` / `#97989A` | iguais | cores da marca (base dos tokens abaixo) |
+| `--fundo` | `#161616` | `#F5F5F5` | fundo do conteúdo e da barra (Black 2) |
 | `--lateral` | `#121212` | `#FFFFFF` | menu (Black 1) |
 | `--cartao` | `#262626` | `#FFFFFF` | todos os cartões, diálogos, menus suspensos |
-| `--cartao-2` | `#2E2E2E` | `#F0F2F0` | passar o mouse, linha selecionada, campo dentro de cartão |
-| `--texto` / `--texto-2` / `--suave` | `#FFF` / `#D0D0D0` / `#8C8C8C` | `#161616` / `#3F4642` / `#6B7270` | texto; `--suave` só em rótulos de eixo e notas |
-| `--borda` | `#333333` | `#E3E7E3` | linhas de tabela, divisórias |
+| `--cartao-2` | `#2E2E2E` | `#F0F0F1` | passar o mouse, linha selecionada, campo dentro de cartão |
+| `--texto` / `--texto-2` / `--suave` | `#FFF` / `#D0D0D0` / `#97989A` | `#161616` / `#4B4B4D` / `#66676A` | texto; `--suave` só em rótulos de eixo e notas |
+| `--borda` / `--borda-forte` | `#333333` / `#4B4B4D` | `#E4E4E5` / `#CBCCCE` | linhas de tabela, divisórias |
 | `--contorno` | `rgba(255,255,255,.85)` | `rgba(22,22,22,.35)` | contorno de campos e botões secundários (Figma: branco 1 px) |
-| `--verde` | `#41B06E` | `#1E7A45` | ação principal, item ativo, links, série principal dos gráficos |
-| `--sobre-verde` | `#0B1A12` | `#FFFFFF` | texto em cima do verde (6,5:1) |
+| `--primaria` | `#F6A42B` | `#F6A42B` | ação principal, item ativo, bordas e destaques (era `--verde` até 17/11/2026) |
+| `--primaria-texto` | `#F6A42B` | `#9E5A00` | texto e links na cor da marca (no claro, laranja escuro: 5,4:1 no branco) |
+| `--sobre-primaria` | `#161616` | `#161616` | texto em cima do laranja (8,8:1) |
+| `--primaria-suave` | `rgba(246,164,43,.16)` | `rgba(246,164,43,.14)` | fundo de seleção e destaque leve |
+| `--serie-1` | `#F6A42B` | `#C77A0A` | série principal dos gráficos (no claro mais escura: 3,4:1 no branco) |
 | `--sobe` / `--desce` | `#2EA41B` / `#FF5A5A` | `#1C7C10` / `#C62828` | variação favorável / desfavorável |
 | `--pilula-ok` / `-alerta` / `-ruim` | `#3DBF4A` / `#F6C25E` / `#F92F2F` | iguais | Complete / On Delivery / Canceled |
 | `--selo` | `#BC7C01` | igual | contadores do menu, rótulo de destaque do gráfico |
-| `--ic-verde` / `--ic-roxo` / `--ic-areia` / `--ic-rosa` | `#CBECD8` / `#C4C3E9` / `#E9E1C3` / `#EBCACA` | iguais | quadrados de ícone dos KPIs e listas |
+| `--ic-laranja` / `--ic-roxo` / `--ic-areia` / `--ic-rosa` | `#FCDCAA` / `#C4C3E9` / `#E9E1C3` / `#EBCACA` | iguais | quadrados de ícone dos KPIs e listas (`--ic-verde` `#CBECD8` só para "caiu = bom") |
 | `--r` / `--r-icone` / `--r-pilula` | 5 / 15 / 25 px | | cantos |
 | `--e-1…5` | 5 / 10 / 15 / 20 / 25 px | | espaços |
 | Tipo | Plus Jakarta Sans | | 12/500 rótulos · 14/500 texto e títulos de cartão · 16/600 grupos do menu · 20/600 título da página · 24/500 números |
@@ -55,14 +71,14 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 | Componente | Classe | Anatomia | Notas |
 |---|---|---|---|
 | Cartão | `.cartao`, `.painel`, `.filtros`, `.meta-bloco` | fundo `--cartao`, canto 5, respiro 25, cabeçalho 32 px (título 14/500 + ação à direita) | sem borda nem sombra no escuro |
-| KPI (Total Revenue) | `.kpi` (gerado por `htmlBomba`) | quadrado 73 px canto 15 com ícone 38 px · rótulo 14/500 + ⓘ · número 24/500 · variação 10/500 "vs. mês anterior" | a cor do quadrado segue a ordem verde → roxo → areia → rosa |
+| KPI (Total Revenue) | `.kpi` (gerado por `htmlBomba`) | quadrado 73 px canto 15 com ícone 38 px · rótulo 14/500 + ⓘ · número 24/500 · variação 10/500 "vs. mês anterior" | a cor do quadrado segue a ordem laranja → roxo → areia → rosa |
 | Linha de lista (Top Selling) | `.linha-lista` | mini-ícone 46 px · nome 14/600 + detalhe 12 · valor/pílula à direita | início (categorias), motoristas (unidades) |
 | Medidor | `htmlMedidor` | meio círculo 14 px de traço, marca da meta, número 24/500 no centro | verde ≥ meta, âmbar até 5% abaixo, vermelho abaixo disso |
 | Pílula | `.status`, `.sit-*`, `.selo-*` | 10–12/600, canto 25, 2×9 px | sempre com texto; o ícone ↑↓ continua |
 | Tabela (Top Transactions) | `table.dados` | cabeçalho 12/500 sem fundo; linhas 13 px com borda superior `--borda`; passar o mouse `--cartao-2` | cabeçalho preso ao rolar |
-| Gráfico (General Sale Activity) | `graficoPeriodo` | linha verde 2,5 suave, sem grade cheia (tracejada), faixa de destaque 26 px no ponto, dica escura | rótulos de eixo 12 `--suave` |
-| Botão | `.btn` / `.btn-principal` / `.btn-icone` | 38 px (44 px no celular ≤ 600 px); contorno `--contorno`; principal verde | |
-| Campo | inputs, `.filtro-botao` | 38 px (44 px no celular ≤ 600 px), contorno `--contorno`, canto 5 | foco: contorno verde |
+| Gráfico (General Sale Activity) | `graficoPeriodo` | linha `--serie-1` (laranja) 2,5 suave, sem grade cheia (tracejada), faixa de destaque 26 px no ponto, dica escura | rótulos de eixo 12 `--suave` |
+| Botão | `.btn` / `.btn-principal` / `.btn-icone` | 38 px (44 px no celular ≤ 600 px); contorno `--contorno`; principal laranja (texto escuro) | |
+| Campo | inputs, `.filtro-botao` | 38 px (44 px no celular ≤ 600 px), contorno `--contorno`, canto 5 | foco: contorno laranja |
 | Busca de página | `#busca-pagina` | campo 174 px com lupa; lista suspensa com as páginas do menu | Enter abre a primeira; ↑↓ navegam |
 | Ações da linha | `lib/acoes-linha.js` | botão "⋯" 32 px; linha com Editar abre ao clicar | |
 | Baixar | `lib/baixar.js` | botão com ícone, menu CSV / XLSX | |
@@ -70,9 +86,9 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 ### States and Interactions
 | Elemento | Estado | Comportamento |
 |---|---|---|
-| Item do menu | ativo | fundo `--cartao`, ícone verde |
+| Item do menu | ativo | fundo `--cartao`, ícone laranja |
 | Item do menu | passar o mouse | fundo `#1C1C1C` |
-| Cartão-link (KPI, início) | passar o mouse | contorno 1 px verde (Figma: atalhos) |
+| Cartão-link (KPI, início) | passar o mouse | contorno 1 px laranja (Figma: atalhos) |
 | Botão | passar o mouse / foco | fundo `--cartao-2` / contorno de foco 3 px `--foco` |
 | Botão Atualizar | dados novos | ponto âmbar no canto; girando enquanto atualiza |
 | Busca de página | sem resultado | "Nenhuma página com esse nome" |
@@ -88,7 +104,7 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 
 ### Edge Cases
 - **Vazio**: texto `--suave` dentro do cartão, nunca cartão sumindo sem aviso.
-- **Carregando**: anel girando verde no centro do cartão.
+- **Carregando**: anel girando laranja no centro do cartão.
 - **Erro**: faixa vermelha suave com o texto do erro.
 - **Número grande**: KPI encolhe até 18 px e quebra; nunca é cortado.
 - **Nome longo**: quebra linha em tabelas (`.trunc`), reticências só no menu.
@@ -122,7 +138,7 @@ mini-ícone, e **postos em cartões de lista** (nome, cidade, pílula do cartão
 | Barra | 64 px, `--lateral` | logotipo 30 px, título 20/600, botão "Entrar"/"Gestão" com contorno |
 | Conteúdo | máx. 960 px, respiro 16 (celular) / 25 (≥ 760 px), espaço 15/25 | KPIs → busca → aviso de cartão → unidades / postos |
 | Unidades | grade `auto-fill minmax(220px)` | cartão 46 px de ícone + nome 16/600 + "N postos" |
-| Postos | grade `auto-fill minmax(300px)` | cartão com cabeçalho (ícone + nome + cidade), pílula do cartão, aviso, botão verde "Abrir no mapa" |
+| Postos | grade `auto-fill minmax(300px)` | cartão com cabeçalho (ícone + nome + cidade), pílula do cartão, aviso, botão laranja "Abrir no mapa" |
 
 Minha média: KPIs (média, meta, economia) + medidor em meio círculo + listas em cartões. Trocar senha: um cartão central.
 
@@ -151,11 +167,11 @@ Minha média: KPIs (média, meta, economia) + medidor em meio círculo + listas 
 
 ### Área dos motoristas (revisão de 29/10/2026)
 - Texto mínimo de 14 px (celular, na rua); botões de 44 px; `--suave` #9A9A9A, igual à gestão.
-- Página dos postos: sem números de resumo no topo; posto compacto com o mapa como ícone; o verde fica para os avisos importantes.
+- Página dos postos: sem números de resumo no topo; posto compacto com o mapa como ícone; o laranja fica para os avisos importantes.
 - Nome dos cartões igual ao do portal (Ticket, TruckPag, Veloe).
 - Ícones: fundo escuro translúcido (`--ic-*` em rgba ~16%) com traço claro, nunca pastel claro — o modo escuro forçado do
   celular escurece cores claras e deixa os quadradinhos com cor de lama. As páginas declaram `color-scheme: dark` (CSS e meta).
-- Lista de unidades: um estilo só (pino verde); cor alternada sem significado não entra.
+- Lista de unidades: um estilo só (pino laranja); cor alternada sem significado não entra.
 - Minha média: o medidor é o destaque; cada abastecimento mostra ✓ (na meta) ou ↓ (abaixo), com texto para leitor de tela.
 
 ### % da meta (29/10/2026)
@@ -207,7 +223,7 @@ Sempre a lixeira: `<button class="btn-lixeira" aria-label="Excluir ..." title="E
 
 **Seleção múltipla em formulário** (ex.: unidades dos encarregados no PRIME): botão `.filtro-botao` + painel `.painel-filtro` com busca e `.opcao[role=checkbox]` (o mesmo dos filtros), valor num `input hidden` e chips `.pr-chip` das escolhidas embaixo. Nunca campo de texto separado por vírgula.
 
-**Notificação no canto (toast):** `mostrarNotificacao({chave, titulo, texto, nivel, acao, aoFechar, sozinha})` em `lib/notificacao.js`. Canto inferior direito, 380 px (celular: 12 px das bordas), borda esquerda de 4 px na cor do nível (info `--verde`, alerta `--pilula-alerta`, crítico `--pilula-ruim`), ícone 20 px, título 14/600, texto 13 `--texto-2`, X 30 px (40 no celular). Entrada: desliza 28 px da direita + aparece, 260 ms cubic-bezier(.2,.8,.2,1); saída 180 ms ease-in; movimento reduzido: só esmaece (120 ms). Crítico = role alert; os outros = status. Mesma chave atualiza o aviso; máximo 3 na tela. Não usar para confirmação de ação (isso é o `aviso()` do gestao.js).
+**Notificação no canto (toast):** `mostrarNotificacao({chave, titulo, texto, nivel, acao, aoFechar, sozinha})` em `lib/notificacao.js`. Canto inferior direito, 380 px (celular: 12 px das bordas), borda esquerda de 4 px na cor do nível (info `--primaria`, alerta `--pilula-alerta`, crítico `--pilula-ruim`), ícone 20 px, título 14/600, texto 13 `--texto-2`, X 30 px (40 no celular). Entrada: desliza 28 px da direita + aparece, 260 ms cubic-bezier(.2,.8,.2,1); saída 180 ms ease-in; movimento reduzido: só esmaece (120 ms). Crítico = role alert; os outros = status. Mesma chave atualiza o aviso; máximo 3 na tela. Não usar para confirmação de ação (isso é o `aviso()` do gestao.js).
 
 
 ## Cores dos cartões (padrão do portal, lib/cartoes.js)

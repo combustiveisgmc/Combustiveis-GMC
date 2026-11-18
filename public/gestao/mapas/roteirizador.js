@@ -238,7 +238,7 @@ const ROTULO_CLASSE = {
   livre: ['Fora da lista', 'sit-livre'],
 };
 const COR_PINO = '#1C2226';   // pino das paradas: escuro nos dois temas (o número é branco)
-const COR_CLASSE = { polo: '--bom', autorizado: '--serie-1', minimo: '--faixa', livre: '--eixo' };
+const COR_CLASSE = { polo: '--bom', autorizado: '--cat-1', minimo: '--faixa', livre: '--eixo' };
 
 // cidades para localizar origem/destino: sede de cada município (IBGE); o dicionário do planejador só completa o que
 // faltar (ex.: distritos). Os postos não dão mais coordenada de cidade: só marcam "cidade com postos da frota".
@@ -525,7 +525,7 @@ export async function montar(ctx) {
               <li><span class="rot-num rot-num-mini" style="background:#1C2226">1</span>Abastecimento sugerido (O origem, D destino)</li>
               <li><span class="rot-base-mini" aria-hidden="true">R</span>Unidade (base) da empresa</li>
               <li><i style="background:var(--bom)"></i>Posto polo (pode completar)</li>
-              <li><i style="background:var(--serie-1)"></i>Autorizado</li>
+              <li><i style="background:var(--cat-1)"></i>Autorizado</li>
               <li><i style="background:var(--faixa)"></i>Mínimo: pernoite/auxiliar</li>
               <li><i style="background:var(--eixo)"></i>Fora da lista (só na rota)</li>
             </ul>

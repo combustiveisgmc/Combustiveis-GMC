@@ -1,4 +1,4 @@
-const CACHE_NAME = 'postos-autorizados-v15';   // v15: login do motorista pelo usuário de 6 números, sem CPF (v14: média do motorista sem os abastecimentos fora do PRIME)
+const CACHE_NAME = 'postos-autorizados-v16';   // v16: identidade do Grupo Miranda Coelho (logo, ícone e laranja); v15: login do motorista pelo usuário de 6 números, sem CPF
 const SHELL_FILES = [
   '/',
   '/app.css',
@@ -7,7 +7,7 @@ const SHELL_FILES = [
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  '/logo-mark.png'
+  '/logo-grupo-negativo.png'
 ];
 
 self.addEventListener('install', function (event) {

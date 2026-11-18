@@ -110,11 +110,16 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
 ## Visual (design v2, refeito do zero em 28/10/2026)
 
+- **Identidade do Grupo Miranda Coelho (18/11/2026):** laranja `#F6A42B` (cor principal), preto `#4B4B4D` e cinza `#97989A`, nas
+  variáveis `--gmc-laranja`, `--gmc-preto` e `--gmc-cinza` de `public/gestao/gestao.css` e `public/app.css` (para trocar a cor da
+  marca, mude só essas três). Logo com o nome: `public/logo-grupo.png` (fundo claro) e `logo-grupo-negativo.png` (fundo escuro);
+  só o símbolo: `logo-simbolo*.png` (menu recolhido). Ícone do aplicativo e do site: `icon-192.png` e `icon-512.png`.
+  Verde e vermelho continuam querendo dizer bom e ruim.
 - Baseado no Figma "SaaS – Sales Management Dashboard – Muvic" (layout Blacksale) e no protótipo `prototipos/design-muvic`.
   Especificação completa (tokens, composição, componentes, estados, celular, acessibilidade): `design-system/MASTER.md`.
 - Gestão: `public/gestao/gestao.css` (escrito do zero). Cada tela é uma grade de 12 colunas com faixas de cartões:
   indicadores no topo, medidor/resumo + números, gráfico + lateral, tabela. Escuro por padrão; claro no interruptor do menu.
-- Barra superior: título, Atualizar e a ação verde, **Buscar página** (tecla "/") e a conta sempre na ponta direita.
+- Barra superior: título, Atualizar e a ação laranja, **Buscar página** (tecla "/") e a conta sempre na ponta direita.
   Início no formato Overview do Figma (indicadores, gasto diário, média por categoria, números de cada painel; "Todas as
   páginas" só no celular). Endereço que não existe mostra "Página não encontrada".
 - Filtros: à mostra ficam **Período, Placa e Estabelecimento** (nessa ordem, nas telas que têm esses filtros; senão o

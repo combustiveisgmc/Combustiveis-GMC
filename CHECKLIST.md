@@ -109,3 +109,9 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Pontos de cada dia no gráfico de gasto diário do Início.
 - [x] "Gerenciar acessos" fora do menu lateral (fica na Conta).
 - [x] Engrenagem de configuração das opções dentro de cada cadastro (placas, motoristas, postos, contratos, fornecedores, cartões).
+
+## 11. Identidade visual do Grupo Miranda Coelho (18/11/2026)
+- [x] Cores da marca nas variáveis de tema (laranja F6A42B confirmado pelo usuário, preto 4B4B4D, cinza 97989A), escuro e claro.
+- [x] Logo com o nome no lugar da antiga (gestão, motoristas, Minha média, Trocar senha), negativa no tema escuro.
+- [x] Logo sem o nome como ícone do aplicativo e do site (e no menu recolhido).
+- [ ] Conferir com a área responsável se o laranja certo é mesmo o F6A42B (o código enviado foi F6542B).

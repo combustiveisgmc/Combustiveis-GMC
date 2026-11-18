@@ -120,8 +120,8 @@
 .mt-nav a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:64px;padding:6px 4px;
   color:var(--suave);font-size:14px;font-weight:600;text-decoration:none;-webkit-tap-highlight-color:transparent;}
 .mt-nav a svg{width:24px;height:24px;flex-shrink:0;}
-.mt-nav a[aria-current="page"]{color:var(--placa);}
-.mt-nav a[aria-current="page"]::before{content:"";position:absolute;left:22%;right:22%;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--placa);}
+.mt-nav a[aria-current="page"]{color:var(--primaria);}
+.mt-nav a[aria-current="page"]::before{content:"";position:absolute;left:22%;right:22%;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--primaria);}
 .mt-nav a:focus-visible{outline:2px solid var(--foco);outline-offset:-4px;border-radius:var(--raio);}
 @media (max-width:759px){
   .mt-pagina{padding-bottom:calc(64px + env(safe-area-inset-bottom, 0px) + 24px);}
@@ -133,7 +133,7 @@
   .mt-nav{order:-1;display:flex;gap:6px;border-bottom:1px solid var(--linha);}
   .mt-nav a{flex-direction:row;gap:8px;min-height:48px;padding:0 16px;}
   .mt-nav a:hover{color:var(--asfalto);}
-  .mt-nav a[aria-current="page"]{color:var(--placa);}
+  .mt-nav a[aria-current="page"]{color:var(--primaria);}
   .mt-nav a[aria-current="page"]::before{top:auto;bottom:-1px;left:10px;right:10px;border-radius:3px 3px 0 0;}
 }
 /* acesso a este portal (aba Senhas): usuário e troca da senha */
@@ -148,6 +148,6 @@
 .mt-campo input:focus-visible{outline:2px solid var(--foco);outline-offset:1px;}
 .mt-conta-msg{margin:0;font-size:14px;}
 .mt-conta-acoes{display:flex;gap:10px;flex-wrap:wrap;}
-.mt-botao-principal{min-height:44px;padding:0 18px;border:0;border-radius:var(--raio-pilula);background:var(--placa);color:var(--sobre-placa);font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+.mt-botao-principal{min-height:44px;padding:0 18px;border:0;border-radius:var(--raio-pilula);background:var(--primaria);color:var(--sobre-primaria);font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
 .mt-botao-principal:disabled{opacity:.6;cursor:default;}
 .mt-botao-principal:focus-visible{outline:2px solid var(--asfalto);outline-offset:2px;}

@@ -6,6 +6,17 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Identidade visual do Grupo Miranda Coelho** (pedido do usuário, cores e logos da área responsável):
+  - Cores: laranja **F6A42B** como cor principal (o código recebido era F6542B, um laranja avermelhado diferente da logo; o usuário
+    confirmou o F6A42B, igual ao laranja da logo), preto **4B4B4D** e cinza **97989A**. Tokens novos `--gmc-laranja/preto/cinza`
+    em `gestao.css` e `app.css`; `--verde*` renomeados para `--primaria*` (+ `--primaria-texto` e `--sobre-primaria`); tema claro
+    com cinzas neutros. Texto em cima do laranja é escuro (contraste); no tema claro o texto laranja é mais escuro (#9E5A00).
+  - Verde e vermelho continuam com o significado de bom/ruim (medidor, pílulas, variação, economia do PRIME). No Roteirizador os
+    postos autorizados passaram a azul, para não confundir com os "mínimos" (amarelo).
+  - Logo com o nome do grupo no lugar da antiga (menu da gestão, página dos motoristas, Minha média, Trocar senha), versão negativa
+    no tema escuro; símbolo sozinho no menu recolhido e como ícone do aplicativo e do site (`icon-192/512.png`). `logo-mark.png` apagado;
+    cache do aplicativo dos motoristas v16 (baixa as logos e o ícone novos).
+  - `design-system/MASTER.md` com a seção Identidade visual e os tokens novos. Teste `tests/js/identidade.test.mjs`.
 - **Ajustes de tela (pedido do usuário, 8 itens):**
   - Início: tirados os ícones "i" dos cartões (o cartão inteiro já leva à tela); o ícone de três pontinhos do gráfico "Média km/L
     contra a meta" virou a seta "abrir" (leva ao painel Média geral); o gráfico de gasto diário mostra um ponto em cada dia.
