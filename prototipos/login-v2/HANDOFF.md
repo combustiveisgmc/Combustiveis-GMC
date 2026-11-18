@@ -90,7 +90,7 @@ senha inicial é o mesmo número; fica 30 dias conectado e vai para a área do m
    `app.js` para "Falta cartão").
 2. Postos e unidades passam para a área do motorista (`/motorista/`), com sessão.
 3. `functions/api/login.js`: sem mudança de regra.
-4. Copiar `caminhao-1200.webp` e `caminhao-720.webp` para `public/` (a logo `logo-grupo-negativo.png` já está lá).
+4. Copiar `foto-caminhao-1200.webp` e `foto-caminhao-720.webp` para `public/` (a logo `logo-grupo-negativo.png` já está lá).
 5. Registrar a tela no `design-system/MASTER.md`; atualizar `briefing.md`, `CHANGELOG.md` e `CHECKLIST.md`;
    `npm run verificar`.
 
@@ -103,3 +103,7 @@ senha inicial é o mesmo número; fica 30 dias conectado e vai para a área do m
 - Medido sem rolagem e sem corte: 1920×937 (Full HD com o navegador), 1440×900, 1366×657 (notebook com o
   navegador), 1366×600 e 1280×585.
 - No celular (≤ 900 px) a página continua podendo rolar: quando o teclado abre, o campo precisa subir.
+
+### Foto nova (18/11/2026)
+- Foto do caminhão refeita pelo usuário (1536×2752, Downloads/Gemini_Generated_Image_fbc8…): `foto-caminhao-1200.webp`
+  (84 KB) e `foto-caminhao-720.webp` (42 KB). Nomes novos para o navegador não mostrar a foto antiga do cache.
