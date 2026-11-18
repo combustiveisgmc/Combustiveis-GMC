@@ -86,11 +86,11 @@ a{color:inherit;}
 .lateral{position:sticky;top:0;height:100vh;flex-shrink:0;width:var(--lateral-largura);background:var(--lateral);display:flex;flex-direction:column;z-index:30;}
 :root[data-theme="light"] .lateral{border-right:1px solid var(--borda);}
 .lateral-corpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding:var(--e-5);display:flex;flex-direction:column;gap:var(--e-5);scrollbar-width:thin;scrollbar-color:#333 transparent;}
-.lateral-topo{display:flex;align-items:center;gap:8px;padding:var(--e-2);}
+.lateral-topo{display:flex;align-items:center;gap:8px;padding:var(--e-2) 0;}
 /* logo do Grupo Miranda Coelho (18/11/2026): com o nome no menu aberto, só o símbolo no menu recolhido. Versão negativa
    (cinza vira claro) no tema escuro e a original no claro: .so-escuro / .so-claro */
-.lateral-marca{flex:1 1 auto;min-width:0;display:flex;align-items:center;padding-left:4px;}
-.lateral-marca img{display:block;height:34px;width:auto;max-width:100%;}
+.lateral-marca{flex:1 1 auto;min-width:0;display:flex;align-items:center;}
+.lateral-marca img{display:block;width:100%;max-width:176px;height:auto;}   /* proporção da logo mantida (não esticar) */
 .lateral-simbolo{display:none;width:40px;height:auto;flex-shrink:0;}
 .app.recolhido .lateral-simbolo{display:block;}
 :root[data-theme="light"] .so-escuro, :root:not([data-theme="light"]) .so-claro{display:none !important;}
@@ -1136,7 +1136,21 @@ body.apresentando .pagina{padding-left:40px;padding-right:40px;}
 .ini-tabela td .status{white-space:nowrap;}
 @container (max-width:1050px){.abertura > .apoio-coluna{grid-column:1 / -1;}.abertura:has(> .apoio-coluna) + .apoio{grid-column:1 / -1 !important;}}
 
-@media (max-width:820px){.barra-titulo{flex-basis:calc(100% - 156px);}.notif-centro,.conta{order:2;}.barra-busca{order:3;}.barra-acoes{order:4;}}
+/* celular (18/11/2026): menu, título, sino e conta na mesma linha; a conta ficava sem espaço (100% - 156px não cabia com os
+   botões de 44 px), caía para a linha de baixo à esquerda e o painel dela abria para fora da tela */
+@media (max-width:820px){
+  .barra-titulo{flex:1 1 0;min-width:0;}
+  .notif-centro,.conta{order:2;}.barra-busca{order:3;}.barra-acoes{order:4;}
+  .barra h1{overflow-wrap:anywhere;}
+  .conta-painel{width:min(260px, calc(100vw - 24px));}
+  /* notificações: gaveta pela direita, como o menu pela esquerda; sai arrastando o dedo para a direita (gestao.js) */
+  .sino-painel{position:fixed;top:0;right:0;bottom:0;z-index:85;width:min(380px, 88vw);max-height:none;border:0;border-left:1px solid var(--borda-forte);
+    border-radius:0;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px);
+    animation:sino-entra .22s ease both;touch-action:pan-y;}
+  .sino-fechar{width:44px;height:44px;}
+  .notif{touch-action:pan-y;}
+}
+@keyframes sino-entra{from{transform:translateX(100%);}to{transform:none;}}
 
 /* ---- revisão de design (29/10/2026) ---- */
 /* cabeçalho: ações da página antes da busca; a conta sempre na ponta direita */
@@ -1453,6 +1467,7 @@ table.dados.pr-rank th:last-child, .pr-rank td.pr-total{min-width:92px;white-spa
   padding:14px 10px 14px 16px;border:1px solid var(--borda-forte);border-left:4px solid var(--notif-cor);border-radius:var(--r);background:var(--cartao);box-shadow:var(--sombra);
   animation:notif-entra .26s cubic-bezier(.2,.8,.2,1) both;}
 .notif.saindo{animation:notif-sai .18s ease-in both;}
+.notif.arrastado{opacity:0 !important;animation:none !important;}   /* já saiu pelo arrasto (celular) */
 .notif-alerta{--notif-cor:var(--pilula-alerta);}
 .notif-critico{--notif-cor:var(--pilula-ruim);}
 .notif-info{--notif-cor:var(--primaria);}

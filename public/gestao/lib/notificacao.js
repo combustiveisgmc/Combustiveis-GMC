@@ -10,6 +10,7 @@
 //  - Depois de fechar no X, o aviso só volta conforme a regra ("repetir"). Se a condição deixar de valer, o "fechado" é esquecido.
 import { carregarDados, esc, ehDiesel } from './dados.js';
 import { NOME_TANQUE, calcularEstoque, linhasDaCopia, juntarLinhas } from './bomba.js';
+import { arrastarParaFechar } from './gesto.js';
 
 const MAX_NA_TELA = 3;
 const ICONE = { info: 'i-info', alerta: 'i-alerta', critico: 'i-alerta' };
@@ -42,6 +43,9 @@ export function mostrarNotificacao(n) {
     if (e.target.closest('.notif-acao')) fecharNotificacao(chave, false);
   });
   el.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharNotificacao(chave, true); });
+  // celular: arrastar o aviso para o lado fecha (como fechar no X), igual ao menu (18/11/2026)
+  arrastarParaFechar(el, { direcoes: [1, -1], esmaecer: true, ativo: () => window.matchMedia('(max-width:820px)').matches,
+    aoSair: () => { el.classList.add('arrastado'); fecharNotificacao(chave, true); } });
   naTela.set(chave, el);
   pilhaEl().appendChild(el);
   if (n.sozinha) el._timer = setTimeout(() => fecharNotificacao(chave, false), n.sozinha);

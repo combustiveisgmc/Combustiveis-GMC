@@ -35,10 +35,10 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 - Cores da marca: **laranja `#F6A42B`** (`--gmc-laranja`, cor principal; o código recebido era F6542B e o usuário confirmou o F6A42B,
   igual ao laranja da logo), **preto `#4B4B4D`** (`--gmc-preto`) e **cinza `#97989A`** (`--gmc-cinza`). Os tokens de uso abaixo
   apontam para eles; trocar a cor da marca = mudar só os três `--gmc-*` em `gestao.css` e `app.css`.
-- Logos em `public/`: `logo-grupo.png` (com o nome, para fundo claro), `logo-grupo-negativo.png` (o cinza vira claro, para fundo
-  escuro), `logo-simbolo.png` / `logo-simbolo-negativo.png` (só o símbolo: menu recolhido). Ícone do aplicativo e do site:
-  `icon-192.png` / `icon-512.png` (símbolo em fundo branco). No tema escuro usar a negativa: classes `.so-escuro` / `.so-claro`.
-- Menu aberto: logo com o nome, 34 px de altura. Menu recolhido: só o símbolo, 40 px. Barra das páginas dos motoristas e da troca
+- Logos em `public/` (variante monocromática escolhida pelo usuário em 18/11/2026): `logo-grupo.png` (com o nome, preta #4B4B4D,
+  fundo claro), `logo-grupo-negativo.png` (branca, fundo escuro), `logo-simbolo.png` / `logo-simbolo-negativo.png` (só o símbolo:
+  menu recolhido). Ícone do aplicativo e do site: `icon-192.png` / `icon-512.png` (símbolo branco em fundo #161616). No tema escuro usar a negativa: classes `.so-escuro` / `.so-claro`.
+- Menu aberto: logo com o nome em toda a largura livre (até 176 px, proporção mantida; ~151×29 px). Menu recolhido: só o símbolo, 40 px. Barra das páginas dos motoristas e da troca
   de senha: logo negativa com 30 px (24 px até 420 px de largura), separada do título por uma linha.
 - Texto sobre o laranja é escuro (`#161616`, 8,8:1): o branco sobre o laranja tem só 2:1.
 - Verde e vermelho continuam com o significado de bom/ruim (pílulas, medidor, variação, economia do PRIME); o laranja não é "bom".
@@ -234,3 +234,10 @@ Pedido do usuário: toda tabela nova classifica por coluna, como as outras. Usar
 (`tabelaOrdenavel(tabela, {colunas, padrao, vazio, classeLinha})`): clique no cabeçalho ordena, de novo inverte, ▲/▼ e
 `aria-sort`, vazios no fim, texto em ordem do português, total no `<tfoot>` fora da ordenação. Coluna sem ordenação: `v: null`.
 Faixas de indicadores com valores longos ou texto de apoio: `.apoio.apoio-pilha` (rótulo em cima, número embaixo).
+
+## Gestos no celular (18/11/2026)
+- Menu: arrastar da metade esquerda para a direita abre; arrastar para a esquerda fecha (`gestao.js`).
+- Notificações (sino): gaveta pela direita (`.sino-painel` fixo, 88vw até 380 px, fundo escurecido); arrastar para a direita fecha;
+  arrastar da borda direita (28 px) para a esquerda abre. Avisos do canto: arrastar para qualquer lado fecha (como o X), esmaecendo.
+- Regra comum (`lib/gesto.js`): começa com 12 px na horizontal e 1,5× mais horizontal que vertical; sai com 30% da largura ou
+  arrasto rápido (> 0,5 px/ms); senão volta ao lugar. `data-sem-gesto` desliga o gesto do menu dentro de um elemento.

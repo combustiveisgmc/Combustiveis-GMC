@@ -1,4 +1,4 @@
-const CACHE_NAME = 'postos-autorizados-v16';   // v16: identidade do Grupo Miranda Coelho (logo, ícone e laranja); v15: login do motorista pelo usuário de 6 números, sem CPF
+const CACHE_NAME = 'postos-autorizados-v17';   // v17: logos brancas do Grupo Miranda Coelho (variante monocromática); v16: identidade do grupo (laranja, logo, ícone)
 const SHELL_FILES = [
   '/',
   '/app.css',

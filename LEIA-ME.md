@@ -112,7 +112,7 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
 - **Identidade do Grupo Miranda Coelho (18/11/2026):** laranja `#F6A42B` (cor principal), preto `#4B4B4D` e cinza `#97989A`, nas
   variáveis `--gmc-laranja`, `--gmc-preto` e `--gmc-cinza` de `public/gestao/gestao.css` e `public/app.css` (para trocar a cor da
-  marca, mude só essas três). Logo com o nome: `public/logo-grupo.png` (fundo claro) e `logo-grupo-negativo.png` (fundo escuro);
+  marca, mude só essas três). Logo (variante monocromática, desde 18/11): `public/logo-grupo.png` (preta, fundo claro) e `logo-grupo-negativo.png` (branca, fundo escuro);
   só o símbolo: `logo-simbolo*.png` (menu recolhido). Ícone do aplicativo e do site: `icon-192.png` e `icon-512.png`.
   Verde e vermelho continuam querendo dizer bom e ruim.
 - Baseado no Figma "SaaS – Sales Management Dashboard – Muvic" (layout Blacksale) e no protótipo `prototipos/design-muvic`.
@@ -732,6 +732,7 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 
 ## Notificações: sino e configuração (05/11/2026; sino desde 18/11/2026)
 - **Sino** no canto superior direito, ao lado da conta: o número vermelho é o de avisos não lidos; a lista mostra título, texto, data e hora. "Marcar como lidas" zera o número; clicar num aviso abre a tela dele. No canto da tela (aviso que salta) só aparecem os alertas de nível **crítico**.
+- No celular o painel abre como gaveta pela direita e sai arrastando o dedo para a direita (como o menu); arrastar da borda direita da tela para a esquerda abre. Os avisos que saltam no canto saem arrastando para o lado.
 - As regras ficam em "Configurar notificações", no rodapé do sino (a tela saiu do menu Operacional; precisa da permissão "Notificações").
 - Avisos que aparecem no canto da tela para quem está no portal. Crie em "Nova notificação": tipo (estoque baixo da bomba interna, comunicado com data de início e fim, preço alto em posto externo, falta cartão avisada pelo motorista, Base desatualizada; cada tipo tem os seus campos), bases (no estoque baixo dá para marcar várias; nenhuma marcada = todas), tanque, limite em litros ou % da capacidade, nível, mensagem (use {base}, {tanque}, {volume}, {limite}, {capacidade}, {percentual}), para quem e quando volta depois de fechar no X.
 - "Ver no canto da tela" mostra o aviso como vai ficar. A coluna "Agora" diz se a regra está disparando e onde. A chave "Ativa" pausa sem apagar.

@@ -6,6 +6,7 @@ import { iniciarMascaraMoeda, iniciarMascaras } from './lib/mascara.js';
 import { iniciarSelecao } from './lib/selecao.js';
 import { confirmar } from './lib/confirmar.js';
 import { iniciarNotificacoes, listaDoSino } from './lib/notificacao.js';
+import { arrastarParaFechar } from './lib/gesto.js';
 window.confirmar = confirmar;   // confirmação dentro do site (as páginas chamam confirmar() sem importar)
 
 const $ = (id) => document.getElementById(id);
@@ -143,6 +144,23 @@ function aplicarMenu() {
     if (alvo) { const it = atual.itens[Number(alvo.dataset.i)]; if (it) marcar([it]); }
     if (e.target.closest('a')) abrir(false);
   });
+  // celular (18/11/2026): o painel é uma gaveta pela direita (CSS) e sai arrastando o dedo para a direita, como o menu sai
+  // arrastando para a esquerda; arrastar para a esquerda a partir da borda direita da tela abre.
+  const celular = window.matchMedia('(max-width:820px)');
+  painel.setAttribute('data-sem-gesto', '');   // o gesto do menu não vale dentro do painel
+  arrastarParaFechar(painel, { direcoes: [1], ativo: () => celular.matches, aoSair: () => abrir(false) });
+  let borda = null;
+  document.addEventListener('touchstart', (e) => {
+    borda = celular.matches && e.touches.length === 1 && painel.classList.contains('oculto') && !app.classList.contains('menu-aberto') &&
+      e.touches[0].clientX > window.innerWidth - 28 && !e.target.closest('.leaflet-container, input[type=range]')
+      ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!borda) return;
+    const dx = e.touches[0].clientX - borda.x, dy = e.touches[0].clientY - borda.y;
+    if (Math.abs(dy) > 30) { borda = null; return; }
+    if (dx < -40) { borda = null; abrir(true); }
+  }, { passive: true });
   desenhar();
 })();
 

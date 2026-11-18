@@ -115,3 +115,8 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Logo com o nome no lugar da antiga (gestão, motoristas, Minha média, Trocar senha), negativa no tema escuro.
 - [x] Logo sem o nome como ícone do aplicativo e do site (e no menu recolhido).
 - [ ] Conferir com a área responsável se o laranja certo é mesmo o F6A42B (o código enviado foi F6542B).
+- [x] Logos trocadas pela variante monocromática (branca no escuro, preta no claro; ícone com símbolo branco em fundo escuro).
+
+## 12. Celular (18/11/2026)
+- [x] Conta ao lado das notificações no canto superior direito; painel da conta inteiro na tela.
+- [x] Notificações saem arrastando para o lado, como o menu (painel do sino em gaveta e avisos do canto).

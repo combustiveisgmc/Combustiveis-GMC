@@ -6,6 +6,14 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Logos trocadas pela variante monocromática do grupo** (pedido do usuário: não gostou das coloridas): branca no tema escuro e
+  em preto da marca (4B4B4D) no tema claro; símbolo branco em fundo escuro como ícone do aplicativo e do site; logo do menu sem
+  distorção (largura limitada mantém a proporção). Cache do aplicativo dos motoristas v17.
+- **Celular: conta ao lado do sino**, como no computador. A conta caía para a linha de baixo, à esquerda (a largura do título não
+  deixava espaço para os dois botões de 44 px), e o painel dela abria para fora da tela.
+- **Celular: notificações saem arrastando para o lado, como o menu**: o painel do sino virou gaveta pela direita (sai arrastando
+  para a direita; arrastar da borda direita para a esquerda abre) e os avisos do canto saem arrastando para qualquer lado.
+  Gesto em `public/gestao/lib/gesto.js`; teste `tests/js/gesto.test.mjs`.
 - **Identidade visual do Grupo Miranda Coelho** (pedido do usuário, cores e logos da área responsável):
   - Cores: laranja **F6A42B** como cor principal (o código recebido era F6542B, um laranja avermelhado diferente da logo; o usuário
     confirmou o F6A42B, igual ao laranja da logo), preto **4B4B4D** e cinza **97989A**. Tokens novos `--gmc-laranja/preto/cinza`
