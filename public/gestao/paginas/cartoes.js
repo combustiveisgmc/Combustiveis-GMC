@@ -3,6 +3,7 @@
 // dos motoristas (botão "Falta cartão no caminhão?" da página dos postos). Cada mudança fica pendente até o vigia
 // do computador da sincronização gravá-la na planilha; depois a lista é publicada de novo (como em Placas e Motoristas).
 import { carregarDados, esc, fmt, fmtDia } from '../lib/dados.js';
+import { BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const NOME_ESTADO = { pendente: 'Aguardando gravação', aguardando: 'Planilha aberta no Excel', aplicada: 'Gravada na planilha', erro: 'Erro ao gravar' };
 const emAberto = (a) => a.estado === 'pendente' || a.estado === 'aguardando';
@@ -78,6 +79,7 @@ export async function montar(ctx) {
 
     <dialog class="dialogo" id="cf-dialogo" aria-labelledby="cf-dlg-titulo">
       <form id="cf-form" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="cf-dlg-titulo"></h2>
         <p class="dialogo-explica" id="cf-dlg-explica"></p>
         <p class="erro-form oculto" id="cf-erro" role="alert"></p>
@@ -94,6 +96,13 @@ export async function montar(ctx) {
     </dialog>`;
   const $ = (id) => pagina.querySelector('#' + id);
   const dlg = $('cf-dialogo'), form = $('cf-form');
+  // engrenagem: aqui as listas são as do controle dos cartões (situações e categorias com cartão), fixas: só para consulta
+  form.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    abrirOpcoes({ tela: 'cartoes-frota', titulo: 'Opções do controle de cartões', podeEditar: false,
+      campos: [{ id: 'situacao', rotulo: 'Situações dos cartões', valores: SIT, fixo: true, explica: 'Gravadas na planilha CONTROLE CARTÕES FROTA e usadas nos avisos: não mudam por aqui.' },
+        { id: 'categoria', rotulo: 'Categorias que entram no controle', valores: [...CATS_CARTAO], fixo: true, explica: 'As categorias do cadastro de placas que precisam de cartão. A categoria em si se configura no cadastro de placas.' }] });
+  });
 
   // ---------- última transação de cada cartão (Base) ----------
   carregarDados().then((d) => {

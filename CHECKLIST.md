@@ -98,3 +98,14 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Mapa de calor como no BI (zoom automático, postos escolhidos sozinhos, colunas Data/Placa/Cartão).
 - [ ] Placa desabilitada escondida no roteirizador (a lista vem da aba Metas).
 - [ ] 41 fábricas de clientes com localização aproximada para conferir.
+
+## 10. Ajustes de tela (18/11/2026)
+- [x] Tirar os ícones "i" dos cartões do Início.
+- [x] Três pontinhos do gráfico "Média km/L contra a meta" → ícone de abrir o painel responsável.
+- [x] Sino de notificações ao lado da conta, só alertas críticos no canto da tela; configuração das notificações dentro do sino
+      (tela saiu do grupo Operacional).
+- [x] Varredura de textos sobrepostos/estourando (Operação por motorista > mais informações, Preço x ANP e demais telas, 1440 e 390 px).
+- [x] Barra de rolagem maior que a página em Evolução placas.
+- [x] Pontos de cada dia no gráfico de gasto diário do Início.
+- [x] "Gerenciar acessos" fora do menu lateral (fica na Conta).
+- [x] Engrenagem de configuração das opções dentro de cada cadastro (placas, motoristas, postos, contratos, fornecedores, cartões).

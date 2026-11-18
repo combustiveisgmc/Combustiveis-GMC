@@ -5,7 +5,7 @@ import { iniciarAcoesLinha } from './lib/acoes-linha.js';
 import { iniciarMascaraMoeda, iniciarMascaras } from './lib/mascara.js';
 import { iniciarSelecao } from './lib/selecao.js';
 import { confirmar } from './lib/confirmar.js';
-import { iniciarNotificacoes } from './lib/notificacao.js';
+import { iniciarNotificacoes, listaDoSino } from './lib/notificacao.js';
 window.confirmar = confirmar;   // confirmação dentro do site (as páginas chamam confirmar() sem importar)
 
 const $ = (id) => document.getElementById(id);
@@ -31,6 +31,7 @@ const carregandoUsuario = fetch('/api/me', { credentials: 'same-origin' })
     aplicarMenu();
     iniciarNotificacoes({ pode, usuario });   // avisos no canto da tela (Operacional > Notificações)
     $('conta-acessos').hidden = !pode(ROTAS.acessos.perm);
+    $('sino-rodape').hidden = !pode(ROTAS.notificacoes.perm);   // engrenagem do sino: configurar as notificações
     conferirAlertasCartoes();
     conferirConferencia();
   })
@@ -96,6 +97,53 @@ function aplicarMenu() {
     else if (e.key === 'ArrowDown') { e.preventDefault(); ls[(i + 1) % ls.length].focus(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); ls[(i - 1 + ls.length) % ls.length].focus(); }
   });
+})();
+
+// ---------- sino (notificações): ao lado da conta; lista o que está disparando (lib/notificacao.js) ----------
+// "Lida" = já vista naquela ocorrência (aviso + hora em que apareceu), guardada no navegador por login. Só o nível crítico
+// também aparece no canto da tela; aqui fica tudo. Engrenagem: Configurar notificações (antes no menu Operacional).
+(function sino() {
+  const botao = $('btn-sino'), painel = $('sino-painel'), lista = $('sino-lista'), selo = $('sino-selo');
+  let atual = listaDoSino();
+  const chaveLidas = () => 'notif-lidas:' + atual.uid;
+  const lidas = () => { try { return JSON.parse(localStorage.getItem(chaveLidas()) || '{}') || {}; } catch { return {}; } };
+  const salvar = (m) => { try { localStorage.setItem(chaveLidas(), JSON.stringify(m)); } catch {} };
+  const naoLida = (it, m) => m[it.chave] !== it.desde;
+  const quando = (ms) => { const d = new Date(ms); return isNaN(d) ? '' : d.toLocaleDateString('pt-BR') + ', ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
+  const ICONE_NIVEL = { critico: 'i-alerta', alerta: 'i-alerta', info: 'i-info' };
+  function desenhar() {
+    const m = lidas(), n = atual.itens.filter((it) => naoLida(it, m)).length;
+    selo.textContent = n > 99 ? '99+' : String(n);
+    selo.classList.toggle('oculto', !n);
+    $('sino-sr').textContent = n ? 'Notificações: ' + n + (n === 1 ? ' não lida' : ' não lidas') : 'Notificações';
+    botao.title = n ? n + (n === 1 ? ' notificação não lida' : ' notificações não lidas') : 'Notificações';
+    $('sino-lidas').hidden = !n;
+    lista.innerHTML = atual.itens.length ? atual.itens.map((it, i) => {
+      const corpo = '<svg class="sino-ic" aria-hidden="true"><use href="#' + (ICONE_NIVEL[it.nivel] || 'i-info') + '"/></svg>' +
+        '<span class="sino-txt"><strong>' + esc(it.titulo || 'Aviso') + '</strong>' + (it.texto ? '<span class="sino-desc">' + esc(it.texto) + '</span>' : '') +
+        '<small>' + esc(quando(it.desde)) + (it.nivel === 'critico' ? ' · crítico' : '') + '</small></span>';
+      const cls = 'sino-item nivel-' + esc(it.nivel || 'info') + (naoLida(it, m) ? ' nao-lida' : '');
+      return '<li class="' + cls + '">' + (it.acao && it.acao.href ? '<a href="' + esc(it.acao.href) + '" data-i="' + i + '">' + corpo + '</a>' : '<div data-i="' + i + '">' + corpo + '</div>') + '</li>';
+    }).join('') : '<li class="sino-vazio">Nenhuma notificação agora.</li>';
+  }
+  const marcar = (its) => { const m = lidas(); for (const it of its) m[it.chave] = it.desde; salvar(m); desenhar(); };
+  const abrir = (sim) => {
+    painel.classList.toggle('oculto', !sim);
+    botao.setAttribute('aria-expanded', String(sim));
+    if (sim) desenhar();
+  };
+  window.addEventListener('centro-notificacoes', (e) => { atual = e.detail; desenhar(); });
+  botao.addEventListener('click', () => abrir(painel.classList.contains('oculto')));
+  $('sino-fechar').addEventListener('click', () => { abrir(false); botao.focus(); });
+  $('sino-lidas').addEventListener('click', () => marcar(atual.itens));
+  document.addEventListener('mousedown', (e) => { if (!e.target.closest('.notif-centro')) abrir(false); });
+  painel.addEventListener('keydown', (e) => { if (e.key === 'Escape') { abrir(false); botao.focus(); } });
+  painel.addEventListener('click', (e) => {
+    const alvo = e.target.closest('[data-i]');
+    if (alvo) { const it = atual.itens[Number(alvo.dataset.i)]; if (it) marcar([it]); }
+    if (e.target.closest('a')) abrir(false);
+  });
+  desenhar();
 })();
 
 $('btn-sair').addEventListener('click', () => {
@@ -370,8 +418,10 @@ const ROTAS = {
     perm: 'programa-prime',
     montar: (ctx) => import('./dashboards/prime-resultado.js').then((m) => m.montar(ctx)),
   },
+  // fora do menu desde 18/11/2026: abre pela engrenagem do sino (cabeçalho); "grupo" = o que aparece acima do título
   notificacoes: {
-    titulo: 'Notificações',
+    titulo: 'Configurar notificações',
+    grupo: 'Notificações',
     montar: (ctx) => import('./paginas/notificacoes.js').then((m) => m.montar(ctx)),
   },
   'consulta-km': {
@@ -440,8 +490,10 @@ const ROTAS = {
     titulo: 'Motoristas',
     montar: (ctx) => import('./paginas/cadastros.js').then((m) => m.montar(ctx, 'motoristas')),
   },
+  // fora do menu lateral desde 18/11/2026: abre pelo menu da conta (iniciais no canto de cima)
   'acessos': {
     titulo: 'Gerenciar acessos',
+    grupo: 'Conta',
     perm: 'admin',
     montar: (ctx) => import('./paginas/acessos.js').then((m) => m.montar(ctx)),
   },
@@ -622,7 +674,7 @@ async function desenharRota() {
   // grupo do menu acima do título (o nome da página é o mesmo do menu; o grupo dá o contexto)
   const itemMenu = document.querySelector('#menu a[data-rota="' + rota + '"]');
   const grupo = itemMenu && itemMenu.closest('.menu-secao');
-  $('grupo-pagina').textContent = grupo ? grupo.querySelector('.menu-grupo span').textContent : '';
+  $('grupo-pagina').textContent = grupo ? grupo.querySelector('.menu-grupo span').textContent : (r.grupo || '');
   document.querySelectorAll('#menu a[data-rota]').forEach((a) => {
     if (a.dataset.rota === rota) {
       a.setAttribute('aria-current', 'page');

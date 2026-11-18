@@ -5,6 +5,7 @@
 import { fmt, esc, fmtDia } from '../lib/dados.js';
 import { htmlApoio, agendador } from '../lib/filtros.js';
 import { graficoPeriodo } from '../lib/graficos.js';
+import { carregarOpcoes, listaEfetiva, temConfig, BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const ROTA = '#/contratos-anp';
 // regra do contrato: o preço só muda quando a ANP varia mais de 5% (para cima ou para baixo) desde a data base
@@ -98,14 +99,16 @@ export async function montar(ctx) {
     <p class="nota anp-fonte" id="ct-fonte"></p>
     <dialog class="dialogo" id="ct-dlg" aria-labelledby="ct-dlg-titulo">
       <form method="dialog" id="ct-form" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="ct-dlg-titulo">Adicionar contrato</h2>
         <div class="grade-form">
-          <label class="campo-form largo"><span>Unidade</span><input name="unidade" maxlength="80" autocomplete="off" required></label>
+          <label class="campo-form largo"><span>Unidade</span><input name="unidade" maxlength="80" autocomplete="off" required list="ct-sug-unidade"></label>
           <label class="campo-form"><span>Estado de referência da ANP</span><select name="uf" class="campo-sel">${Object.entries(NOME_UF).map(([k, v]) => '<option value="' + k + '">' + esc(v) + '</option>').join('')}</select></label>
           <label class="campo-form"><span>Data do contrato</span><input type="date" name="data_contrato" required></label>
-          <label class="campo-form largo"><span>Produto</span><input name="produto" maxlength="60" autocomplete="off"></label>
+          <label class="campo-form largo"><span>Produto</span><input name="produto" maxlength="60" autocomplete="off" list="ct-sug-produto"></label>
           <label class="campo-form largo"><span>Observação</span><input name="observacao" maxlength="300" autocomplete="off"></label>
         </div>
+        <datalist id="ct-sug-unidade"></datalist><datalist id="ct-sug-produto"></datalist>
         <p class="nota" id="ct-dlg-anp"></p>
         <p class="erro-form oculto" id="ct-erro" role="alert"></p>
         <div class="dialogo-acoes"><button type="button" class="btn" id="ct-cancelar">Cancelar</button><button type="submit" class="btn btn-principal" id="ct-salvar">Salvar</button></div>
@@ -262,6 +265,20 @@ export async function montar(ctx) {
   // ---------- cadastro dos contratos ----------
   const form = el('ct-form');
   let editando = null;
+  // unidade (praça) e produto: a lista configurada na engrenagem ou os valores que já existem nos contratos
+  let opc = { opcoes: {}, podeEditar: false };
+  carregarOpcoes('contratos-anp').then((o) => { opc = o; });
+  const existentes = (campo) => [...new Set(contratos.map((c) => String(c[campo] || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const listaDe = (campo) => listaEfetiva(opc, campo, existentes(campo));
+  const encherListas = () => ['unidade', 'produto'].forEach((c) => { el('ct-sug-' + c).innerHTML = listaDe(c).map((v) => '<option value="' + esc(v) + '">').join(''); });
+  form.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    abrirOpcoes({ tela: 'contratos-anp', titulo: 'Opções do cadastro de contratos', podeEditar: opc.podeEditar,
+      campos: [{ id: 'unidade', rotulo: 'Unidades (praças dos contratos)', valores: listaDe('unidade'), configurado: temConfig(opc, 'unidade') },
+        { id: 'produto', rotulo: 'Produtos', valores: listaDe('produto'), configurado: temConfig(opc, 'produto') },
+        { id: 'uf', rotulo: 'Estados de referência da ANP', valores: Object.values(NOME_UF), fixo: true, explica: 'Os estados da pesquisa da ANP: não mudam.' }],
+      aoSalvar: (novos) => { opc = { ...opc, opcoes: { ...opc.opcoes, ...novos } }; encherListas(); } });
+  });
   const anpDoForm = () => {
     const d = form.data_contrato.value, uf = form.uf.value;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { el('ct-dlg-anp').textContent = ''; return; }
@@ -276,6 +293,7 @@ export async function montar(ctx) {
     form.produto.value = c ? c.produto : 'OLEO DIESEL S10'; form.observacao.value = c ? c.observacao || '' : '';
     el('ct-erro').classList.add('oculto');
     anpDoForm();
+    encherListas();
     el('ct-dlg').showModal();
     form.unidade.focus();
   }

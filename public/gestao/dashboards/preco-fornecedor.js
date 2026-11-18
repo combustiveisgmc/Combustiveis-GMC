@@ -10,6 +10,7 @@
 // NFs); quem edita muda o CNPJ e se o fornecedor está ativo.
 import { carregarDados, fmt, esc, fmtDia, isoParaDia, diaIso, dataParaDia } from '../lib/dados.js';
 import { criarFiltros, agendador } from '../lib/filtros.js';
+import { carregarOpcoes, listaEfetiva, temConfig, BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const DESTAQUES = [   // cor + traço: nunca só a cor
   { cor: 'var(--cat-1)', traco: '' },
@@ -151,6 +152,7 @@ export async function montar(ctx) {
     </dialog>
     <dialog class="dialogo" id="pf-dlg-forn" aria-labelledby="pf-dlg-forn-titulo">
       <form method="dialog" id="pf-form-forn" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="pf-dlg-forn-titulo">Novo fornecedor</h2>
         <p class="dialogo-explica">Entra na aba Fornecedores da planilha de negociações e passa a aparecer no lançamento do produto e das unidades marcadas.</p>
         <p class="erro-form oculto" id="pf-erro-forn" role="alert"></p>
@@ -167,6 +169,18 @@ export async function montar(ctx) {
       </form>
     </dialog>`;
   const el = (id) => pagina.querySelector('#' + id);
+  // unidades (praças) do lançamento e do cadastro de fornecedor: a lista configurada na engrenagem ou as que já têm preço
+  let opc = { opcoes: {}, podeEditar: false };
+  carregarOpcoes('preco-fornecedor').then((o) => { opc = o; });
+  const unidadesForm = () => listaEfetiva(opc, 'unidade', unidades);
+  el('pf-form-forn').addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    abrirOpcoes({ tela: 'preco-fornecedor', titulo: 'Opções do cadastro de fornecedores', podeEditar: opc.podeEditar,
+      campos: [{ id: 'unidade', rotulo: 'Unidades (praças)', valores: unidadesForm(), configurado: temConfig(opc, 'unidade'),
+        explica: 'Use o nome da praça como na planilha de negociações (ex.: JEQUIE, SP, BELEM).' },
+        { id: 'produto', rotulo: 'Produtos', valores: ['Diesel', 'Arla 32'], fixo: true }],
+      aoSalvar: (novos) => { opc = { ...opc, opcoes: { ...opc.opcoes, ...novos } }; } });
+  });
 
   const filtros = criarFiltros({
     dimensoes: [{ id: 'periodo', rotulo: 'Período', periodo: true }],
@@ -498,7 +512,7 @@ export async function montar(ctx) {
     formNeg.reset();
     formNeg.data.value = diaIso(dataParaDia(new Date()));
     formNeg.produto.value = produto;
-    formNeg.unidade.innerHTML = unidades.map((u) => '<option value="' + esc(u) + '"' + (u === unidade ? ' selected' : '') + '>' + esc(nomeUnidade(u)) + '</option>').join('');
+    formNeg.unidade.innerHTML = [...new Set([...unidadesForm(), unidade])].map((u) => '<option value="' + esc(u) + '"' + (u === unidade ? ' selected' : '') + '>' + esc(nomeUnidade(u)) + '</option>').join('');
     erro('pf-erro-neg', '');
     desenharLancamento();
     dlgNeg.showModal();
@@ -564,7 +578,7 @@ export async function montar(ctx) {
     formForn.produto.value = x ? x.p : produto;
     formForn.produto.disabled = !!x;
     formForn.ativo.checked = x ? x.ativo : true;
-    const unis = x ? [x.u] : unidades;
+    const unis = x ? [x.u] : unidadesForm();
     const cnpjDe = (u) => { const c = cad.find((y) => y.f === formForn.fornecedor.value.trim().toUpperCase() && y.p === formForn.produto.value && y.u === u); return c ? c.cnpj : ''; };
     el('pf-forn-unidades').innerHTML = unis.map((u) => '<div class="pf-uni-cnpj"><label class="pf-uni"><input type="checkbox" value="' + esc(u) + '"' +
       (x || u === unidade ? ' checked' : '') + (x ? ' disabled' : '') + '> ' + esc(nomeUnidade(u)) + '</label>' +

@@ -143,7 +143,7 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Administradores: `pedro.lagares`, `joao.oliveira`, `vitor.coelho`. Senha inicial: `123456`.
 - No primeiro acesso o site obriga a trocar a senha (mínimo 8 caracteres); a gestão só abre depois disso.
 - Depois, a senha pode ser trocada quando quiser em **Trocar senha**, no topo da gestão.
-- **Gerenciar acessos (pelo portal, só administradores):** Conta → Gerenciar acessos.
+- **Gerenciar acessos (pelo portal, só administradores):** Conta (canto superior direito) → Gerenciar acessos. Desde 18/11/2026 não fica mais no menu lateral.
   - **Novo login:** nome, usuário e tipo de acesso. O portal gera uma senha provisória, mostrada uma única vez,
     e a pessoa troca no primeiro acesso.
   - **Tipo de acesso:** *Administrador* abre tudo e gerencia os acessos. *Acesso personalizado* abre só o que
@@ -725,7 +725,9 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 
 - **PRIME e Mapa de calor (04/11/2026):** no PRIME, "Tirar / trocar" com outro motorista também corrige a Base_copia (o resto do portal muda quando a Base for atualizada) e um parcial no último abastecimento do mês tira junto o 1º do mês seguinte. O motorista vê a média dele sem os abastecimentos fora do PRIME. No Mapa de calor, clicar num posto filtra a tabela de abastecimentos ao lado; o lápis na coluna Unidade troca o centro de custo do abastecimento na Base_copia (precisa do acesso de editar abastecimentos).
 
-## Operacional > Notificações (05/11/2026)
+## Notificações: sino e configuração (05/11/2026; sino desde 18/11/2026)
+- **Sino** no canto superior direito, ao lado da conta: o número vermelho é o de avisos não lidos; a lista mostra título, texto, data e hora. "Marcar como lidas" zera o número; clicar num aviso abre a tela dele. No canto da tela (aviso que salta) só aparecem os alertas de nível **crítico**.
+- As regras ficam em "Configurar notificações", no rodapé do sino (a tela saiu do menu Operacional; precisa da permissão "Notificações").
 - Avisos que aparecem no canto da tela para quem está no portal. Crie em "Nova notificação": tipo (estoque baixo da bomba interna, comunicado com data de início e fim, preço alto em posto externo, falta cartão avisada pelo motorista, Base desatualizada; cada tipo tem os seus campos), bases (no estoque baixo dá para marcar várias; nenhuma marcada = todas), tanque, limite em litros ou % da capacidade, nível, mensagem (use {base}, {tanque}, {volume}, {limite}, {capacidade}, {percentual}), para quem e quando volta depois de fechar no X.
 - "Ver no canto da tela" mostra o aviso como vai ficar. A coluna "Agora" diz se a regra está disparando e onde. A chave "Ativa" pausa sem apagar.
 - O estoque é a mesma conta da tela Estoque; quem não tem acesso ao Estoque não vê o aviso de estoque. Permissão para mexer nas regras: "Notificações" (Gerenciar acessos > Operacional).
@@ -733,3 +735,11 @@ Enquanto isso não for feito, os motoristas continuam usando o site antigo norma
 ## Dashboards > Contratos x ANP (05/11/2026)
 - Os contratos ficam no banco do portal (não lê mais a planilha de reajustes). Cada contrato: unidade, estado de referência da ANP, data do contrato, produto e observação. "Adicionar contrato", lápis e lixeira na tabela (permissão "Contratos x ANP (cadastrar, editar e excluir contratos)").
 - Variação = ANP do estado na semana escolhida ÷ ANP do estado na semana da data do contrato − 1. Passou de ±5%: fora da variação.
+
+## Engrenagem dos cadastros (18/11/2026)
+- Dentro do formulário de cada cadastro (Adicionar/editar placa, motorista, posto, contrato x ANP, fornecedor; cartões só consulta) a
+  engrenagem abre as **opções das listas**: categoria, unidade e marca da placa; unidade do motorista; aviso do posto; produto e unidade do
+  contrato; unidade do fornecedor. Adicione ou tire opções e clique em "Salvar opções".
+- Sem lista própria o formulário sugere o que já existe no cadastro; tirar todas as opções de um campo volta a esse comportamento.
+- Situação, plataforma, combustível e tipo aparecem como **fixos** (são usados nas contas do site).
+- Quem só consulta a tela vê as opções mas não grava. Ficam no banco do portal (D1 `opcoes_cadastro`, espelhado no Supabase) por `/api/opcoes`.

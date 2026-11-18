@@ -6,6 +6,24 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Ajustes de tela (pedido do usuário, 8 itens):**
+  - Início: tirados os ícones "i" dos cartões (o cartão inteiro já leva à tela); o ícone de três pontinhos do gráfico "Média km/L
+    contra a meta" virou a seta "abrir" (leva ao painel Média geral); o gráfico de gasto diário mostra um ponto em cada dia.
+  - **Sino de notificações** no canto superior direito, ao lado da conta: número de não lidas, lista com título, texto, data/hora e
+    nível, "Marcar como lidas", clique leva à tela do aviso; rodapé "Configurar notificações" abre a antiga tela Operacional >
+    Notificações (saiu do menu). No canto da tela (toast) só aparecem os alertas **críticos**; os demais ficam só no sino.
+  - "Gerenciar acessos" saiu do menu lateral (continua em Conta, no canto superior direito).
+  - **Engrenagem nos cadastros:** dentro do formulário de cada cadastro (placas, motoristas, postos, contratos x ANP, fornecedores,
+    cartões) abre as opções das listas (ex.: categoria da placa, unidade, marca, aviso do posto, produto do contrato). Gravadas no D1
+    `opcoes_cadastro` (migração 0027 + espelho Supabase) por `/api/opcoes`; campos usados nas contas (situação, plataforma,
+    combustível, tipo) aparecem como fixos. Sem lista própria, o formulário sugere o que já existe no cadastro.
+  - **Varredura de layout** (todas as telas do menu, 1440 px e 390 px): Preço x ANP (texto "a do estado de cada abastecimento"
+    estourava o cartão e criava rolagem lateral: valor em texto agora quebra linha), Operação por motorista > mais informações do
+    abastecimento (centro de custo longo invadia a coluna vizinha), Evolução placas (barra de rolagem de ~18 mil px: os textos de
+    leitor de tela da tabela escapavam da rolagem; `.tabela-rolagem` com `position:relative`, vale para todas as tabelas), coluna de
+    ações presa à direita no celular (cobria a tabela em Preço postos externos e Cartões frota) e lista de opções da engrenagem.
+  - Testes: `tests/js/opcoes.test.mjs` (catálogo, limpeza, API) e `tests/js/layout.test.mjs` (texto x número na faixa de apoio).
+
 - **PVH7231 → PVH7C31 nos dados do site e do banco** (pedido do usuário): correção de placa em `gestao_normalizar.PLACAS_CORRIGIDAS`,
   aplicada no modelo `gestao` (metas, cartões e Placas MERCOSUL apontam para a PVH7C31) e na leitura da aba Metas que gera os dados
   dos painéis (`importar_base.py`; a Base.xlsx não é alterada); planilha de cartões com a placa trocada pela fila da tela Cartões frota.

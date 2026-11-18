@@ -4,6 +4,7 @@
 import { esc, fmt } from '../lib/dados.js';
 import { criarFiltros } from '../lib/filtros.js';
 import { confirmar } from '../lib/confirmar.js';
+import { carregarOpcoes, listaEfetiva, temConfig, BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const NOME_ESTADO = { pendente: 'Aguardando gravação', aguardando: 'Planilha aberta no Excel', aplicada: 'Gravada na planilha', erro: 'Erro ao gravar' };
 const emAberto = (a) => a.estado === 'pendente' || a.estado === 'aguardando';
@@ -44,10 +45,12 @@ export async function montar(ctx, tipo) {
     if (!r.ok) throw new Error(j.erro || 'Não foi possível ler o cadastro. Recarregue a página.');
     info = j;
   }
+  const opcPronto = carregarOpcoes('cadastro-' + tipo);   // opções configuráveis (engrenagem do formulário)
   try { await carregar(); } catch (e) {
     pagina.innerHTML = '<div class="vazio">' + esc(e.message) + '</div>';
     return {};
   }
+  let opc = await opcPronto;
   if (!info.lista) {
     pagina.innerHTML = '<div class="vazio"><strong>A lista ainda não foi publicada.</strong> O computador da sincronização envia a planilha ' +
       'de placas e motoristas em instantes; abra esta página de novo daqui a pouco.</div>';
@@ -95,6 +98,7 @@ export async function montar(ctx, tipo) {
 
     <dialog class="dialogo dialogo-largo" id="cd-dialogo" aria-labelledby="cd-dlg-titulo">
       <form id="cd-form" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="cd-dlg-titulo"></h2>
         <p class="dialogo-explica" id="cd-dlg-explica"></p>
         <p class="erro-form oculto" id="cd-erro" role="alert"></p>
@@ -280,8 +284,10 @@ export async function montar(ctx, tipo) {
 
   // ---------- formulário ----------
   let editando = null;   // linha em edição; null = cadastro novo
+  // sugestões de cada campo: a lista configurada na engrenagem ou, sem ela, os valores que já existem na planilha
+  const sugDe = (c) => listaEfetiva(opc, c.id, info.sugestoes[c.id] || []);
   $('cd-campos').innerHTML = campos.map((c) => {
-    const sug = info.sugestoes[c.id];
+    const sug = info.sugestoes[c.id] ? sugDe(c) : null;
     const lista = sug ? ' list="cd-lista-' + c.id + '"' : '';
     const dl = sug ? '<datalist id="cd-lista-' + c.id + '">' + sug.map((s) => '<option value="' + esc(s) + '">').join('') + '</datalist>' : '';
     const modo = c.tipo === 'inteiro' ? ' inputmode="numeric"' : c.tipo === 'decimal' ? ' inputmode="decimal"'
@@ -360,7 +366,7 @@ export async function montar(ctx, tipo) {
         c.opcoes.map((o) => opcao(o, o, o === valor)).join('');
       return;
     }
-    const sug = info.sugestoes[c.id] || [];
+    const sug = sugDe(c);
     sel.innerHTML = opcao('', 'Escolha…', !atual) +
       (atual && !sug.includes(atual) ? opcao(atual, atual, true) : '') +
       sug.map((s) => opcao(s, s, s === atual)).join('') + opcao(OUTRA, 'Outra…');
@@ -400,6 +406,23 @@ export async function montar(ctx, tipo) {
     (r ? form[campos[1].id] : form[campos[0].id]).focus();
   }
   if (editar) $('cd-adicionar').addEventListener('click', () => abrir(null));
+
+  // engrenagem: opções dos campos de lista (categoria, unidade, marca...); situação fica fixa (usada nas contas do site)
+  form.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    const conf = campos.filter((c) => c.sugestoes).map((c) => ({ id: c.id, rotulo: c.rotulo, valores: sugDe(c), configurado: temConfig(opc, c.id) }));
+    const fixos = campos.filter((c) => c.tipo === 'opcao').map((c) => ({ id: c.id, rotulo: c.rotulo, valores: c.opcoes, fixo: true }));
+    abrirOpcoes({ tela: 'cadastro-' + tipo, titulo: 'Opções do cadastro de ' + T.varios, campos: conf.concat(fixos), podeEditar: opc.podeEditar,
+      aoSalvar: (novos) => {
+        opc = { ...opc, opcoes: { ...opc.opcoes, ...novos } };
+        for (const c of campos.filter((x) => x.sugestoes)) {
+          if (c.selecao) { prepararSelecao(c, lerCampo(c), false); continue; }
+          const dl = $('cd-lista-' + c.id);
+          if (dl) dl.innerHTML = sugDe(c).map((v) => '<option value="' + esc(v) + '">').join('');
+        }
+        ctx.aviso('Opções do cadastro gravadas.');
+      } });
+  });
   $('cd-cancelar').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 

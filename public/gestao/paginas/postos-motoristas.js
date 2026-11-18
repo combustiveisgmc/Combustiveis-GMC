@@ -7,6 +7,7 @@
 import { esc, fmt, fmtDia, carregarDados } from '../lib/dados.js';
 import { seloCartao } from '../lib/cartoes.js';
 import { botoesMaisMenos } from '../lib/filtros.js';
+import { carregarOpcoes as carregarOpcoesCadastro, listaEfetiva, temConfig, BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const semAcento = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 const chave = (s) => semAcento(s).toUpperCase().replace(/\s+/g, ' ').trim();
@@ -92,11 +93,12 @@ export async function montar(ctx) {
 
     <dialog class="dialogo" id="pm-dialogo" aria-labelledby="pm-dlg-titulo">
       <form id="pm-form" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="pm-dlg-titulo"></h2>
         <p class="dialogo-explica" id="pm-dlg-explica"></p>
         <p class="erro-form oculto" id="pm-erro" role="alert"></p>
         <div class="pm-neg oculto" id="pm-neg" role="status"></div>
-        <datalist id="pm-sug-postos"></datalist>
+        <datalist id="pm-sug-postos"></datalist><datalist id="pm-sug-avisos"></datalist>
         <div class="grade-form">
           <label class="campo-form"><span>Unidade</span><select name="unidade" required></select></label>
           <label class="campo-form"><span>Situação</span><select name="status" required></select></label>
@@ -106,7 +108,7 @@ export async function montar(ctx) {
           <label class="campo-form"><span>Tipo</span><select name="tipo"></select></label>
           <label class="campo-form"><span>Valor negociado (R$/L)</span><input name="valor" inputmode="numeric" data-moeda="2" autocomplete="off" placeholder="Em branco: mantém o atual…"></label>
           <label class="campo-form"><span>Combustível</span><select name="combustivel"></select></label>
-          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off" placeholder="Ex.: SEMPRE COMPLETAR…"></label>
+          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off" list="pm-sug-avisos" placeholder="Ex.: SEMPRE COMPLETAR…"></label>
           <label class="campo-form"><span>Latitude</span><input name="latitude" inputmode="decimal" autocomplete="off" placeholder="-4,9541…"></label>
           <label class="campo-form"><span>Longitude</span><input name="longitude" inputmode="decimal" autocomplete="off" placeholder="-47,5031…"></label>
         </div>
@@ -119,6 +121,21 @@ export async function montar(ctx) {
     </dialog>`;
   const $ = (id) => pagina.querySelector('#' + id);
   const dlg = $('pm-dialogo'), form = $('pm-form');
+  // avisos para o motorista: a lista configurada na engrenagem (tela "postos") ou os avisos que já existem nos postos
+  let opcCadastro = { opcoes: {}, podeEditar: false };
+  carregarOpcoesCadastro('postos').then((o) => { opcCadastro = o; });
+  const avisosExistentes = () => [...new Set(postos.map((p) => String(p.Aviso || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const listaAvisos = () => listaEfetiva(opcCadastro, 'aviso', avisosExistentes());
+  const encherAvisos = () => { $('pm-sug-avisos').innerHTML = listaAvisos().map((v) => '<option value="' + esc(v) + '">').join(''); };
+  form.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    abrirOpcoes({ tela: 'postos', titulo: 'Opções do cadastro de postos', podeEditar: opcCadastro.podeEditar,
+      campos: [{ id: 'aviso', rotulo: 'Avisos para o motorista', valores: listaAvisos(), configurado: temConfig(opcCadastro, 'aviso') },
+        ...(opcoes ? [{ id: 'unidade', rotulo: 'Unidade', valores: opcoes.unidades, fixo: true }, { id: 'status', rotulo: 'Situação', valores: opcoes.status, fixo: true },
+          { id: 'plataforma', rotulo: 'Cartão', valores: opcoes.plataformas, fixo: true }, { id: 'tipo', rotulo: 'Tipo', valores: opcoes.tipos.filter(Boolean), fixo: true }] : []),
+        { id: 'combustivel', rotulo: 'Combustível', valores: COMBUSTIVEIS, fixo: true }],
+      aoSalvar: (novos) => { opcCadastro = { ...opcCadastro, opcoes: { ...opcCadastro.opcoes, ...novos } }; encherAvisos(); } });
+  });
   // login só com "ver a lista": sem os botões de alterar (o servidor também recusa a gravação)
   // (modo consulta: a lista, os filtros e a busca continuam; somem as ações e o histórico de alterações)
   const consulta = ctx.pode && !ctx.pode('postos-editar');
@@ -492,6 +509,7 @@ export async function montar(ctx) {
     if (acao === 'adicionar' || acao === 'editar') form.posto.setAttribute('list', 'pm-sug-postos'); else form.posto.removeAttribute('list');
     $('pm-neg').classList.add('oculto');
     form.status.disabled = acao === 'bloquear' || acao === 'autorizar';
+    encherAvisos();
     dlg.showModal();
     (acao === 'adicionar' ? form.posto : acao === 'editar' ? form.plataforma : form.aviso).focus();
   }

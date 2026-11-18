@@ -13,6 +13,7 @@
 import { carregarDados, fmt, esc, fmtDia, fmtMes, mesDoDia, chaveNome, ehDiesel } from '../lib/dados.js';
 import { criarFiltros, htmlBomba, htmlApoio, agendador, botoesMaisMenos, statusHtml } from '../lib/filtros.js';
 import { graficoPeriodo, emAndamento } from '../lib/graficos.js';
+import { carregarOpcoes as carregarOpcoesCadastro, listaEfetiva, temConfig, BOTAO_OPCOES, abrirOpcoes } from '../lib/opcoes.js';
 
 const DIESEL = { has: ehDiesel };   // todo tipo de diesel (lib/dados.js)
 const TOLERANCIA = 0.005;   // R$/L: diferença de arredondamento não conta como "pagou acima"
@@ -174,8 +175,9 @@ export async function montar(ctx) {
         <div class="grade-form">
           <label class="campo-form"><span>Preço novo (R$/L)</span><input name="valor" inputmode="numeric" data-moeda="2" autocomplete="off" required placeholder="0,00"></label>
           <label class="campo-form"><span>Variação</span><input name="variacao" readonly tabindex="-1"></label>
-          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off"></label>
+          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off" list="pp-sug-avisos"></label>
         </div>
+        <datalist id="pp-sug-avisos"></datalist>
         <fieldset class="perm-bloco oculto" id="pp-unidades"><legend>Atualizar nas unidades</legend><div></div></fieldset>
         <p class="nota">Vira uma negociação nova na planilha, com a data de hoje e o momento do contato como referência do preço. Tipo, cartão e situação continuam os mesmos.</p>
         <div class="dialogo-acoes">
@@ -186,6 +188,7 @@ export async function montar(ctx) {
     </dialog>
     <dialog class="dialogo" id="pp-incluir" aria-labelledby="pp-inc-titulo">
       <form id="pp-inc-form" novalidate>
+        ${BOTAO_OPCOES}
         <h2 id="pp-inc-titulo">Incluir negociação</h2>
         <p class="dialogo-explica" id="pp-inc-explica"></p>
         <p class="erro-form oculto" id="pp-inc-erro" role="alert"></p>
@@ -198,7 +201,7 @@ export async function montar(ctx) {
           <label class="campo-form"><span>Tipo</span><select name="tipo"></select></label>
           <label class="campo-form"><span>Combustível</span><select name="combustivel"></select></label>
           <label class="campo-form largo"><span>Cidade</span><input name="cidade" required autocomplete="off" placeholder="Ex.: MARABA - PA…"></label>
-          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off"></label>
+          <label class="campo-form largo"><span>Aviso para o motorista</span><input name="aviso" autocomplete="off" list="pp-sug-avisos"></label>
         </div>
         <p class="nota">Vira a primeira negociação deste posto na planilha (a mesma do "Adicionar posto" em Postos dos motoristas). Como autorizado, ele entra na lista dos motoristas da unidade. Unidade, cidade, cartão e combustível vêm dos abastecimentos dele na Base: confira.</p>
         <div class="dialogo-acoes">
@@ -208,6 +211,12 @@ export async function montar(ctx) {
       </form>
     </dialog>`;
   const el = (id) => pagina.querySelector('#' + id);
+  // avisos para o motorista: a lista configurada na engrenagem (tela "postos", a mesma de Postos dos motoristas) ou os que existem
+  let opcCadastro = { opcoes: {}, podeEditar: false };
+  carregarOpcoesCadastro('postos').then((o) => { opcCadastro = o; });
+  const listaAvisos = () => listaEfetiva(opcCadastro, 'aviso',
+    [...new Set(autorizadosLista.map((p) => String(p.Aviso || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR')));
+  const encherAvisos = () => { el('pp-sug-avisos').innerHTML = listaAvisos().map((v) => '<option value="' + esc(v) + '">').join(''); };
 
   // ---------- atualizar o preço de um posto depois do contato (vira uma negociação nova na planilha) ----------
   const podeEditar = !!(ctx.pode && ctx.pode('postos-editar'));
@@ -249,6 +258,7 @@ export async function montar(ctx) {
     caixa.classList.toggle('oculto', porUnidade.length < 2);
     caixa.querySelector('div').innerHTML = porUnidade.map((n, i) =>
       '<label class="opcao-linha"><input type="checkbox" name="unidade" value="' + i + '" checked> <span>' + esc(n.unidade) + ' · ' + esc(n.status.toLowerCase()) + '</span></label>').join('');
+    encherAvisos();
     el('pp-dialogo').showModal();
     f.valor.focus();
   }
@@ -347,9 +357,19 @@ export async function montar(ctx) {
       { rot: 'Negociado atual', val: '—', det: '<span class="medidor-meta">sem negociação</span>' },
       { rot: 'Último pago', val: ult ? fmt.moeda(ult.vlLitro) : '—', det: ult ? '<span class="medidor-meta">' + esc(fmtDia(ult.dia)) + (ult.placa ? ' · ' + esc(ult.placa) : '') + '</span>' : '' },
     ]);
+    encherAvisos();
     el('pp-incluir').showModal();
     f.valor.focus();
   }
+  el('pp-inc-form').addEventListener('click', (e) => {
+    if (!e.target.closest('[data-opcoes]')) return;
+    abrirOpcoes({ tela: 'postos', titulo: 'Opções do cadastro de postos', podeEditar: opcCadastro.podeEditar,
+      campos: [{ id: 'aviso', rotulo: 'Avisos para o motorista', valores: listaAvisos(), configurado: temConfig(opcCadastro, 'aviso') },
+        ...(opcoes ? [{ id: 'unidade', rotulo: 'Unidade', valores: opcoes.unidades, fixo: true }, { id: 'status', rotulo: 'Situação', valores: opcoes.status, fixo: true },
+          { id: 'plataforma', rotulo: 'Cartão', valores: opcoes.plataformas, fixo: true }, { id: 'tipo', rotulo: 'Tipo', valores: opcoes.tipos.filter(Boolean), fixo: true }] : []),
+        { id: 'combustivel', rotulo: 'Combustível', valores: COMBUSTIVEIS, fixo: true }],
+      aoSalvar: (novos) => { opcCadastro = { ...opcCadastro, opcoes: { ...opcCadastro.opcoes, ...novos } }; encherAvisos(); } });
+  });
   el('pp-incluir').querySelector('[data-fechar]').addEventListener('click', () => el('pp-incluir').close());
   el('pp-inc-form').addEventListener('submit', async (e) => {
     e.preventDefault();

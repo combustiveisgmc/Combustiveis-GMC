@@ -191,7 +191,8 @@ function kpi(href, rot, num, uni, v, mesAntTxt, melhorSubir) {
     varHtml = '<span class="reg-var"><b class="' + (bom === null ? '' : bom ? 'sobe' : 'desce') + '">' + ICONE(sobe ? 'i-cima' : 'i-baixo') +
       fmt.pct(Math.abs(v)) + '</b>vs. ' + esc(mesAntTxt) + '</span>';
   }
-  return '<a class="registro" href="' + esc(href) + '"><span class="reg-rot">' + esc(rot) + ICONE('i-info') + '</span>' +
+  // sem o ícone "i" ao lado do nome (não abria nada; o cartão inteiro já leva ao painel), 18/11/2026
+  return '<a class="registro" href="' + esc(href) + '"><span class="reg-rot">' + esc(rot) + '</span>' +
     '<span class="reg-val"><span class="reg-num num">' + esc(num) + '</span>' + (uni ? '<span class="reg-uni">' + esc(uni) + '</span>' : '') + varHtml + '</span></a>';
 }
 // linha da tabela "Números de cada painel"
@@ -297,7 +298,8 @@ export async function montarResumo(caixa, { pode, texto }) {
     const cats = [...r.mgCat.entries()].filter(([, s]) => s.litros && s.litrosMeta).sort((x, y) => y[1].litros - x[1].litros).slice(0, 4);
     html += '<section class="meta-bloco ini-meta' + (quer.desp ? '' : ' ini-sozinho') + '" aria-labelledby="ini-meta-titulo">' +
       '<div class="cab-cartao"><h2 id="ini-meta-titulo">Média km/L contra a meta</h2>' +
-        '<a class="btn-cartao" href="' + esc(urlMg) + '" aria-label="Abrir Média geral" title="Abrir Média geral">' + ICONE('i-pontos') + '</a></div>' +
+        // seta de "abrir" (leva ao painel do gráfico); os três pontinhos davam a ideia de um menu de opções que não existe
+        '<a class="btn-cartao" href="' + esc(urlMg) + '" aria-label="Abrir o painel Média geral" title="Abrir o painel Média geral">' + ICONE('i-abrir') + '</a></div>' +
       '<div class="medidor">' + htmlMedidor(media, meta, statusHtml) + '</div>' +
       cats.map(([cat, s]) => {
         const m = s.km / s.litros, mt = s.km / s.litrosMeta, pct = m / mt;
@@ -386,7 +388,8 @@ export async function montarResumo(caixa, { pode, texto }) {
       if (chave === feito) return;
       feito = chave;
       graficoPeriodo(box, grafico, {
-        linhas: [{ campo: 'v', rot: 'Gasto no dia', cor: 'var(--serie-1)' }, { campo: 'm', rot: 'Esperado para o dia', cor: 'var(--texto-2)', tracejada: true }],
+        // pontos em cada dia na linha do gasto (sem eles não dava para saber onde ficava cada dia), 18/11/2026
+        linhas: [{ campo: 'v', rot: 'Gasto no dia', cor: 'var(--serie-1)', pontos: true }, { campo: 'm', rot: 'Esperado para o dia', cor: 'var(--texto-2)', tracejada: true }],
         fmtV: (v) => fmt.moeda(v), fmtEixo: (v) => (Math.abs(v) >= 1000 ? fmt.int(v / 1000) + 'k' : fmt.int(v)),
         rotulo: 'Gasto por dia em ' + mesTxt, altura: alto - 6, ultimoParcial,
       });

@@ -4,6 +4,8 @@
 //  - TIPOS: catálogo dos tipos de aviso. Cada tipo diz os campos do formulário, as variáveis da mensagem, quem pode receber
 //    (precisa) e como verifica (avaliar). Tipo novo = uma entrada nova aqui + a validação em functions/api/notificacoes.
 //  - iniciarNotificacoes({pode, usuario}): busca as regras ativas do usuário, carrega só os dados que elas usam, verifica e mostra.
+//    Desde 18/11/2026 tudo o que dispara vai para o sino do cabeçalho (evento "centro-notificacoes", listaDoSino()); no canto
+//    da tela só aparece o que é de nível crítico.
 //    Refaz a cada 10 min, ao chegar dado novo, ao voltar para a aba (no máximo a cada 2 min) e quando uma regra é gravada.
 //  - Depois de fechar no X, o aviso só volta conforme a regra ("repetir"). Se a condição deixar de valer, o "fechado" é esquecido.
 import { carregarDados, esc, ehDiesel } from './dados.js';
@@ -326,6 +328,26 @@ function esquecerFechado(uid, k) {
   try { localStorage.removeItem(chaveFechado(uid, k)); sessionStorage.removeItem(chaveFechado(uid, k)); } catch {}
 }
 
+// ---------------- sino do cabeçalho ----------------
+// hora em que cada aviso apareceu pela primeira vez (fica enquanto ele continuar disparando): mostra no sino e marca "lida"
+function horasDesde(uid, chaves) {
+  const k = 'notif-desde:' + uid;
+  let m = {};
+  try { m = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch {}
+  const novo = {};
+  for (const c of chaves) novo[c] = m[c] || Date.now();
+  try { localStorage.setItem(k, JSON.stringify(novo)); } catch {}
+  return novo;
+}
+let doSino = { uid: '', itens: [] };
+export const listaDoSino = () => doSino;
+function publicarSino(uid, itens) {
+  const ordem = { critico: 0, alerta: 1, info: 2 };
+  itens.sort((a, b) => (ordem[a.nivel] ?? 3) - (ordem[b.nivel] ?? 3) || b.desde - a.desde);
+  doSino = { uid, itens };
+  window.dispatchEvent(new CustomEvent('centro-notificacoes', { detail: doSino }));
+}
+
 export function iniciarNotificacoes({ pode, usuario }) {
   if (!usuario) return;
   const uid = usuario.usuario || usuario.id || usuario.nome;   // login (o /api/me não traz o id)
@@ -341,8 +363,12 @@ export function iniciarNotificacoes({ pode, usuario }) {
       const agora = avaliar(minhas, ctx);
       const chaves = new Set(agora.map((x) => x.chave));
       for (const k of [...ativas]) if (!chaves.has(k)) { esquecerFechado(uid, k); fecharNotificacao(k, false); ativas.delete(k); }
+      const desde = horasDesde(uid, chaves);
+      publicarSino(uid, agora.map((x) => ({ chave: x.chave, titulo: x.titulo, texto: x.texto, nivel: x.regra.nivel,
+        acao: x.acao || TIPOS[x.regra.tipo].acao, desde: desde[x.chave] })));
       for (const x of agora) {
         ativas.add(x.chave);
+        if (x.regra.nivel !== 'critico') continue;   // no canto da tela só o crítico; o resto fica no sino
         if (lerFechado(uid, x.chave, x.regra.repetir)) continue;
         mostrarNotificacao({ chave: x.chave, titulo: x.titulo, texto: x.texto, nivel: x.regra.nivel, acao: x.acao || TIPOS[x.regra.tipo].acao,
           aoFechar: () => marcarFechado(uid, x.chave, x.regra.repetir) });

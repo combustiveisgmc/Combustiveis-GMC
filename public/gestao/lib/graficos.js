@@ -53,7 +53,7 @@ function ticks(min, max, alvo) {
  * @param {Array} pts     [{rotulo, rotuloLongo, ...valores}]
  * @param {object} o
  * @param {{campo, rot, cor}} [o.barras]  série em colunas (começa no zero)
- * @param {Array<{campo, rot, cor, tracejada?}>} o.linhas
+ * @param {Array<{campo, rot, cor, tracejada?, pontos?}>} o.linhas   pontos: marca cada período na linha mesmo com muitos períodos
  * @param {Function} o.fmtV    formata os valores das dicas e dos rótulos das colunas
  * @param {Function} [o.fmtEixo] formata o eixo vertical
  * @param {Function} [o.fmtRotulo] formato curto dos rótulos em cima das colunas (padrão: fmtV)
@@ -131,8 +131,9 @@ export function graficoPeriodo(box, pts, o) {
           (parcial ? '<path d="M' + x(n - 2).toFixed(1) + ' ' + y(pts[n - 2][s.campo]).toFixed(1) + ' L' + x(n - 1).toFixed(1) + ' ' + y(pts[n - 1][s.campo]).toFixed(1) +
             '" fill="none" stroke="' + s.cor + '" stroke-width="2" stroke-dasharray="4 4" opacity="0.55" stroke-linecap="round"/>' +
             '<circle cx="' + x(n - 1) + '" cy="' + y(pts[n - 1][s.campo]) + '" r="3.5" fill="var(--superficie)" stroke="' + s.cor + '" stroke-width="2" opacity="0.7"/>' : '') +
-        (n <= 12 ? pts.map((p, i) => (!tem(p[s.campo]) ? ''
-          : '<circle cx="' + x(i) + '" cy="' + y(p[s.campo]) + '" r="3.5" fill="var(--superficie)" stroke="' + s.cor + '" stroke-width="2"/>')).join('') : '');
+        // pontos: sempre que a série pede (s.pontos) ou com poucos períodos; o último em andamento já tem o seu
+        (n <= 12 || s.pontos ? pts.map((p, i) => (!tem(p[s.campo]) || (parcial && i === n - 1) ? ''
+          : '<circle class="ponto-serie" cx="' + x(i) + '" cy="' + y(p[s.campo]) + '" r="' + (n <= 12 ? 3.5 : 3) + '" fill="var(--superficie)" stroke="' + s.cor + '" stroke-width="2"/>')).join('') : '');
       }).join('') +
       // faixa vertical no período apontado, como o destaque do gráfico do Figma
       '<rect class="cursor" y="' + m.t + '" width="26" height="' + (H - m.t - m.b) + '" rx="5" fill="var(--tinta)" opacity="0.12" style="display:none"/>' +

@@ -410,9 +410,11 @@ export function htmlBomba(t) {
 export const valorRs = (v) => (v === null || v === undefined || !isFinite(v) ? '—' : 'R$ ' + fmt.d2(v));
 
 // Linha de apoio: [{rot, val, det?(html)}]
+// valor sem nenhum algarismo (ex.: "a do estado de cada abastecimento") é texto: quebra linha em vez de estourar o cartão (18/11)
+export const valorTexto = (v) => typeof v === 'string' && v.trim() !== '' && v.trim() !== '—' && !/\d/.test(v);
 export function htmlApoio(itens) {
   return itens.map((a) =>
-    '<div><dt>' + esc(a.rot) + '</dt><dd><span class="num">' + esc(a.val) + '</span>' + (a.det ? ' ' + a.det : '') + '</dd></div>').join('');
+    '<div><dt>' + esc(a.rot) + '</dt><dd><span class="num' + (valorTexto(a.val) ? ' apoio-texto' : '') + '">' + esc(a.val) + '</span>' + (a.det ? ' ' + a.det : '') + '</dd></div>').join('');
 }
 
 // "Mostrar mais N" e "Mostrar menos" embaixo de uma lista paginada aos poucos (botões data-mais / data-menos)
