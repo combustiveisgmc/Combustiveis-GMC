@@ -131,3 +131,31 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Quem só tem a Consulta de KM não recebe mais o preço alto (padrão do tipo = painéis de preço).
 - [x] "Para quem" com "Quem tem acesso a estas telas" e a contagem de quem recebe agora.
 - [ ] Usuário ajustar as telas do aviso "Preço alto no posto" (hoje 4 logins; a equipe das bases deixou de receber).
+
+## 15. Migração 100% nuvem (decidida em 18/11/2026)
+Decisões do usuário: banco principal = **Supabase** (D1 só para login, sessões, filas e configurações); a Base.xlsx continua
+alimentando o BI e outras planilhas, atualizada **à mão** pelo botão Exportar do Editar abastecimentos; o Consolidador grava no banco.
+O vigia só é desligado no fim, com cada tarefa abaixo já rodando na nuvem e conferida.
+
+### 15.1 Exportação e cadastros (primeira etapa)
+- [x] Botão **Exportar** no Editar abastecimentos: planilha igual à Base_copia (48 colunas A..AV, Arial 8, cabeçalho em negrito,
+      filtro automático, formato de cada coluna), só com os abastecimentos dos filtros da tela; fonte `public.base_transacoes` (18/11).
+- [ ] Opções dos cadastros (hoje listas na engrenagem) viram **tabelas**: unidades, categorias de veículo, marcas, avisos de posto,
+      produtos de contrato; placa, motorista, cartão, posto, contrato e fornecedor apontam para elas (a unidade é um cadastro).
+
+### 15.2 Abastecimentos no banco
+- [ ] `base_transacoes` vira a origem: painéis leem do banco (não mais da Base.xlsx via vigia).
+- [ ] Editar abastecimentos, Rateio das NFs e Bomba interna gravam direto no banco (sem fila para a Base_copia).
+- [ ] Consolidador grava os lotes no banco.
+- [ ] APIs Ticket e TruckPag (tempo real e D-1) numa tarefa agendada na nuvem, com as credenciais como segredo.
+
+### 15.3 Demais planilhas no banco
+- [ ] Placas e motoristas sem a planilha (já gravam no Supabase).
+- [ ] Cartões frota, postos dos motoristas e negociações, preço bomba interna, coordenadas dos postos.
+- [ ] Real x Orçado: orçamento no banco com tela de lançamento.
+- [ ] ANP e Petrobras baixados por tarefa agendada na nuvem; conferir se a pasta Reajustes SGB ainda é usada.
+
+### 15.4 Desligar o vigia
+- [ ] Conferir painéis x banco por alguns dias com o vigia ainda ligado (só lendo).
+- [ ] Desligar a tarefa agendada nos dois computadores e retirar o revezamento.
+

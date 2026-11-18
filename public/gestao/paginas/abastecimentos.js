@@ -18,6 +18,8 @@ import { fmt, esc, fmtDia, carregarDesabilitadas, placaDesabilitada } from '../l
 import { criarFiltros } from '../lib/filtros.js';
 import { seloCartao as selo, nomeCartao } from '../lib/cartoes.js';
 import { normFuel, normKey, chaveCadeia } from '../lib/consolidador.js';
+import { carregarExcelJS, linhaPlanilha, montarPlanilha, confere } from '../lib/exportar-base.js';
+import { salvar } from '../lib/baixar.js';
 
 const POR_PAGINA = 60;   // linhas desenhadas por vez; a tabela tem rolagem própria e carrega o próximo lote ao chegar no fim
 const CAMPO = { E: 'serial', F: 'placa', L: 'mot', O: 'litros', P: 'vl', Q: 'hodo', R: 'km', S: 'kml', T: 'valor', AB: 'inf1', AD: 'inf3' };
@@ -316,6 +318,8 @@ export async function montar(ctx) {
       <div class="tabela-ferramentas">
         <label class="ea-alternar"><input type="checkbox" id="ea-suspeitos"> Só os KM para conferir <span class="ea-qtd" id="ea-qtd-suspeitos"></span></label>
         <label class="ea-alternar"><input type="checkbox" id="ea-alterados"> Só os alterados</label>
+        <button type="button" class="btn ea-exportar" id="ea-exportar" title="Planilha igual à Base_copia, só com os abastecimentos dos filtros">
+          <svg aria-hidden="true"><use href="#i-baixar"/></svg><span class="txt">Exportar</span></button>
         ${editar ? `<div class="ea-barra oculto" id="ea-barra" role="region" aria-label="Alterações não salvas">
           <span id="ea-barra-txt"></span>
           <button type="button" class="btn" id="ea-descartar">Descartar</button>
@@ -332,6 +336,46 @@ export async function montar(ctx) {
       <div class="tabela-rolagem tabela-historico"><table class="dados" id="ea-hist"></table></div>
     </section>`;
   const el = (id) => pagina.querySelector('#' + id);
+  // ---------- Exportar (18/11/2026): planilha igual à Base_copia com os abastecimentos dos filtros (lib/exportar-base.js) ----------
+  const LOTE_EXPORTAR = 5000;   // linhas por chamada (/api/abastecimentos/exportar)
+  el('ea-exportar').addEventListener('click', async () => {
+    const b = el('ea-exportar'), txt = b.querySelector('.txt');
+    const nums = visiveis().map((l) => l.linha).sort((a, c) => a - c);
+    if (!nums.length) { ctx.aviso('Nenhum abastecimento com esses filtros para exportar.'); return; }
+    b.disabled = true;
+    try {
+      const ExcelJS = await carregarExcelJS();
+      const banco = [];
+      for (let i = 0; i < nums.length; i += LOTE_EXPORTAR) {
+        txt.textContent = 'Exportando… ' + Math.round((i / nums.length) * 100) + '%';
+        const r = await fetch('/api/abastecimentos/exportar', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ linhas: nums.slice(i, i + LOTE_EXPORTAR) }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.erro || 'Não foi possível exportar (' + r.status + ').');
+        banco.push(...j.linhas);
+      }
+      // cada linha do banco tem de ser o mesmo abastecimento da tela (placa, minuto e litros); senão a cópia do banco e a lista
+      // da tela são de versões diferentes da Base_copia e a exportação sairia com linhas trocadas
+      const trocadas = banco.filter((r) => !confere(r, porLinha.get(r[41]))).length;
+      if (trocadas) throw new Error('A lista da tela e o banco estão em versões diferentes da Base_copia (' + fmt.int(trocadas) +
+        ' abastecimento(s) não batem). Nada foi exportado: recarregue a página em alguns minutos e exporte de novo.');
+      txt.textContent = 'Montando a planilha…';
+      const linhasPl = banco.map(linhaPlanilha);
+      const datas = linhasPl.map((l) => l[4]).filter(Boolean).sort((a, c) => a - c);
+      const dia = (d) => d.toISOString().slice(0, 10).split('-').reverse().join('-');
+      const nome = 'Base_copia ' + (datas.length ? dia(datas[0]) + (dia(datas[0]) !== dia(datas[datas.length - 1]) ? ' a ' + dia(datas[datas.length - 1]) : '') : 'exportada') + '.xlsx';
+      const buf = await montarPlanilha(ExcelJS, linhasPl).xlsx.writeBuffer();
+      salvar(nome, new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const faltam = nums.length - banco.length;
+      ctx.aviso(fmt.int(banco.length) + ' abastecimento(s) exportado(s) em "' + nome + '".' +
+        (faltam > 0 ? ' ' + fmt.int(faltam) + ' não estavam no banco ainda (a lista da tela é mais nova que a cópia do banco); exporte de novo em alguns minutos.' : '') +
+        (servidor.size || servidorExcl.size ? ' Correções ainda não gravadas na Base_copia saem como estavam antes.' : ''));
+    } catch (e) {
+      ctx.aviso(e.message);
+    } finally {
+      b.disabled = false; txt.textContent = 'Exportar';
+    }
+  });
   const estado = { limite: POR_PAGINA, suspeitos: false, alterados: false, ordem: { campo: 'data', dir: -1 } };
   // colunas da tabela: [id, título, largura mínima em px, numérica, valor para ordenar]. A tabela estica nas telas largas e
   // rola para o lado nas estreitas, sem cortar o conteúdo (Data e Placa ficam presas à esquerda); o cartão aparece embaixo da placa

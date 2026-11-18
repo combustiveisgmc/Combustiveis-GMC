@@ -25,6 +25,13 @@ Precisa só do Node.js instalado. Não rode `npm install`: os comandos baixam o 
 npm, fora desta pasta, para o ownCloud não sincronizar milhares de arquivos. Na primeira vez em um
 computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 
+## Exportar a Base (Editar abastecimentos, desde 18/11/2026)
+- Botão **Exportar** na tabela do Editar abastecimentos: baixa uma planilha igual à Base_copia (aba Transações, 48 colunas, mesma
+  formatação) só com os abastecimentos que estão nos filtros da tela (período, placa, motorista, posto, cartão, informações adicionais,
+  "só os KM para conferir", "só os alterados"). É ela que atualiza a Base.xlsx à mão (o BI e outras planilhas leem a Base).
+- Vem do banco (Supabase, `base_transacoes`). Correções ainda não gravadas na Base_copia saem como estavam antes. Se a lista da tela
+  e o banco estiverem em versões diferentes (um lote acabou de entrar), nada é exportado e o aviso pede para recarregar a página.
+
 ## Banco de dados no Supabase (desde 12/11/2026)
 
 - Projeto Supabase (Postgres 17) ligado ao repositório do GitHub (pasta `.`, branch `main`). As tabelas ficam em

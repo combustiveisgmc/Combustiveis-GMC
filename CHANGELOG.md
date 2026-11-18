@@ -6,6 +6,16 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Migração 100% nuvem decidida** (pedido do usuário): banco principal Supabase, Base.xlsx atualizada à mão pela exportação,
+  Consolidador gravando no banco e o vigia desligado só no fim. Plano por etapas no CHECKLIST (§15).
+- **Editar abastecimentos > Exportar**: planilha igual à Base_copia > Transações (48 colunas A..AV, mesmas larguras, Arial 8,
+  cabeçalho em negrito centralizado, filtro automático, formato de cada coluna) só com os abastecimentos dos filtros da tela; nome
+  "Base_copia <primeiro dia> a <último dia>.xlsx". Dados de `public.base_transacoes` (função `gestao_exportar_base`, migração
+  `20261118200000_gestao_exportar_base.sql`) por `/api/abastecimentos/exportar` (permissão Editar abastecimentos), planilha montada no
+  navegador com ExcelJS 4.4.0 (cdnjs). Colunas de fórmula recalculadas (ANO, MÊS, COD UNID. = placa + hodômetro, DATA REF, AV =
+  placa + forma). Trava: se a lista da tela e o banco forem de versões diferentes da Base_copia, não exporta. Conferido com a
+  Base_copia em 2.014 linhas (18/10 a 17/11): 45 colunas idênticas; COD UNID. (46 linhas) e AV (3) saem com o valor atual (a planilha
+  guardava o de antes de uma correção de hodômetro ou placa). Teste `tests/js/exportar-base.test.mjs`.
 - **Notificações: "Quem tem acesso a estas telas"** (pedido do usuário: quem só vê a Consulta de KM recebia o aviso de preço alto).
   Em Configurar notificações > Para quem há agora três opções: o padrão do tipo, **quem tem acesso a alguma das telas marcadas**
   (as telas do menu, por grupo) e só estes usuários; a linha "Recebem agora" mostra quantos e quem recebe. O servidor filtra as
