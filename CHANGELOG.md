@@ -6,6 +6,9 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Divisão por cartão > Dia a dia com %** (pedido do usuário): cada dia mostra o % dos litros de cada cartão, inteiro (ex.: 63%) e em
+  fonte menor para caber nas colunas estreitas (aparece em fatias a partir de 10%; coluna com pelo menos ~28 px, no celular o gráfico
+  rola para o lado). `pctCurto` em `dashboards/divisao-cartoes.js`; teste em `tests/js/layout.test.mjs`.
 - **Densidade dos painéis** (pedido do usuário: cartões altos demais, rolagem constante): em 1440×900 o principal de cada painel
   (filtros, indicadores, medidor e o 1º gráfico) passa a caber acima da dobra. Tokens novos em `gestao.css`: `--vao` 16 px (vão entre
   cartões, era 25), `--recheio` 18/20 px (recheio dos cartões, era 25), `--recheio-filtros` 12/20 px, `--reg-icone` 52 px (ícone dos

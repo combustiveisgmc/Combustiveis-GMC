@@ -20,6 +20,8 @@ const corTexto = (k) => (k === SEM ? '#fff' : corTextoCartao(k));
 const posicao = (k) => { const i = ORDEM.indexOf(k); return k === SEM ? 99 : i < 0 ? 50 : i; };
 const ordenarCartoes = (ks) => [...ks].sort((a, b) => posicao(a) - posicao(b) || a.localeCompare(b));
 const L = (v) => fmt.int(v) + ' L';
+// % inteiro para as colunas estreitas do Dia a dia (18/11/2026): 0,634 -> "63%"; abaixo de 1% mostra "<1%"
+export const pctCurto = (p) => (p > 0 && p < 0.005 ? '<1%' : Math.round(p * 100) + '%');
 
 const DIMENSOES = [
   { id: 'periodo', rotulo: 'Período', periodo: true },
@@ -115,12 +117,14 @@ export async function montar(ctx) {
 
   // ---------- colunas 100% empilhadas (Mês a mês e Dia a dia) ----------
   // cols: [{id, rot, rotLongo, total, por: Map, marcado, oculto (rótulo do eixo), parcial}]
+  // textos: true = % com casas (Mês a mês); 'curto' = % inteiro, fonte menor (Dia a dia, colunas estreitas; 18/11/2026); false = sem
   function htmlColunas(cols, cartoes, textos) {
+    const curto = textos === 'curto';
     return '<div class="dc-colunas" style="--n:' + cols.length + '">' + cols.map((c, i) => {
       const segs = cartoes.filter((k) => c.por.get(k)).map((k) => {
         const p = c.por.get(k) / c.total;
         return '<span class="dc-seg' + (apagado(k) ? ' apagado' : '') + (corTexto(k) !== '#fff' ? ' claro' : '') + '" data-cartao="' + esc(k) + '" style="height:' + (p * 100).toFixed(3) + '%;background:' + cor(k) + ';color:' + corTexto(k) + '">' +
-          (textos && p >= 0.08 ? '<b>' + esc(fmt.pct(p)) + '</b>' : '') + '</span>';
+          (textos && p >= (curto ? 0.1 : 0.08) ? '<b' + (curto ? ' class="dc-pct-curto"' : '') + '>' + esc(curto ? pctCurto(p) : fmt.pct(p)) + '</b>' : '') + '</span>';
       }).join('');
       const desc = c.total ? cartoes.filter((k) => c.por.get(k)).map((k) => rotCartao(k) + ' ' + fmt.pct(c.por.get(k) / c.total)).join(', ') : 'sem abastecimento';
       return '<button type="button" class="dc-col' + (c.marcado ? ' marcado' : '') + (c.total ? '' : ' vazia') + '" data-i="' + i + '" aria-label="' + esc(c.rotLongo + ': ' + desc) + '"' +
@@ -215,7 +219,7 @@ export async function montar(ctx) {
     el('dc-tit-dias').textContent = 'Dia a dia em ' + nomeMesLongo;
     const dias = cols.filter((c) => c.total).length;
     el('dc-conta-dia').textContent = dias === 1 ? '1 dia com abastecimento' : dias + ' dias com abastecimento';
-    box.innerHTML = dias ? htmlColunas(cols, cartoes, false) : '<div class="vazio">Nenhum abastecimento em postos externos neste mês.</div>';
+    box.innerHTML = dias ? htmlColunas(cols, cartoes, 'curto') : '<div class="vazio">Nenhum abastecimento em postos externos neste mês.</div>';
     if (dias) ligarColunas(box, cols, cartoes, null);
   }
 

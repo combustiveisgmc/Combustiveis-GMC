@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Entrar · Gestão de frotas · Grupo Miranda Coelho</title>
+<meta name="theme-color" content="#161616">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Protótipo v2 da tela de login. Estrutura e proporções do Figma "Login Page Perfect UI" (frame
+   Sign-In-Form-Desktop-Layout-1440x900 e Sign-In-Form-Mobile-Layout-375x812); cores, fonte, logo e foto da
+   identidade do Grupo Miranda Coelho no portal (design-system/MASTER.md, desde 18/11/2026). Login simulado. */
+:root {
+  color-scheme: dark;
+  --fundo: #161616; --lateral: #121212; --cartao: #262626; --cartao-2: #2E2E2E;
+  --texto: #FFFFFF; --texto-2: #D0D0D0; --suave: #9A9A9A;
+  --borda: #333333; --linha-campo: rgba(255,255,255,.08);
+  /* marca do Grupo Miranda Coelho: laranja #F6A42B, texto escuro em cima dele (8,8:1) */
+  --primaria: #F6A42B; --primaria-escura: #E0921C; --sobre-primaria: #161616; --primaria-suave: rgba(246,164,43,.16);
+  --erro: #FF5A5A; --erro-fundo: rgba(249,47,47,.12);
+  --alerta: #F6C25E; --alerta-fundo: rgba(246,194,94,.12);
+  --foco: rgba(246,164,43,.45);
+  --r: 5px; --r-pilula: 25px;
+  --painel: 456px;          /* Figma: Frame 28986, 456 px */
+  --form: 360px;            /* Figma: Frame 28985, 360 px */
+  --campo: 48px;            /* Figma: Login-Input, 48 px */
+  --botao: 40px;            /* Figma: Primary-button-40px */
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; background: var(--fundo); color: var(--texto); font: 400 14px/1.45 'Plus Jakarta Sans', system-ui, sans-serif; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+svg { flex: none; }
+.oculto { display: none !important; }
+
+/* ---------- desktop: foto à esquerda ocupando tudo, painel fixo de 456 px à direita ---------- */
+.tela { display: grid; grid-template-columns: minmax(0, 1fr) var(--painel); min-height: 100vh; min-height: 100dvh; }
+
+.foto { position: relative; overflow: hidden; background: #0d0d0d; }
+.foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 75% 55%;
+  /* parte do visual: sem menu "Copiar/Salvar imagem", sem arrastar */
+  pointer-events: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
+/* Figma: legenda pequena no canto inferior esquerdo da foto ("Photo by …") → assinatura discreta da empresa */
+.foto-legenda { position: absolute; left: 48px; bottom: 48px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,.85); text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+
+.painel { background: var(--fundo); display: flex; flex-direction: column; justify-content: space-between; padding: 48px; min-height: 100%; }
+.topo { display: flex; flex-direction: column; gap: 48px; width: 100%; max-width: var(--form); }
+
+/* logo (Figma: UI-Unicorn-Logo, 48 px de altura) → logo negativa do Grupo Miranda Coelho + nome do portal */
+.marca { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.marca img { height: 40px; width: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
+.marca span { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--primaria); padding-left: 2px; }
+
+/* formulário (Figma: Sign-In-Form-Web) */
+.form-bloco { display: flex; flex-direction: column; gap: 24px; }
+.form-bloco h1 { font-size: 20px; line-height: 28px; font-weight: 600; }
+form { display: flex; flex-direction: column; gap: 32px; }
+.campos { display: flex; flex-direction: column; gap: 20px; }
+.campos-lista { display: flex; flex-direction: column; gap: 16px; }
+.campo { display: flex; flex-direction: column; gap: 8px; }
+.campo label { padding: 0 16px; font-size: 12px; line-height: 12px; font-weight: 500; color: var(--texto-2); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tipo-conta { font-size: 11px; line-height: 16px; font-weight: 600; padding: 0 8px; border-radius: var(--r-pilula); background: var(--primaria-suave); color: var(--primaria); }
+/* campo preenchido (Figma: Input-BG #F2F2F2 + borda 0,5 px, canto 6) → no escuro, --cartao com borda sutil */
+.caixa { position: relative; display: flex; align-items: center; height: var(--campo); background: var(--cartao); border: 1px solid var(--linha-campo); border-radius: 6px; transition: border-color .15s, box-shadow .15s, background .15s; }
+.caixa:hover { background: var(--cartao-2); }
+.caixa:focus-within { border-color: var(--primaria); box-shadow: 0 0 0 3px var(--foco); background: var(--cartao); }
+.caixa input { flex: 1; min-width: 0; height: 100%; padding: 0 16px; background: none; border: 0; outline: none; font-size: 16px; /* 16 px evita zoom no iPhone */ }
+.caixa input::placeholder { color: #8A8A8A; }
+.olho { width: 44px; height: 44px; margin-right: 2px; display: grid; place-items: center; background: none; border: 0; color: var(--texto-2); cursor: pointer; border-radius: var(--r); }
+.olho:hover { color: #fff; }
+.olho svg { width: 18px; height: 18px; }
+.campo.invalido .caixa { border-color: var(--erro); }
+.msg-campo { padding: 0 16px; font-size: 12px; color: var(--erro); display: none; }
+.campo.invalido .msg-campo { display: block; }
+.dica { padding: 0 16px; font-size: 12px; color: var(--texto-2); }
+.caps { padding: 0 16px; font-size: 12px; color: var(--alerta); display: none; }
+.caps.ver { display: block; }
+
+/* linha "Manter conectado" + "Esqueci a senha" (Figma: Frame 28978, interruptor 40×20) */
+.opcoes { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 20px; }
+.interruptor { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; min-height: 32px; }
+.interruptor input { appearance: none; position: relative; width: 40px; height: 20px; margin: 0; border-radius: 36px; background: var(--cartao-2); border: 1px solid var(--linha-campo); cursor: pointer; transition: background .18s; }
+.interruptor input::after { content: ''; position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 1px 1px 2px -1px rgba(0,0,0,.4); transition: transform .18s ease; }
+.interruptor input:checked { background: var(--primaria); border-color: var(--primaria); }
+.interruptor input:checked::after { transform: translateX(20px); }
+.link { background: none; border: 0; padding: 0; color: var(--primaria); font-size: 12px; font-weight: 500; cursor: pointer; min-height: 32px; text-align: right; }
+.link:hover { text-decoration: underline; }
+.ajuda-senha { font-size: 12px; color: var(--texto-2); background: var(--cartao); border-radius: 6px; padding: 12px 16px; margin-top: -12px; }
+.ajuda-senha strong { color: var(--texto); }
+
+.aviso { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 6px; font-size: 13px; }
+.aviso svg { width: 16px; height: 16px; margin-top: 1px; }
+.aviso.erro { background: var(--erro-fundo); color: #FFB3B3; }
+.aviso.erro svg { color: var(--erro); }
+.aviso.bloqueio { background: var(--alerta-fundo); color: #F9DDA4; }
+.aviso.bloqueio svg { color: var(--alerta); }
+
+/* botões (Figma: Primary-button-40px #007AFF → laranja da marca; Google-Big-Button #333 → botão escuro) */
+.acoes { display: flex; flex-direction: column; gap: 32px; }
+.btn { min-height: var(--botao); width: 100%; padding: 8px 16px; border: 0; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; text-align: center; transition: background .15s; }
+.btn-entrar { background: var(--primaria); color: var(--sobre-primaria); font-weight: 700; letter-spacing: .02em; }
+.btn-entrar:hover { background: var(--primaria-escura); }
+.btn-entrar[disabled] { cursor: progress; opacity: .85; }
+.giro { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(22,22,22,.3); border-top-color: var(--sobre-primaria); animation: girar .7s linear infinite; display: none; }
+.btn-entrar.carregando .giro { display: block; }
+.divisoria { height: 1px; background: var(--borda); }
+.btn-escuro { background: var(--cartao-2); color: var(--texto); font-size: 13px; font-weight: 500; }
+.btn-escuro:hover { background: #363636; }
+.btn-escuro svg { width: 18px; height: 18px; color: var(--alerta); }
+.oferta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12px; margin-top: 24px; text-align: center; }
+.oferta span { color: var(--texto-2); }
+.oferta b { color: var(--primaria); font-weight: 500; }
+
+/* rodapé do painel (Figma: Bottom-Panel) */
+.rodape { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: var(--suave); max-width: var(--form); width: 100%; }
+.marca-celular { display: none; }
+
+.ok { display: flex; flex-direction: column; gap: 12px; }
+.ok .circulo { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--primaria-suave); color: var(--primaria); }
+.ok .circulo svg { width: 24px; height: 24px; }
+.ok p { color: var(--texto-2); }
+
+/* barra do protótipo: troca de estado para revisar sem digitar */
+.prototipo { position: fixed; left: 16px; top: 16px; z-index: 10; display: flex; gap: 6px; align-items: center; padding: 6px; border-radius: var(--r-pilula); background: rgba(18,18,18,.85); border: 1px solid #BC7C01; backdrop-filter: blur(6px); font-size: 12px; }
+.prototipo b { color: #F0B54A; padding: 0 6px 0 8px; }
+.prototipo button { border: 0; background: var(--cartao); border-radius: var(--r-pilula); padding: 5px 10px; cursor: pointer; font-size: 12px; font-weight: 500; }
+.prototipo button:hover { background: var(--cartao-2); }
+
+@keyframes girar { to { transform: rotate(360deg); } }
+@keyframes surgir { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.surgir { animation: surgir .2s cubic-bezier(.2,.8,.2,1); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- celular e telas estreitas (Figma: Sign-In-Form-Mobile-Layout-375x812): sem foto, formulário no topo,
+   logo centralizada abaixo dele e rodapé no fim. Alvos de 44 px e texto mínimo de 14 px (área dos motoristas). ---------- */
+@media (max-width: 900px) {
+  .tela { display: block; }
+  .foto { display: none; }
+  .painel { min-height: 100vh; min-height: 100dvh; padding: 40px 16px 72px; align-items: center; }
+  .topo { max-width: 400px; gap: 0; }
+  .topo > .marca { display: none; }
+  .marca-celular { display: flex; justify-content: center; margin-top: 64px; }
+  .marca-celular .marca { align-items: center; }
+  .marca-celular .marca img { height: 32px; }
+  .rodape { max-width: 400px; margin-top: 40px; }
+  .campo label, .interruptor, .link, .dica, .msg-campo, .caps, .ajuda-senha, .oferta, .rodape, .aviso { font-size: 14px; }
+  .campo label { line-height: 16px; }
+  .btn { min-height: 44px; font-size: 16px; }
+  .btn-escuro { font-size: 15px; }
+  .marca span { font-size: 14px; }
+  .interruptor, .link { min-height: 44px; }
+  .prototipo { left: 50%; top: auto; bottom: 12px; transform: translateX(-50%); }
+}
+</style>
+</head>
+<body>
+
+<div class="tela">
+  <aside class="foto" aria-hidden="true">
+    <img src="caminhao-1200.webp" srcset="caminhao-720.webp 720w, caminhao-1200.webp 1200w" sizes="calc(100vw - 456px)" alt="" width="1200" height="2139" draggable="false">
+    <span class="foto-legenda">RajaLog Transportes · Grupo Miranda Coelho</span>
+  </aside>
+
+  <main class="painel">
+    <div class="topo">
+      <div class="marca">
+        <img src="logo-grupo-negativo.png" alt="Grupo Miranda Coelho" width="208" height="40" draggable="false">
+        <span>Gestão de frotas</span>
+      </div>
+
+      <section class="form-bloco" id="painel-form" aria-labelledby="titulo">
+        <h1 id="titulo">Que bom te ver de novo</h1>
+
+        <form id="form" novalidate>
+          <div class="campos">
+            <div class="aviso erro oculto" id="aviso" role="alert"></div>
+
+            <div class="campos-lista">
+              <div class="campo" id="campo-usuario">
+                <label for="usuario">Usuário <span class="tipo-conta oculto" id="tipo-conta">Motorista</span></label>
+                <div class="caixa">
+                  <input id="usuario" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="64" placeholder="Digite seu usuário" aria-describedby="erro-usuario dica-motorista" required>
+                </div>
+                <span class="msg-campo" id="erro-usuario">Digite o seu usuário.</span>
+                <span class="dica oculto" id="dica-motorista">Motorista: o usuário são os 6 primeiros números do seu CPF, e a senha é o mesmo número, se você ainda não trocou.</span>
+              </div>
+
+              <div class="campo" id="campo-senha">
+                <label for="senha">Senha</label>
+                <div class="caixa">
+                  <input id="senha" name="senha" type="password" autocomplete="current-password" maxlength="200" placeholder="Digite sua senha" aria-describedby="erro-senha caps" required>
+                  <button type="button" class="olho" id="olho" aria-label="Mostrar senha" aria-pressed="false">
+                    <svg id="ic-olho" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <span class="msg-campo" id="erro-senha">Digite a sua senha.</span>
+                <span class="caps" id="caps" aria-live="polite">Caps Lock está ligado.</span>
+              </div>
+            </div>
+
+            <div class="opcoes">
+              <label class="interruptor" id="manter-rot">
+                <input type="checkbox" role="switch" id="manter" name="manter">
+                <span>Manter conectado</span>
+              </label>
+              <button type="button" class="link" id="btn-esqueci" aria-expanded="false" aria-controls="ajuda-senha">Esqueci a senha</button>
+            </div>
+            <p class="ajuda-senha oculto" id="ajuda-senha"></p>
+          </div>
+
+          <div class="acoes">
+            <button type="submit" class="btn btn-entrar" id="btn-entrar"><span class="giro" aria-hidden="true"></span><span id="txt-entrar">Entrar</span></button>
+            <div class="divisoria" role="presentation"></div>
+            <button type="button" class="btn btn-escuro" id="btn-cartao">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></svg>
+              Falta cartão no caminhão? Avisar
+            </button>
+          </div>
+        </form>
+
+        <p class="oferta"><span>Não tem acesso?</span><b>Fale com a gestão de combustível</b></p>
+      </section>
+
+      <section class="ok oculto" id="painel-ok" role="status" tabindex="-1">
+        <div class="circulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div>
+        <h1>Tudo certo</h1>
+        <p id="ok-texto"></p>
+        <button type="button" class="link" id="btn-voltar" style="text-align:left">Voltar ao login (protótipo)</button>
+      </section>
+
+      <div class="marca-celular">
+        <div class="marca">
+          <img src="logo-grupo-negativo.png" alt="Grupo Miranda Coelho" width="166" height="32" draggable="false">
+          <span>Gestão de frotas</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="rodape">
+      <span>Gestão de frotas</span>
+      <span>© 2026 Grupo Miranda Coelho</span>
+    </footer>
+  </main>
+</div>
+
+<div class="prototipo" aria-label="Estados do protótipo">
+  <b>Protótipo</b>
+  <button type="button" data-estado="motorista">Motorista</button>
+  <button type="button" data-estado="erro">Erro</button>
+  <button type="button" data-estado="bloqueio">Bloqueio</button>
+  <button type="button" data-estado="limpar">Limpar</button>
+</div>
+
+<script>
+// Login simulado. No portal real o envio vai para POST /api/login (functions/api/login.js): usuário de 6 números
+// = motorista (senha inicial = o próprio usuário); qualquer outro = usuário da gestão.
+const $ = (id) => document.getElementById(id);
+const form = $('form'), usuario = $('usuario'), senha = $('senha'), aviso = $('aviso');
+const ICONES = {
+  erro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>',
+  relogio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+};
+const ehUsuarioMotorista = (s) => /^\d{6}$/.test(s.trim());
+
+let ehMotorista = false;
+let dicaLiberada = false;   // a regra do usuário do motorista só aparece depois de um erro
+function atualizarTipo() {
+  ehMotorista = ehUsuarioMotorista(usuario.value);
+  $('tipo-conta').classList.toggle('oculto', !ehMotorista);
+  $('dica-motorista').classList.toggle('oculto', !(ehMotorista && dicaLiberada));
+  $('manter-rot').classList.toggle('oculto', ehMotorista);   // motorista já fica 30 dias conectado
+  senha.inputMode = ehMotorista ? 'numeric' : 'text';
+  atualizarAjuda();
+}
+usuario.addEventListener('input', () => { $('campo-usuario').classList.remove('invalido'); esconderAviso(); atualizarTipo(); });
+senha.addEventListener('input', () => { $('campo-senha').classList.remove('invalido'); esconderAviso(); });
+['keydown', 'keyup'].forEach((t) => senha.addEventListener(t, (e) => {
+  if (e.getModifierState) $('caps').classList.toggle('ver', e.getModifierState('CapsLock'));
+}));
+senha.addEventListener('blur', () => $('caps').classList.remove('ver'));
+
+$('olho').addEventListener('click', () => {
+  const ver = senha.type === 'password';
+  senha.type = ver ? 'text' : 'password';
+  $('olho').setAttribute('aria-pressed', String(ver));
+  $('olho').setAttribute('aria-label', ver ? 'Esconder senha' : 'Mostrar senha');
+  $('ic-olho').innerHTML = ver
+    ? '<path d="M3 3l18 18M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.7 17.7 0 0 1-3.2 4.2M6.6 6.6A17.4 17.4 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'
+    : '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+  senha.focus();
+});
+
+function atualizarAjuda() {
+  $('ajuda-senha').innerHTML = ehMotorista
+    ? '<strong>Motorista:</strong> se você trocou a senha e esqueceu, peça à gestão de combustível para voltar à senha inicial.'
+    : '<strong>Equipe de gestão:</strong> peça a um administrador do portal para gerar uma senha nova. No primeiro acesso você escolhe a sua.';
+}
+$('btn-esqueci').addEventListener('click', () => {
+  const abrir = $('ajuda-senha').classList.contains('oculto');
+  atualizarAjuda();
+  $('ajuda-senha').classList.toggle('oculto', !abrir);
+  $('btn-esqueci').setAttribute('aria-expanded', String(abrir));
+});
+
+function mostrarAviso(tipo, texto) {
+  aviso.className = 'aviso surgir ' + tipo;
+  aviso.innerHTML = (tipo === 'bloqueio' ? ICONES.relogio : ICONES.erro) + '<span>' + texto + '</span>';
+}
+function esconderAviso() { aviso.className = 'aviso erro oculto'; }
+function carregando(sim) {
+  $('btn-entrar').disabled = sim;
+  $('btn-entrar').classList.toggle('carregando', sim);
+  $('txt-entrar').textContent = sim ? 'Entrando…' : 'Entrar';
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  esconderAviso();
+  const faltaU = !usuario.value.trim(), faltaS = !senha.value;
+  $('campo-usuario').classList.toggle('invalido', faltaU);
+  $('campo-senha').classList.toggle('invalido', faltaS);
+  if (faltaU || faltaS) { (faltaU ? usuario : senha).focus(); return; }
+
+  carregando(true);
+  setTimeout(() => {   // simula a resposta do servidor
+    carregando(false);
+    const s = senha.value.toLowerCase();
+    if (s === 'bloqueio') {
+      mostrarAviso('bloqueio', 'Muitas tentativas erradas. Tente de novo em 15 minutos.');
+    } else if (s === 'erro' || (ehMotorista && senha.value.trim() !== usuario.value.trim())) {
+      mostrarAviso('erro', 'Usuário ou senha incorretos.');
+      if (ehMotorista) { dicaLiberada = true; atualizarTipo(); }
+      senha.select();
+    } else {
+      $('painel-form').classList.add('oculto');
+      $('painel-ok').classList.remove('oculto');
+      $('ok-texto').textContent = ehMotorista
+        ? 'No portal real abre a área do motorista: postos autorizados da sua unidade e a sua média.'
+        : 'No portal real abre o painel da gestão' + ($('manter').checked ? ', conectado por 48 horas.' : '.');
+      $('painel-ok').focus();
+    }
+  }, 900);
+});
+
+$('btn-voltar').addEventListener('click', () => {
+  $('painel-ok').classList.add('oculto'); $('painel-form').classList.remove('oculto'); senha.value = ''; usuario.focus();
+});
+$('btn-cartao').addEventListener('click', () => {
+  alert('No portal real abre o formulário "Avisar cartão faltando" (o mesmo de hoje), sem precisar de login.');
+});
+
+// atalhos do protótipo (usuário de exemplo fictício: 123456, senha inicial 123456)
+document.querySelectorAll('.prototipo button').forEach((b) => b.addEventListener('click', () => {
+  const est = b.dataset.estado;
+  $('painel-ok').classList.add('oculto'); $('painel-form').classList.remove('oculto');
+  esconderAviso();
+  if (est === 'limpar') { usuario.value = ''; senha.value = ''; dicaLiberada = false; }
+  if (est === 'motorista') { usuario.value = '123456'; senha.value = ''; }
+  if (est === 'erro') { usuario.value = 'joao.oliveira'; senha.value = 'erro'; }
+  if (est === 'bloqueio') { usuario.value = 'joao.oliveira'; senha.value = 'bloqueio'; }
+  atualizarTipo();
+  if (est === 'erro' || est === 'bloqueio') form.requestSubmit();
+  else (est === 'motorista' ? senha : usuario).focus();
+}));
+
+atualizarTipo();
+</script>
+</body>
+</html>

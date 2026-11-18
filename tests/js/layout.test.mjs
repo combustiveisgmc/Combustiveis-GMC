@@ -15,3 +15,12 @@ test('htmlApoio: texto recebe apoio-texto (quebra linha); número continua sem q
   assert.match(h, /<span class="num apoio-texto">a do estado de cada abastecimento<\/span>/);
   assert.match(h, /<span class="num">R\$ 10,00<\/span>/);
 });
+
+// Divisão por cartão > Dia a dia com % (18/11/2026): % inteiro nas colunas estreitas
+test('pctCurto: % inteiro; abaixo de meio por cento vira "<1%"', async () => {
+  const { pctCurto } = await import('../../public/gestao/dashboards/divisao-cartoes.js');
+  assert.equal(pctCurto(0.634), '63%');
+  assert.equal(pctCurto(1), '100%');
+  assert.equal(pctCurto(0.003), '<1%');
+  assert.equal(pctCurto(0), '0%');
+});

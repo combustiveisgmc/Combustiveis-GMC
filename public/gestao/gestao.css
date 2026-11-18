@@ -1597,6 +1597,11 @@ table.dados.nt-tabela td{white-space:normal;vertical-align:middle;}
 .dc-rot-m, .dc-rot-c{display:none;}
 @container (max-width:47px){ .dc-seg b{display:none;} .dc-rot-l{display:none;} .dc-rot-m{display:inline;} }
 @container (max-width:21px){ .dc-rot-m{display:none;} .dc-rot-c{display:inline;} }
+/* Dia a dia com % (18/11/2026): % inteiro em fonte menor; a coluna tem pelo menos 28 px (o gráfico rola para o lado no celular) */
+.dc-grafico-dias .dc-colunas{min-width:calc(var(--n) * 30px);}
+.dc-seg b.dc-pct-curto{font-size:10px;letter-spacing:-.02em;}
+@container (max-width:47px){ .dc-seg b.dc-pct-curto{display:inline;} }
+@container (max-width:25px){ .dc-seg b.dc-pct-curto{display:none;} }
 .dc-matriz tr.dc-ano th, .dc-matriz tr.dc-ano td{background:var(--cartao-2);font-weight:600;}
 .dc-matriz tr.dc-cartao td:first-child{padding-left:30px;}
 .dc-matriz tfoot th, .dc-matriz tfoot td{font-weight:700;border-top:1px solid var(--borda-forte);}

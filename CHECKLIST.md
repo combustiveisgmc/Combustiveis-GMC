@@ -125,3 +125,4 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Cartões, vãos, ícones dos indicadores, medidor e gráficos mais compactos (tokens `--vao`, `--recheio`, `--reg-icone`).
 - [x] Principal de cada painel acima da dobra em 1440×900 (conferido nas 29 telas do menu, sem rolagem lateral nem erro).
 - [x] Grupos de filtro lado a lado em tela larga.
+- [x] Divisão por cartão: % no gráfico Dia a dia (18/11/2026).
