@@ -90,7 +90,7 @@ senha inicial é o mesmo número; fica 30 dias conectado e vai para a área do m
    `app.js` para "Falta cartão").
 2. Postos e unidades passam para a área do motorista (`/motorista/`), com sessão.
 3. `functions/api/login.js`: sem mudança de regra.
-4. Copiar `foto-caminhao-1200.webp` e `foto-caminhao-720.webp` para `public/` (a logo `logo-grupo-negativo.png` já está lá).
+4. Copiar `caminhao-rajalog-1200.webp` e `caminhao-rajalog-720.webp` para `public/` (a logo `logo-grupo-negativo.png` já está lá).
 5. Registrar a tela no `design-system/MASTER.md`; atualizar `briefing.md`, `CHANGELOG.md` e `CHECKLIST.md`;
    `npm run verificar`.
 
@@ -105,5 +105,9 @@ senha inicial é o mesmo número; fica 30 dias conectado e vai para a área do m
 - No celular (≤ 900 px) a página continua podendo rolar: quando o teclado abre, o campo precisa subir.
 
 ### Foto nova (18/11/2026)
-- Foto do caminhão refeita pelo usuário (1536×2752, Downloads/Gemini_Generated_Image_fbc8…): `foto-caminhao-1200.webp`
-  (84 KB) e `foto-caminhao-720.webp` (42 KB). Nomes novos para o navegador não mostrar a foto antiga do cache.
+- Foto do caminhão refeita pelo usuário (1536×2752, Downloads/Gemini_Generated_Image_fbc8…): `caminhao-rajalog-1200.webp`
+  (84 KB) e `caminhao-rajalog-720.webp` (42 KB). Nomes novos para o navegador não mostrar a foto antiga do cache.
+- Texto da porta corrigido (18/11/2026): a IA de imagem escreveu "Logataria e Doomeiara" embaixo de "RajaLog"; a frase foi
+  apagada e reescrita como **"Logística e Distribuição"** (Segoe UI, mesma inclinação ~3,5° e cor da porta). Arquivos
+  `caminhao-rajalog-1200.webp` / `caminhao-rajalog-720.webp`; original corrigido em alta resolução em
+  Downloads/caminhao-rajalog-logistica-e-distribuicao.jpg.
