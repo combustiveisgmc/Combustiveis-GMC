@@ -23,6 +23,8 @@ import unicodedata
 
 import openpyxl
 
+from gestao_normalizar import PLACAS_CORRIGIDAS   # placa escrita errada nas planilhas -> a certa (17/11/2026)
+
 PASTA_PROJETO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_PADRAO = os.path.join(os.path.dirname(PASTA_PROJETO), 'Base.xlsx')
 SAIDA = os.path.join(PASTA_PROJETO, '.dados', 'abastecimentos.json')
@@ -369,6 +371,7 @@ def gerar(origem=BASE_PADRAO, locais_path=LOCAIS_PADRAO, negociacoes_path=NEGOCI
         for r in wm.iter_rows(min_row=2, values_only=True):
             r = tuple(r) + (None,) * (len(cab) - len(r))  # linhas com células finais vazias vêm curtas
             placa = texto(r[im['PLACA']]).upper()
+            placa = PLACAS_CORRIGIDAS.get(placa, placa)   # ex.: PVH7231 na aba Metas = PVH7C31 dos abastecimentos
             if not placa or placa in veiculos:
                 continue
             veiculos[placa] = {

@@ -31,10 +31,12 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 - [x] Senhas dos portais dos cartões: decisão do usuário (17/11) = manter na planilha (cartão físico é necessário); o modelo não guarda.
 - [x] Unidades padronizadas no modelo (apelidos); RAJA SÃO PAULO = RAJA LOG GRANEL (modelo + 2 motoristas na planilha, 17/11).
 - [x] Carros do ADM cadastrados (18, exportação da Ticket, 17/11); Kemigas não entram (vão ser vendidos).
+- [x] Placa VENDIDO volta a aparecer nos filtros do site (18/11), para enxergar vendido abastecendo.
+- [x] PVH7231 → PVH7C31 no banco e nos dados do site (18/11; Base.xlsx não alterada).
 - [ ] Placas VENDIDO com abastecimento recente e cartão Ticket ativo (HIB6D61, HFD9063, OPF3G97...): usuário revisar.
 - [ ] Motoristas: listas dos últimos 10 dias enviadas (17/11); usuário decidir cadastrar / desligar.
 - [x] Coordenadas "sem vírgula" = formato da planilha (não erro); 187 postos localizados pelo endereço (17/11).
-- [ ] 19 postos sem coordenada abastecidos nos últimos 60 dias: cadastro manual no Mapa de calor (os mais antigos ficam de fora).
+- [x] Postos sem coordenada: decisão do usuário (18/11) = ficam sem; ele cadastra pelo Mapa de calor quando precisar.
 - [x] Situação das placas: 258 ATIVA e 21 VENDIDO (sem unidade/categoria), 17/11. Usuário vai revisar ativas x vendidas.
 - [ ] Corrigir as placas divergentes entre Base, Ticket, TruckPag e Veloe (aba Placas MERCOSUL).
 - [x] Lançamentos sem placa (VAZAMENTO, LAVAGEM...) = desperdício (`abastecimentos.tipo`), 17/11.

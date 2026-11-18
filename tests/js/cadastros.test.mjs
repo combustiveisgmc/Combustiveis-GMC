@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { normalizarChave, CHAVE, CAMPOS, validar } from '../../lib/cadastros.js';
 import { normPlaca, placaValida, situacao, SITUACOES } from '../../lib/cartoes.js';
 import { pode, TODAS } from '../../lib/permissoes.js';
+import { placasDesabilitadas } from '../../functions/api/placas-desabilitadas.js';
 
 test('chave do cadastro: placa sem traço e usuário só com números', () => {
   assert.equal(CHAVE.placas, 'placa');
@@ -40,4 +41,10 @@ test('placa vendida: situação VENDIDO (17/11/2026) e sem unidade/categoria na 
   assert.deepEqual(v.erros, []);
   assert.equal(v.dados.situacao, 'VENDIDO');
   assert.ok(validar('placas', 'editar', { situacao: 'SUMIDA' }).erros.length);
+});
+
+test('só placa DESABILITADA some dos filtros; VENDIDO continua aparecendo (usuário, 17/11/2026)', async () => {
+  const env = { DADOS: { get: async () => ({ placas: [{ placa: 'AAA-1A11', situacao: 'DESABILITADA' }, { placa: 'BBB2B22', situacao: 'VENDIDO' },
+    { placa: 'CCC3C33', situacao: 'ATIVA' }] }) } };
+  assert.deepEqual([...(await placasDesabilitadas(env))], ['AAA1A11']);
 });

@@ -4,6 +4,15 @@ Toda alteração pedida e feita no portal Gestão de Combustível, da mais nova 
 Cada alteração nova entra no topo, com a data, o que foi pedido e o que mudou. O detalhe técnico de cada item continua
 no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
+## 18/11/2026
+
+- **PVH7231 → PVH7C31 nos dados do site e do banco** (pedido do usuário): correção de placa em `gestao_normalizar.PLACAS_CORRIGIDAS`,
+  aplicada no modelo `gestao` (metas, cartões e Placas MERCOSUL apontam para a PVH7C31) e na leitura da aba Metas que gera os dados
+  dos painéis (`importar_base.py`; a Base.xlsx não é alterada); planilha de cartões com a placa trocada pela fila da tela Cartões frota.
+- **Placa VENDIDO volta a aparecer nos filtros** (Editar abastecimentos, Consulta de KM, barra de filtros): só DESABILITADA some, para dar
+  para ver carro vendido abastecendo.
+- Postos sem coordenada ficam sem: o usuário cadastra pelo Mapa de calor.
+
 ## 17/11/2026
 
 - **Preço das bombas internas pelo Rateio das NFs: só com a nota fechada e uma vez só** (pedido do usuário; o preço ia e voltava entre duas notas, ex.: R$ 6,72 x R$ 6,87 em Jequié, 294 abastecimentos corrigidos mais de uma vez). Causas: o mesmo abastecimento da API e da Base contava em dobro quando a hora caía em outro minuto (empurrava a fila das notas), a correção era refeita a cada ciclo e achava a linha só por placa + hora (diesel e Arla do mesmo caminhão no mesmo segundo). Agora: preço só quando todas as notas do abastecimento fecharam; travado depois ("Rateio das NFs (nota fechada)") e o corrigido à mão no Editar abastecimentos nunca é mexido; API x Base casados por placa, ±10 min e ±0,5 L; o pedido leva o tanque e o vigia só grava na linha do combustível certo (migrations/0026, coluna alteracoes_base_copia.tanque). Arquivos: scripts/bomba_rateio.mjs, scripts/planilha_base_copia.py, functions/api/sync/bomba-rateio/{precos,estado}.js, functions/api/sync/base-copia/pendentes.js. Testes: tests/js/rateio_preco.test.mjs, tests/py/test_base_copia_linha.py.

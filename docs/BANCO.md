@@ -170,3 +170,10 @@ Achados do levantamento do espelho e da carga. A carga não esconde nenhum: o qu
   além da fila para a planilha. Banco fora do ar: o site usa a lista publicada da planilha (`lib/supabase.js`).
 - **Vigia** recarrega o modelo sozinho depois que o espelho muda (no máximo a cada 5 min, ~4 min por carga): log "Modelo do banco recarregado".
 - Próximos: motoristas (as senhas continuam vindo da planilha), cartões, postos/negociações, bomba interna, abastecimentos.
+
+### 3.9 Ajustes de 18/11/2026
+
+- **Correção de placa:** `scripts/gestao_normalizar.py` `PLACAS_CORRIGIDAS` (hoje só PVH7231 → PVH7C31). Toda placa que passa pela carga é
+  corrigida; o `importar_base.py` usa a mesma lista na aba Metas. Placa errada nova nas planilhas: acrescentar ali (e no teste).
+- Placa VENDIDO não some mais dos filtros do site (só DESABILITADA).
+- Postos sem coordenada ficam sem; o usuário cadastra pelo Mapa de calor.

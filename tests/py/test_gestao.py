@@ -25,6 +25,7 @@ class Normalizar(unittest.TestCase):
         self.assertEqual(N.placa('NTE 9213'), ('NTE9213', True))
         self.assertEqual(N.placa('VAZAMENTO'), ('VAZAMENTO', False))
         self.assertEqual(N.placa('PRIMEIRO ABASTECIMENTO DO TANQUE')[1], False)
+        self.assertEqual(N.placa('PVH-7231'), ('PVH7C31', True))   # grafia errada das planilhas corrigida (17/11)
 
     def test_unidade_todos_os_jeitos(self):
         for t in ('Jequié', 'JEQUIE', 'JEQUIÉ', 'RAJA JEQUIE'):

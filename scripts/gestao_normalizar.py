@@ -18,9 +18,15 @@ def chave(texto):
     return re.sub(r'\s+', ' ', s).strip().upper()
 
 
+# placa escrita errada nas planilhas -> placa certa (o banco e o site usam a certa; as planilhas ficam como estão)
+# PVH7231 -> PVH7C31: corrigida pelo usuário no cadastro em 17/11/2026; Metas da Base, Placas MERCOSUL e cartões tinham a antiga
+PLACAS_CORRIGIDAS = {'PVH7231': 'PVH7C31'}
+
+
 def placa(texto):
-    """Placa sem traço/espaço, maiúscula. Devolve (placa, valida)."""
+    """Placa sem traço/espaço, maiúscula, já corrigida (PLACAS_CORRIGIDAS). Devolve (placa, valida)."""
     p = re.sub(r'[\s\-]', '', str(texto or '')).upper()
+    p = PLACAS_CORRIGIDAS.get(p, p)
     return p, bool(PLACA_RE.match(p))
 
 
