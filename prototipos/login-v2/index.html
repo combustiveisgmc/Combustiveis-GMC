@@ -38,7 +38,10 @@ svg { flex: none; }
 .oculto { display: none !important; }
 
 /* ---------- desktop: foto à esquerda ocupando tudo, painel fixo de 456 px à direita ---------- */
-.tela { display: grid; grid-template-columns: minmax(0, 1fr) var(--painel); min-height: 100vh; min-height: 100dvh; }
+/* tela fixa na altura da janela (sem rolagem): os espaços do painel encolhem com a altura disponível (vh),
+   do tamanho do Figma (900 px de altura) até ~600 px */
+.tela { display: grid; grid-template-columns: minmax(0, 1fr) var(--painel); height: 100vh; height: 100dvh; overflow: hidden; }
+@media (min-width: 901px) { html, body { height: 100%; overflow: hidden; } }
 
 .foto { position: relative; overflow: hidden; background: #0d0d0d; }
 .foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 75% 55%;
@@ -47,8 +50,8 @@ svg { flex: none; }
 /* Figma: legenda pequena no canto inferior esquerdo da foto ("Photo by …") → assinatura discreta da empresa */
 .foto-legenda { position: absolute; left: 48px; bottom: 48px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,.85); text-shadow: 0 1px 6px rgba(0,0,0,.5); }
 
-.painel { background: var(--fundo); display: flex; flex-direction: column; justify-content: space-between; padding: 48px; min-height: 100%; }
-.topo { display: flex; flex-direction: column; gap: 48px; width: 100%; max-width: var(--form); }
+.painel { background: var(--fundo); display: flex; flex-direction: column; justify-content: space-between; gap: clamp(12px, 2.5vh, 24px); padding: clamp(24px, 5.3vh, 48px) 48px; height: 100%; overflow: hidden; }
+.topo { display: flex; flex-direction: column; gap: clamp(20px, 5.3vh, 48px); width: 100%; max-width: var(--form); }
 
 /* logo (Figma: UI-Unicorn-Logo, 48 px de altura) → logo negativa do Grupo Miranda Coelho + nome do portal */
 .marca { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -56,11 +59,11 @@ svg { flex: none; }
 .marca span { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--primaria); padding-left: 2px; }
 
 /* formulário (Figma: Sign-In-Form-Web) */
-.form-bloco { display: flex; flex-direction: column; gap: 24px; }
+.form-bloco { display: flex; flex-direction: column; gap: clamp(12px, 2.7vh, 24px); }
 .form-bloco h1 { font-size: 20px; line-height: 28px; font-weight: 600; }
-form { display: flex; flex-direction: column; gap: 32px; }
-.campos { display: flex; flex-direction: column; gap: 20px; }
-.campos-lista { display: flex; flex-direction: column; gap: 16px; }
+form { display: flex; flex-direction: column; gap: clamp(16px, 3.6vh, 32px); }
+.campos { display: flex; flex-direction: column; gap: clamp(12px, 2.2vh, 20px); }
+.campos-lista { display: flex; flex-direction: column; gap: clamp(10px, 1.8vh, 16px); }
 .campo { display: flex; flex-direction: column; gap: 8px; }
 .campo label { padding: 0 16px; font-size: 12px; line-height: 12px; font-weight: 500; color: var(--texto-2); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .tipo-conta { font-size: 11px; line-height: 16px; font-weight: 600; padding: 0 8px; border-radius: var(--r-pilula); background: var(--primaria-suave); color: var(--primaria); }
@@ -100,7 +103,7 @@ form { display: flex; flex-direction: column; gap: 32px; }
 .aviso.bloqueio svg { color: var(--alerta); }
 
 /* botões (Figma: Primary-button-40px #007AFF → laranja da marca; Google-Big-Button #333 → botão escuro) */
-.acoes { display: flex; flex-direction: column; gap: 32px; }
+.acoes { display: flex; flex-direction: column; gap: clamp(14px, 3.6vh, 32px); }
 .btn { min-height: var(--botao); width: 100%; padding: 8px 16px; border: 0; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; text-align: center; transition: background .15s; }
 .btn-entrar { background: var(--primaria); color: var(--sobre-primaria); font-weight: 700; letter-spacing: .02em; }
 .btn-entrar:hover { background: var(--primaria-escura); }
@@ -111,7 +114,7 @@ form { display: flex; flex-direction: column; gap: 32px; }
 .btn-escuro { background: var(--cartao-2); color: var(--texto); font-size: 13px; font-weight: 500; }
 .btn-escuro:hover { background: #363636; }
 .btn-escuro svg { width: 18px; height: 18px; color: var(--alerta); }
-.oferta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12px; margin-top: 24px; text-align: center; }
+.oferta { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12px; margin-top: clamp(12px, 2.7vh, 24px); text-align: center; }
 .oferta span { color: var(--texto-2); }
 .oferta b { color: var(--primaria); font-weight: 500; }
 
@@ -138,9 +141,9 @@ form { display: flex; flex-direction: column; gap: 32px; }
 /* ---------- celular e telas estreitas (Figma: Sign-In-Form-Mobile-Layout-375x812): sem foto, formulário no topo,
    logo centralizada abaixo dele e rodapé no fim. Alvos de 44 px e texto mínimo de 14 px (área dos motoristas). ---------- */
 @media (max-width: 900px) {
-  .tela { display: block; }
+  .tela { display: block; height: auto; overflow: visible; }
   .foto { display: none; }
-  .painel { min-height: 100vh; min-height: 100dvh; padding: 40px 16px 72px; align-items: center; }
+  .painel { height: auto; overflow: visible; min-height: 100vh; min-height: 100dvh; padding: 40px 16px 72px; align-items: center; }
   .topo { max-width: 400px; gap: 0; }
   .topo > .marca { display: none; }
   .marca-celular { display: flex; justify-content: center; margin-top: 64px; }
@@ -154,6 +157,15 @@ form { display: flex; flex-direction: column; gap: 32px; }
   .marca span { font-size: 14px; }
   .interruptor, .link { min-height: 44px; }
   .prototipo { left: 50%; top: auto; bottom: 12px; transform: translateX(-50%); }
+}
+/* telas muito baixas (≤ 640 px úteis): logo, título e respiros menores para tudo caber sem rolagem.
+   Fica no fim do CSS para valer sobre as regras de cima. */
+@media (min-width: 901px) and (max-height: 640px) {
+  .painel { padding-top: 20px; padding-bottom: 20px; }
+  .topo { gap: 16px; }
+  .marca img { height: 32px; }
+  .marca { gap: 6px; }
+  .form-bloco h1 { font-size: 18px; line-height: 24px; }
 }
 </style>
 </head>

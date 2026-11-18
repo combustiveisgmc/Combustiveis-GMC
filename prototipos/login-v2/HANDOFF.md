@@ -93,3 +93,13 @@ senha inicial é o mesmo número; fica 30 dias conectado e vai para a área do m
 4. Copiar `caminhao-1200.webp` e `caminhao-720.webp` para `public/` (a logo `logo-grupo-negativo.png` já está lá).
 5. Registrar a tela no `design-system/MASTER.md`; atualizar `briefing.md`, `CHANGELOG.md` e `CHECKLIST.md`;
    `npm run verificar`.
+
+### Tela fixa, sem rolagem (18/11/2026)
+- No computador (> 900 px) a tela tem a altura exata da janela (`height: 100dvh`, `overflow: hidden`): nunca rola.
+- Os espaços do painel encolhem com a altura disponível (`clamp(…, vh, …)`): no tamanho do Figma (900 px de altura)
+  ficam iguais ao modelo (respiro 48, 48 entre marca e formulário, 24/20/16/32 no formulário); em telas baixas descem
+  até 24/20/12/12/10/16 px.
+- Em telas com até 640 px úteis: respiro 20 px, logo com 32 px e título 18 px.
+- Medido sem rolagem e sem corte: 1920×937 (Full HD com o navegador), 1440×900, 1366×657 (notebook com o
+  navegador), 1366×600 e 1280×585.
+- No celular (≤ 900 px) a página continua podendo rolar: quando o teclado abre, o campo precisa subir.
