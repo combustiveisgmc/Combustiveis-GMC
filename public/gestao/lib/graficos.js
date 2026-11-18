@@ -75,7 +75,7 @@ export function graficoPeriodo(box, pts, o) {
     box.innerHTML = '<div class="vazio">Nenhum dado neste recorte. Tire um filtro para ver o gráfico.</div>';
     return;
   }
-  const W = Math.max(320, box.clientWidth), H = o.altura || 260;
+  const W = Math.max(320, box.clientWidth), H = o.altura || 220;   // 220 (era 260): densidade dos painéis, 18/11/2026
   const m = { l: 44, r: 16, t: 20, b: 28 };
   const vals = pts.flatMap((p) => series.map((s) => p[s.campo]).filter(tem));
   let lo = Math.min(...vals), hi = Math.max(...vals);

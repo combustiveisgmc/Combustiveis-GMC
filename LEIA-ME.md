@@ -115,6 +115,7 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
   marca, mude só essas três). Logo (variante monocromática, desde 18/11): `public/logo-grupo.png` (preta, fundo claro) e `logo-grupo-negativo.png` (branca, fundo escuro);
   só o símbolo: `logo-simbolo*.png` (menu recolhido). Ícone do aplicativo e do site: `icon-192.png` e `icon-512.png`.
   Verde e vermelho continuam querendo dizer bom e ruim.
+- **Densidade (18/11/2026):** cartões mais compactos para o principal de cada painel caber na primeira tela (1440×900). Os espaços ficam nos tokens `--vao`, `--recheio`, `--recheio-filtros` e `--reg-icone` de `public/gestao/gestao.css`: para afrouxar ou apertar todos os painéis de uma vez, mude só eles.
 - Baseado no Figma "SaaS – Sales Management Dashboard – Muvic" (layout Blacksale) e no protótipo `prototipos/design-muvic`.
   Especificação completa (tokens, composição, componentes, estados, celular, acessibilidade): `design-system/MASTER.md`.
 - Gestão: `public/gestao/gestao.css` (escrito do zero). Cada tela é uma grade de 12 colunas com faixas de cartões:

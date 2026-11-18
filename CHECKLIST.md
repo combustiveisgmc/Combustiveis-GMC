@@ -120,3 +120,8 @@ e vai para o `CHANGELOG.md`. Regra de toda alteração: rodar `npm run verificar
 ## 12. Celular (18/11/2026)
 - [x] Conta ao lado das notificações no canto superior direito; painel da conta inteiro na tela.
 - [x] Notificações saem arrastando para o lado, como o menu (painel do sino em gaveta e avisos do canto).
+
+## 13. Densidade dos painéis (18/11/2026)
+- [x] Cartões, vãos, ícones dos indicadores, medidor e gráficos mais compactos (tokens `--vao`, `--recheio`, `--reg-icone`).
+- [x] Principal de cada painel acima da dobra em 1440×900 (conferido nas 29 telas do menu, sem rolagem lateral nem erro).
+- [x] Grupos de filtro lado a lado em tela larga.

@@ -63,6 +63,7 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 | `--pilula-ok` / `-alerta` / `-ruim` | `#3DBF4A` / `#F6C25E` / `#F92F2F` | iguais | Complete / On Delivery / Canceled |
 | `--selo` | `#BC7C01` | igual | contadores do menu, rótulo de destaque do gráfico |
 | `--ic-laranja` / `--ic-roxo` / `--ic-areia` / `--ic-rosa` | `#FCDCAA` / `#C4C3E9` / `#E9E1C3` / `#EBCACA` | iguais | quadrados de ícone dos KPIs e listas (`--ic-verde` `#CBECD8` só para "caiu = bom") |
+| `--vao` / `--recheio` / `--recheio-filtros` / `--reg-icone` | 16 px / 18 20 px / 12 20 px / 52 px | iguais | densidade (18/11/2026): vão entre cartões, recheio dos cartões e dos filtros, ícone dos indicadores |
 | `--r` / `--r-icone` / `--r-pilula` | 5 / 15 / 25 px | | cantos |
 | `--e-1…5` | 5 / 10 / 15 / 20 / 25 px | | espaços |
 | Tipo | Plus Jakarta Sans | | 12/500 rótulos · 14/500 texto e títulos de cartão · 16/600 grupos do menu · 20/600 título da página · 24/500 números |
@@ -71,7 +72,7 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 | Componente | Classe | Anatomia | Notas |
 |---|---|---|---|
 | Cartão | `.cartao`, `.painel`, `.filtros`, `.meta-bloco` | fundo `--cartao`, canto 5, respiro 25, cabeçalho 32 px (título 14/500 + ação à direita) | sem borda nem sombra no escuro |
-| KPI (Total Revenue) | `.kpi` (gerado por `htmlBomba`) | quadrado 73 px canto 15 com ícone 38 px · rótulo 14/500 + ⓘ · número 24/500 · variação 10/500 "vs. mês anterior" | a cor do quadrado segue a ordem laranja → roxo → areia → rosa |
+| KPI (Total Revenue) | `.kpi` (gerado por `htmlBomba`) | quadrado `--reg-icone` (52 px) canto 15 com ícone 28 px · rótulo 14/500 + ⓘ · número 24/500 · variação 10/500 "vs. mês anterior" | a cor do quadrado segue a ordem laranja → roxo → areia → rosa |
 | Linha de lista (Top Selling) | `.linha-lista` | mini-ícone 46 px · nome 14/600 + detalhe 12 · valor/pílula à direita | início (categorias), motoristas (unidades) |
 | Medidor | `htmlMedidor` | meio círculo 14 px de traço, marca da meta, número 24/500 no centro | verde ≥ meta, âmbar até 5% abaixo, vermelho abaixo disso |
 | Pílula | `.status`, `.sit-*`, `.selo-*` | 10–12/600, canto 25, 2×9 px | sempre com texto; o ícone ↑↓ continua |
@@ -241,3 +242,10 @@ Faixas de indicadores com valores longos ou texto de apoio: `.apoio.apoio-pilha`
   arrastar da borda direita (28 px) para a esquerda abre. Avisos do canto: arrastar para qualquer lado fecha (como o X), esmaecendo.
 - Regra comum (`lib/gesto.js`): começa com 12 px na horizontal e 1,5× mais horizontal que vertical; sai com 30% da largura ou
   arrasto rápido (> 0,5 px/ms); senão volta ao lugar. `data-sem-gesto` desliga o gesto do menu dentro de um elemento.
+
+## Densidade e dobra (18/11/2026)
+- Meta: em 1440×900, filtros + indicadores + resumo/medidor + o 1º gráfico de cada painel aparecem sem rolar.
+- Vão entre cartões `--vao` 16 px; recheio dos cartões `--recheio` 18/20 px; filtros `--recheio-filtros` 12/20 px; barra do título 16/10 px.
+- Indicador: ícone 52 px, recheio 14/18 px, 4 px entre rótulo e número. Medidor até 210 px. Gráfico de período 220 px de altura.
+- Em tela larga (≥ 1101 px) os grupos de filtro ficam lado a lado, separados por uma linha vertical; abaixo disso, empilhados.
+- Tela nova: usar os blocos e tokens existentes; não voltar a `var(--e-5)` para recheio ou vão de cartão.

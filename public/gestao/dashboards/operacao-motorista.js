@@ -288,7 +288,7 @@ export async function montar(ctx) {
       box.innerHTML = '<div class="vazio">Escolha um período com pelo menos dois dias com abastecimento para ver a evolução.</div>';
       return;
     }
-    const W = Math.max(320, box.clientWidth), H = 250;
+    const W = Math.max(320, box.clientWidth), H = 210;   // era 250 (densidade, 18/11/2026)
     const m = { l: 40, r: 64, t: 14, b: 28 };
     const vals = comDado.flatMap((p) => [p.media, p.meta].filter((v) => v !== null));
     let lo = Math.min(...vals), hi = Math.max(...vals);

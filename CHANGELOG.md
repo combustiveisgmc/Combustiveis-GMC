@@ -6,6 +6,12 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 18/11/2026
 
+- **Densidade dos painéis** (pedido do usuário: cartões altos demais, rolagem constante): em 1440×900 o principal de cada painel
+  (filtros, indicadores, medidor e o 1º gráfico) passa a caber acima da dobra. Tokens novos em `gestao.css`: `--vao` 16 px (vão entre
+  cartões, era 25), `--recheio` 18/20 px (recheio dos cartões, era 25), `--recheio-filtros` 12/20 px, `--reg-icone` 52 px (ícone dos
+  indicadores, era 73). Barra do título mais baixa, medidor até 210 px (era 300), gráficos com 220 px de altura por padrão (era 260;
+  Operação por motorista 210, Preço fornecedor 250) e, em tela larga, os grupos de filtro lado a lado (Preço x ANP/Refinaria: uma
+  linha a menos). Ex.: Operação por motorista, gráfico principal começava em 761 px, agora termina em 896 px. Teste `densidade.test.mjs`.
 - **Logos trocadas pela variante monocromática do grupo** (pedido do usuário: não gostou das coloridas): branca no tema escuro e
   em preto da marca (4B4B4D) no tema claro; símbolo branco em fundo escuro como ícone do aplicativo e do site; logo do menu sem
   distorção (largura limitada mantém a proporção). Cache do aplicativo dos motoristas v17.

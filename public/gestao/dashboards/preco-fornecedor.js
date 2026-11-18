@@ -335,7 +335,7 @@ export async function montar(ctx) {
       box.innerHTML = '<p class="vazio">São precisos pelo menos dois dias de cotação para mostrar a evolução.</p>';
       return;
     }
-    const W = Math.max(320, box.clientWidth), H = 300;
+    const W = Math.max(320, box.clientWidth), H = 250;   // era 300 (densidade, 18/11/2026)
     const m = { l: 48, r: 120, t: 12, b: 28 };
     const d0 = dias[0], d1 = dias[dias.length - 1];
     let lo = Math.min(...todos.map((x) => x.preco)), hi = Math.max(...todos.map((x) => x.preco));
