@@ -221,3 +221,7 @@ Detalhes em `docs/MIGRACAO-PASSO4.md`.
 `gestao_gerar_dados_painel` também grava `public.dados_motoristas` (uma linha por motorista: `chave` = `gestao.chave(nome)`, `linhas`
 json dos 13 meses). `gestao_painel_motorista(p_nome)` devolve as linhas e os veículos do cadastro; `gestao_chaves_tempo_real(p_desde)`
 devolve as chaves placa|minuto|litros×100 para o vigia montar o tempo real sem repetir o banco. Execução só para `service_role`.
+
+`public.nuvem_cache` (nome com prefixo da rotina, valor jsonb, em): estado das rotinas da nuvem que no vigia fica em arquivos
+(`gestao_nuvem_cache_ler(prefixo)` devolve tudo de uma vez; `gestao_nuvem_cache_gravar`). `gestao_linhas_bomba(postos, desde)`: linhas
+A..AN das bombas internas para a planilha de rateio de cada nota.

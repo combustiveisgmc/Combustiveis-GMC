@@ -19,10 +19,17 @@ const SITE = process.env.SITE_URL || 'https://gestao-combustivel.pages.dev';
 // módulos do portal/vigia usados também pelas funções: cópia fiel (tests/js/nuvem.test.mjs confere que estão iguais)
 export const COPIAS = {
   'consolidador.js': 'public/gestao/lib/consolidador.js',
+  'rateio.js': 'public/gestao/lib/rateio.js',
   'estornos.js': 'lib/nuvem/estornos.js',
+  'cartoes.js': 'lib/nuvem/cartoes.js',
+  'rateio-bomba.js': 'lib/nuvem/rateio-bomba.js',
 };
+// em _shared tudo fica na mesma pasta: os imports do portal passam a apontar para o lado
+export const ajustarImports = (texto) => texto.replace(/'\.\.\/\.\.\/public\/gestao\/lib\/([\w-]+\.js)'/g, "'./$1'");
 export function copiar() {
-  for (const [destino, origem] of Object.entries(COPIAS)) fs.copyFileSync(path.join(PROJETO, origem), path.join(FUNCOES, '_shared', destino));
+  for (const [destino, origem] of Object.entries(COPIAS)) {
+    fs.writeFileSync(path.join(FUNCOES, '_shared', destino), ajustarImports(fs.readFileSync(path.join(PROJETO, origem), 'utf8')));
+  }
 }
 
 const lerJson = (a) => JSON.parse(fs.readFileSync(a, 'utf8').replace(/^﻿/, ''));

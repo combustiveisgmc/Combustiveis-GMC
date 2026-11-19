@@ -30,8 +30,8 @@ select rotina, em, modo, ok, resultado from public.nuvem_execucoes order by em d
 |---|---|---|
 | 1 | Estornos TruckPag (`estornos_truckpag.mjs`, 6 h) | **simular desde 19/11** (estado herdado; 1ª execução igual ao vigia) |
 | 2 | Recálculo do KM (`km_recalcular.mjs`) | passa a ser feito pelo banco ao aplicar o lote (o vigia anota ao gravar a planilha) |
-| 3 | Tempo real + D-1 (`cartoes_api.mjs`) | depende de 4; histórico = `dados_gerados 'consolidacao'`; "já na base" = `base_transacoes`; tempo real em `dados_gerados` |
-| 4 | Rateio das NFs (`bomba_rateio.mjs`) | junto com o 3 (o D-1 e o tempo real usam o `ajustar`) |
+| 3 | Tempo real + D-1 (`cartoes_api.mjs`) | **simular desde 19/11** (Edge Function `cartoes-api`, 5 min; regras em `lib/nuvem/cartoes.js`, estado em `nuvem_cache`; publica pelo `/api/sync/kv` quando ligada) |
+| 4 | Rateio das NFs (`bomba_rateio.mjs`) | **simular desde 19/11**, junto com o 3 (`lib/nuvem/rateio-bomba.js`; linhas das bombas por `gestao_linhas_bomba`) |
 | 5 | Conferência com os cartões (`conferencia_cartoes.mjs`) | depois do 3 |
 | 6 | Conciliação de NFs (`conciliacao_nfs.mjs`) | independente (lê as APIs de títulos e NF-e) |
 | 7 | Motoristas e placas nos cartões (`motoristas_cartoes.mjs`, `placas_truckpag.mjs`) | **gravam nas APIs dos cartões**: ligar só com aprovação do usuário; cadastros do banco no lugar de `planilha_cadastros.py` |

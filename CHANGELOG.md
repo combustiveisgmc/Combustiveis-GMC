@@ -6,6 +6,16 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Passo 4 — tempo real, D-1 e Rateio das NFs na nuvem (em simulação).** As regras saíram de `scripts/cartoes_api.mjs` e
+  `scripts/bomba_rateio.mjs` para `lib/nuvem/cartoes.js` e `lib/nuvem/rateio-bomba.js`, usadas pelo vigia e pela nuvem; o vigia
+  ficou só com os arquivos. Comprovado igual: as duas versões rodadas em cópias isoladas com os mesmos dados (inclusive um D-1 de 32
+  linhas com rateio) deram os mesmos lotes, tempo real, lista do rateio e arquivos de estado. Nova Edge Function `cartoes-api` (a cada
+  5 min, em simulação: anota o que mandaria, nada sai dela), estado em `public.nuvem_cache` (herdado do vigia), linhas das bombas por
+  `gestao_linhas_bomba` (iguais às do vigia; o banco já tem as correções mais novas) e rota `/api/sync/kv` para publicar o tempo real e
+  a lista do rateio quando for ligada. 1ª execução: 39 transações em tempo real, iguais às do vigia (só o km do HIB6D61 difere, porque o
+  banco já tem o hodômetro corrigido). Rateio: folga de 1e-9 na comparação de preço/valor (no limite exato a imprecisão decidia
+  diferente nos dois lados). O vigia pula a rotina quando a da nuvem estiver ligada.
+
 - **Migração 15.2 passo 1b — área do motorista do banco; tempo real sem contar em dobro.** A tela do motorista ("Minha média")
   deixa de depender da Base.xlsx (que agora só é atualizada à mão): os abastecimentos dos últimos 13 meses de cada motorista vêm do
   banco, com os mesmos números dos painéis (gerador dos painéis grava `public.dados_motoristas`; `gestao_painel_motorista`; chave KV

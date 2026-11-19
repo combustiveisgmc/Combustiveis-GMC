@@ -917,7 +917,8 @@ if (process.argv.includes('--vigiar')) {
       if (await plantao()) { try { await processarFilasBanco(); } catch (e) { erro('nas filas do banco', e); } }
       if (await plantao()) { try { await processarConsolidador(); } catch (e) { erro('no consolidador', e); } }
       if (await plantao()) { try { await processarEdicaoBase(); } catch (e) { erro('em editar abastecimentos', e); } }
-      if (await plantao()) { try { await processarApisCartoes(); } catch (e) { erro('nas APIs dos cartões', e); } }
+      // passo 4: com a rotina da nuvem ligada (tempo real, D-1 e Rateio das NFs), o vigia não roda a dele
+      if (await plantao() && !(await nuvemLigada('cartoes-api'))) { try { await processarApisCartoes(); } catch (e) { erro('nas APIs dos cartões', e); } }
       if (await plantao()) { try { processarANP(); } catch (e) { erro('nos preços da ANP', e); } }
       if (await plantao()) { try { processarPetrobras(); } catch (e) { erro('nos preços da Petrobras', e); } }
       if (await plantao()) { try { processarReajustes(); } catch (e) { erro('nos reajustes', e); } }

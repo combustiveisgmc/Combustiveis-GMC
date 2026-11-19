@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COPIAS } from '../../scripts/nuvem_publicar.mjs';
+import { COPIAS, ajustarImports } from '../../scripts/nuvem_publicar.mjs';
 import { acharNaBase, itensExclusao, serial } from '../../lib/nuvem/estornos.js';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -14,7 +14,7 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 test('cópias em supabase/functions/_shared iguais às originais', () => {
   for (const [destino, origem] of Object.entries(COPIAS)) {
     assert.equal(fs.readFileSync(path.join(RAIZ, 'supabase/functions/_shared', destino), 'utf8'),
-      fs.readFileSync(path.join(RAIZ, origem), 'utf8'), `${destino} desatualizada: rode node scripts/nuvem_publicar.mjs --copiar`);
+      ajustarImports(fs.readFileSync(path.join(RAIZ, origem), 'utf8')), `${destino} desatualizada: rode node scripts/nuvem_publicar.mjs --copiar`);
   }
 });
 
