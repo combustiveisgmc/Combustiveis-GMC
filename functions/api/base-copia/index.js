@@ -1,5 +1,6 @@
 import { usuarioDaSessao, json } from '../../../lib/auth.js';
 import { pode } from '../../../lib/permissoes.js';
+import { aplicarDepois } from '../../../lib/aplicar-banco.js';
 
 // Operacional > Editar abastecimentos (correções na CONTROLES\Base_copia.xlsx, gravadas pelo vigia).
 // GET  /api/base-copia   alterações pendentes e as dos últimos 7 dias (a página sobrepõe à lista até ela ser republicada)
@@ -44,7 +45,7 @@ export async function onRequestGet({ request, env }) {
   });
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const origem = request.headers.get('Origin');
   if (origem && origem !== new URL(request.url).origin) return json({ erro: 'Origem não permitida.' }, 403);
   const u = await usuarioDaSessao(env.DB, request);
@@ -63,5 +64,6 @@ export async function onRequestPost({ request, env }) {
           JSON.stringify(it.celulas), JSON.stringify(it.antes && typeof it.antes === 'object' ? it.antes : {})));
   const res = await env.DB.batch(stmts);
   const alteracoes = res.map((r) => r.results[0]).map((r) => ({ ...r, celulas: JSON.parse(r.celulas), antes: JSON.parse(r.antes) }));
+  aplicarDepois({ env, waitUntil });   // aplica também direto no banco (15.2 passo 3)
   return json({ ok: true, alteracoes }, 201);
 }

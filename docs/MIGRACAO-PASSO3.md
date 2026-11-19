@@ -39,3 +39,8 @@ guarda `linha`). `bomba_rateio`, `conferencia_cartoes`, `km_recalcular`, `estorn
    G-J/K, exclui). O portal chama ao gravar na fila e, de tempos em tempos, reaplica o que ficou sem `banco_aplicado_em`.
 3. Virada: `supabase_sync.py` deixa de recopiar `base_transacoes` da planilha (o banco vira a origem); antes, conferir banco x planilha.
 4. Volta: religar a cópia da planilha (`base_transacoes` recomposta da Base_copia, que seguiu recebendo tudo).
+
+## Andamento
+- 19/11/2026, item 1 feito ("Pode seguir com o item 1"): as 6 rotas que gravam nas filas chamam `lib/aplicar-banco.js` depois de
+  gravar; a varredura `POST /api/sync/banco/aplicar` (vigia, 1x/min, antes de gravar a planilha) reaplica o que ficou pendente.
+  Pedidos anteriores marcados `banco_aplicado_em = 'anterior'`. Próximo: item 2 (conferir banco x planilha por alguns dias).

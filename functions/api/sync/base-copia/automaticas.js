@@ -1,4 +1,5 @@
 import { tokenSyncValido, json } from '../../../../lib/auth.js';
+import { aplicarDepois } from '../../../../lib/aplicar-banco.js';
 
 // Correções automáticas do vigia na fila da página Editar abastecimentos. Ficam pendentes como as feitas à mão e aparecem
 // no histórico com o nome de quem fez:
@@ -12,7 +13,7 @@ const QUEM = new Set(['Recálculo do KM (automático)', 'Estorno TruckPag (autom
 const COLUNAS = new Set(['R', 'S']);   // KM RODADOS e KM/LITRO
 const numOuNulo = (v) => (v === null || v === undefined ? null : Number.isFinite(Number(v)) ? Number(v) : undefined);
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   if (!tokenSyncValido(request, env)) return json({ erro: 'Não autorizado.' }, 401);
   let corpo;
   try { corpo = await request.json(); } catch { return json({ erro: 'Dados inválidos.' }, 400); }
@@ -32,6 +33,6 @@ export async function onRequestPost({ request, env }) {
     return env.DB.prepare(`INSERT INTO alteracoes_base_copia (usuario_id, usuario_nome, linha, placa, data, acao, celulas, antes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).bind(u.id, quem, i.linha, i.placa.slice(0, 10), i.data, excluir ? 'excluir' : 'editar', JSON.stringify(celulas), JSON.stringify(antes));
   });
-  if (stmts.length) await env.DB.batch(stmts);
+  if (stmts.length) { await env.DB.batch(stmts); aplicarDepois({ env, waitUntil }); }   // também direto no banco (15.2 passo 3)
   return json({ ok: true, inseridos: stmts.length });
 }

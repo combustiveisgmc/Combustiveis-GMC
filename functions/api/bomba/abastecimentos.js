@@ -1,6 +1,7 @@
 import { usuarioDaSessao, json } from '../../../lib/auth.js';
 import { pode } from '../../../lib/permissoes.js';
 import { TANQUES, texto, numero, quandoValido, basesDoUsuario, veBase } from '../../../lib/bomba.js';
+import { aplicarDepois } from '../../../lib/aplicar-banco.js';
 
 // Bomba interna > Inclusão de abastecimento: abastecimentos das bombas internas lançados pelo site.
 // GET  /api/bomba/abastecimentos   {abastecimentos (últimos 90 dias, com a situação da gravação na Base_copia), pode}
@@ -77,7 +78,7 @@ export async function onRequestGet({ request, env }) {
   return json({ abastecimentos: results.filter((a) => veBase(permitidas, a.base_id)), pode: pode(u, 'bomba-abastecimento') });
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const origem = request.headers.get('Origin');
   if (origem && origem !== new URL(request.url).origin) return json({ erro: 'Origem não permitida.' }, 403);
   const u = await usuarioDaSessao(env.DB, request);
@@ -85,7 +86,11 @@ export async function onRequestPost({ request, env }) {
   if (!pode(u, 'bomba-abastecimento')) return json({ erro: 'Seu acesso não inclui o lançamento de abastecimentos.' }, 403);
   let d;
   try { d = await request.json(); } catch { return json({ erro: 'Dados inválidos.' }, 400); }
-  if (d.id) return corrigir(env, u, d);
+  if (d.id) {
+    const resp = await corrigir(env, u, d);
+    if (resp.ok) aplicarDepois({ env, waitUntil });   // aplica também direto no banco (15.2 passo 3)
+    return resp;
+  }
   const v = await validarLancamento(env, u, d);
   if (v.erros.length) return json({ erro: v.erros.join(' ') }, 400);
   const { base, placa, km, litros, preco, motorista, linha } = v;
@@ -98,6 +103,7 @@ export async function onRequestPost({ request, env }) {
     `INSERT INTO bomba_abastecimentos (base_id, tanque, quando, placa, km, litros, motorista, preco, lote_id, usuario_nome)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`)
     .bind(base.id, d.tanque, d.quando, placa, km, litros, motorista, preco, lote.id, u.nome).first();
+  aplicarDepois({ env, waitUntil });
   return json({ ok: true, abastecimento: await ler(env, a.id) }, 201);
 }
 

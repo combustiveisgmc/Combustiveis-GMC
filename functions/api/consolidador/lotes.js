@@ -1,12 +1,13 @@
 import { usuarioDaSessao, json } from '../../../lib/auth.js';
 import { pode } from '../../../lib/permissoes.js';
+import { aplicarDepois } from '../../../lib/aplicar-banco.js';
 
 // POST /api/consolidador/lotes   {resumo, linhas: [[fonte, ...48 colunas da Base]], chaves: [[placa§hodômetro§combustível, data serial]]}
 // O lote fica pendente até o vigia acrescentar as linhas na aba Transações da CONTROLES\Base_copia.xlsx.
 const FONTES = new Set(['TICKET', 'TRUCKPAG', 'VELOE', 'VIBRA']);
 const LIMITE = 1_800_000;   // bytes do lote (uma linha do D1 vai até ~2 MB)
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const origem = request.headers.get('Origin');
   if (origem && origem !== new URL(request.url).origin) return json({ erro: 'Origem não permitida.' }, 403);
   const u = await usuarioDaSessao(env.DB, request);
@@ -29,5 +30,6 @@ export async function onRequestPost({ request, env }) {
   const r = await env.DB.prepare(
     `INSERT INTO consolidador_lotes (usuario_id, usuario_nome, resumo, linhas, chaves) VALUES (?, ?, ?, ?, ?) RETURNING id, criado_em, estado`)
     .bind(u.id, u.nome, JSON.stringify(resumo), linhasJson, JSON.stringify(chaves)).first();
+  aplicarDepois({ env, waitUntil });   // aplica também direto no banco (15.2 passo 3)
   return json({ ok: true, lote: { ...r, usuario_nome: u.nome, resumo, chaves, mensagem: null, linha_inicial: null, linha_final: null } }, 201);
 }

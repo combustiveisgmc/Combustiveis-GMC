@@ -6,6 +6,15 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Migração 15.2 passo 3, item 1 — pedidos das filas aplicados também direto no banco.** Todo lote (Consolidador, D-1 das APIs,
+  Inclusão da bomba interna, "Incluir" da Conferência) e toda correção/exclusão (Editar abastecimentos, Rateio das NFs, estornos,
+  recálculo do KM, "Aplicar o do cartão") passa a ser aplicado no Supabase logo depois de gravado na fila, na ordem em que foi pedido
+  (`lib/aplicar-banco.js`; funções `gestao_aplicar_lote` e `gestao_aplicar_alteracao`, migração `20261119140000`). O que ficar
+  pendente (banco fora do ar) é reaplicado pela varredura `POST /api/sync/banco/aplicar`, chamada pelo vigia uma vez por minuto
+  antes de gravar a planilha. Novas colunas `banco_aplicado_em`/`banco_mensagem` nas filas (D1 `0028`, espelho `20261119130000`);
+  pedidos antigos marcados "anterior" (nunca reaplicados). Cada pedido é reservado antes de aplicar (nunca duas vezes) e exclusão só
+  com a mesma placa. A planilha continua recebendo tudo pelo vigia (cópia de segurança) até a virada (item 3).
+
 - **Migração 15.2 passo 2 — Editar abastecimentos e Consolidador lendo do banco.** A lista do Editar abastecimentos
   (`base-copia.json`, também usada pelo Estoque e pela Inclusão de abastecimento) e o histórico do Consolidador (`consolidacao.json`)
   montados no banco iguais aos scripts `base_copia_lista.py` e `consolidador_historico.py` (tabela `public.dados_gerados`, funções

@@ -200,3 +200,12 @@ Funções (só a chave secreta): `gestao_cadastro_listas()`, `gestao_cadastro_sa
 (dicionários por ordem de aparição, KM impossível corrigido pelo hodômetro, cartão usado, endereços). O pg_cron (`gestao-dados-painel`)
 roda a cada 2 minutos e só refaz quando a assinatura (md5) muda. O portal lê por `gestao_dados_painel_versao()` e `gestao_dados_painel()`.
 
+
+## Filas do portal aplicadas no banco (desde 19/11/2026, 15.2 passo 3)
+As filas do D1 (`consolidador_lotes` = inserir, `alteracoes_base_copia` = corrigir/excluir) são aplicadas em `public.base_transacoes`
+por `gestao_aplicar_lote(p_linhas jsonb)` (pula duplicado por placa + data ao segundo + hodômetro + combustível com todo diesel junto;
+insere e renumera `linha` por data; refaz `chave`) e `gestao_aplicar_alteracao(p_acao, p_linha, p_placa, p_data, p_celulas, p_tanque)`
+(acha a linha como o `planilha_base_copia.py`; placa nova completa G-J, motorista novo completa K; exclusão só com a mesma placa).
+Execução só para `service_role`. Quem chama: `lib/aplicar-banco.js` (portal, ao gravar e na varredura `/api/sync/banco/aplicar`).
+No D1, `banco_aplicado_em` (hora, 'anterior' ou 'aplicando:<hora>' enquanto reservado) e `banco_mensagem` mostram o resultado.
+Enquanto o vigia ainda recopia `base_transacoes` da Base_copia, a cópia prevalece (as duas recebem os mesmos pedidos).

@@ -32,6 +32,15 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Vem do banco (Supabase, `base_transacoes`). Correções ainda não gravadas na Base_copia saem como estavam antes. Se a lista da tela
   e o banco estiverem em versões diferentes (um lote acabou de entrar), nada é exportado e o aviso pede para recarregar a página.
 
+
+## Gravações dos abastecimentos direto no banco (desde 19/11/2026)
+- Tudo o que entra nas filas da Base_copia (lotes do Consolidador, D-1 das APIs, Inclusão da bomba interna, "Incluir" da Conferência;
+  correções e exclusões do Editar abastecimentos, Rateio das NFs, estornos, recálculo do KM) é aplicado também no banco (Supabase,
+  `base_transacoes`) logo depois de gravado, na ordem em que foi pedido. A planilha continua recebendo tudo pelo vigia até a virada.
+- Se o banco estiver fora do ar, o pedido fica pendente e o vigia reaplica uma vez por minuto (`/api/sync/banco/aplicar`).
+- Para ver o resultado de cada pedido: colunas `banco_aplicado_em` e `banco_mensagem` das tabelas `consolidador_lotes` e
+  `alteracoes_base_copia` no D1 ("anterior" = pedido de antes da integração; "erro: ..." = não aplicado, conferir à mão).
+
 ## Banco de dados no Supabase (desde 12/11/2026)
 
 - Projeto Supabase (Postgres 17) ligado ao repositório do GitHub (pasta `.`, branch `main`). As tabelas ficam em

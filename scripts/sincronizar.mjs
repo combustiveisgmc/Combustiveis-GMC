@@ -438,6 +438,15 @@ function planilhaBaseCopia() {
     return nome ? path.join(pasta, nome) : null;
   } catch { return null; }
 }
+// 15.2 passo 3 (19/11/2026): aplica no banco (Supabase) os pedidos das filas que ficaram sem aplicar (o portal já aplica ao gravar;
+// isto cobre banco fora do ar). Roda antes de a planilha ser gravada, uma vez por minuto; o agendador na nuvem assume no passo 4.
+let ultimaVarreduraBanco = 0;
+async function processarFilasBanco() {
+  if (!tokenSync() || Date.now() - ultimaVarreduraBanco < 60_000) return;
+  ultimaVarreduraBanco = Date.now();
+  const r = await api('POST', '/api/sync/banco/aplicar', {});
+  if (r && (r.aplicados || r.erros)) log(`Banco: ${r.aplicados} pedido(s) das filas aplicado(s)${r.erros ? `, ${r.erros} com erro (ver banco_mensagem)` : ''}.`);
+}
 const CONSOLIDACAO_GERADO = path.join(PROJETO, '.dados', 'consolidacao.json');
 const ultimoEstadoLote = new Map();
 async function processarConsolidador() {
@@ -845,6 +854,7 @@ if (process.argv.includes('--vigiar')) {
       try { await processarPostos(); } catch (e) { erro('nos postos', e); }
       if (await plantao()) { try { await processarCadastros(); } catch (e) { erro('em placas/motoristas', e); } }
       if (await plantao()) { try { await processarCartoes(); } catch (e) { erro('nos cartões frota', e); } }
+      if (await plantao()) { try { await processarFilasBanco(); } catch (e) { erro('nas filas do banco', e); } }
       if (await plantao()) { try { await processarConsolidador(); } catch (e) { erro('no consolidador', e); } }
       if (await plantao()) { try { await processarEdicaoBase(); } catch (e) { erro('em editar abastecimentos', e); } }
       if (await plantao()) { try { await processarApisCartoes(); } catch (e) { erro('nas APIs dos cartões', e); } }

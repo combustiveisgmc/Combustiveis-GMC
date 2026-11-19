@@ -1,10 +1,11 @@
 import { tokenSyncValido, json } from '../../../../lib/auth.js';
+import { aplicarDepois } from '../../../../lib/aplicar-banco.js';
 
 // O vigia manda aqui as transações de um dia das APIs dos cartões (Ticket Log e TruckPag), já montadas com o motor do
 // Consolidador: viram um lote como os da tela do Consolidador e o próprio vigia grava na Base_copia (processarConsolidador).
 // POST {dia: 'AAAA-MM-DD', linhas: [[fonte, ...48 colunas]], chaves: [[placa§hodômetro§combustível, serial]], ids: ['ticket:123', ...],
 //       resumo: {n_ticket, n_truckpag, avisos...}}
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   if (!tokenSyncValido(request, env)) return json({ erro: 'Não autorizado.' }, 401);
   let d;
   try { d = await request.json(); } catch { return json({ erro: 'Dados inválidos.' }, 400); }
@@ -23,5 +24,6 @@ export async function onRequestPost({ request, env }) {
   const lote = await env.DB.prepare(
     'INSERT INTO consolidador_lotes (usuario_id, usuario_nome, resumo, linhas, chaves) VALUES (?, ?, ?, ?, ?) RETURNING id')
     .bind(adm.id, 'Integração Ticket/TruckPag (API)', JSON.stringify(resumo), JSON.stringify(linhas), JSON.stringify(chaves)).first();
+  aplicarDepois({ env, waitUntil });   // aplica também direto no banco (15.2 passo 3)
   return json({ ok: true, id: lote.id }, 201);
 }
