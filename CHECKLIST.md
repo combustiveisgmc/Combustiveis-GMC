@@ -155,7 +155,7 @@ Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fi
       para voltar à planilha, apagar a chave). Veículos: decisão do usuário = **Cadastro de placas** (não mais a aba Metas da Base).
 - [ ] 1b. Área do motorista (Minha média) também do banco (hoje o vigia gera da Base.xlsx: `gerarPainelMotoristas`).
 - [x] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco (19/11; chaves KV `base-copia-fonte` e `consolidacao-fonte`).
-- [ ] 3. Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
+- [ ] 3. (inventário e plano em `docs/MIGRACAO-PASSO3.md`) Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
       Consolidador e do D-1, preço do Rateio das NFs; o vigia deixa de espelhar a Base_copia no banco (o banco vira a origem).
 - [ ] 4. Rotinas dos cartões nas Edge Functions: tempo real e D-1 (Ticket/TruckPag), estornos TruckPag, cadastro de motoristas e
       placas nos cartões, conciliação de NFs, conferência com os cartões.
