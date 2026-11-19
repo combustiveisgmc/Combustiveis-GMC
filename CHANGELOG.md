@@ -14,8 +14,8 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
   (`lib/dados-painel.js`, guardado no KV por versão). Liga/desliga pela chave KV `abastecimentos-fonte` = `banco` (publicado desligado).
   Conferido com a lógica Python sobre a Base_copia em 62.959 linhas: 15 de 16 colunas idênticas, dicionários, endereços e "fora de
   abastecimento" iguais; valor difere em R$ 0,0001 em 801 linhas (arredondamento). Veículos: o cadastro difere da aba Metas da Base
-  em 9 metas, 23 unidades (inclui as vendidas) e 3 placas que só estão na Metas — decisão do usuário antes de ligar.
-  Teste `tests/js/dados-painel.test.mjs`.
+  em 9 metas, 23 unidades (inclui as vendidas) e 3 placas que só estão na Metas (sem nenhum abastecimento). Decisão do usuário:
+  vale o **Cadastro de placas**; **ligado em produção** em 19/11. Teste `tests/js/dados-painel.test.mjs`.
 
 ## 18/11/2026
 

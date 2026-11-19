@@ -150,9 +150,9 @@ O vigia só é desligado no fim, com cada tarefa abaixo já rodando na nuvem e c
 Agendador escolhido pelo usuário (19/11/2026): **Supabase Edge Functions** (pg_cron chama as funções; credenciais dos cartões como
 segredos do Supabase). Precisa de um token de acesso do Supabase gerado pelo usuário para publicar as funções.
 Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fim):
-- [ ] 1. Painéis leem os abastecimentos do banco (`base_transacoes` = Base_copia) em vez da Base.xlsx; o resto do arquivo (negociações,
-      locais, orçamento) continua vindo do vigia até a etapa 15.3. **Pronto e conferido (19/11), publicado desligado**: falta o usuário
-      decidir a fonte dos veículos (cadastro x aba Metas) e ligar a chave KV `abastecimentos-fonte` = `banco`.
+- [x] 1. Painéis leem os abastecimentos do banco (`base_transacoes` = Base_copia) em vez da Base.xlsx; o resto do arquivo (negociações,
+      locais, orçamento) continua vindo do vigia até a etapa 15.3. Ligado em produção em 19/11 (KV `abastecimentos-fonte` = `banco`;
+      para voltar à planilha, apagar a chave). Veículos: decisão do usuário = **Cadastro de placas** (não mais a aba Metas da Base).
 - [ ] 1b. Área do motorista (Minha média) também do banco (hoje o vigia gera da Base.xlsx: `gerarPainelMotoristas`).
 - [ ] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco.
 - [ ] 3. Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
