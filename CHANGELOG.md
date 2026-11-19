@@ -6,6 +6,14 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Recuperados os abastecimentos de 16 a 18/11 que tinham sumido.** Pedido do usuário: os lançados pelas planilhas dos cartões
+  não apareciam e o dia 17/11 estava vazio. Causa: no conflito do ownCloud entre os dois computadores do vigia (18/11), a versão da
+  Base_copia que ficou valendo não tinha o que foi gravado de 16/11 ~14h a 18/11 13h20; a virada (19/11 10:47) copiou essa planilha
+  para o banco. Recuperado pela fila do D1 (que guarda cada pedido): lotes 85, 87, 88, 89, 90 e 91 (81 abastecimentos: todo o 17/11,
+  o lançamento de 16/11 e o atrasado do TMZ0C74) e 27 correções perdidas, reaplicados na ordem no banco e na planilha. Cópias antes:
+  `backup.base_transacoes_20261119` e Base_copia em `%LOCALAPPDATA%GestaoCombustivelackup`. Depois: banco = planilha (63.042).
+  A comparação diária passa a tratar texto só com espaços como vazio.
+
 - **Exportar do Editar abastecimentos com as cores dos cartões.** Pedido do usuário: o export "não veio com as formatações, como
   por exemplo as cores das linhas referente a cada cartão". Agora cada linha sai com a cor do cartão como na Base_copia (TRUCKPAG
   verde #99FF99, VIBRA azul #9DC3E6, VELOE lilás #DBB7FF; cartão físico/Ticket sem cor), pintada de A a AU, e cada coluna com o

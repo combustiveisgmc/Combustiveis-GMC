@@ -21,6 +21,9 @@ PASTA = os.path.join(ss.PROJETO, '.dados', 'comparacao-base')
 
 
 def igual(a, b):
+    # texto só com espaços = vazio (a planilha grava vazio onde o lote trazia ' ')
+    a = None if isinstance(a, str) and not a.strip() else a
+    b = None if isinstance(b, str) and not b.strip() else b
     if a is None or b is None:
         return (a in (None, '')) and (b in (None, ''))
     if isinstance(a, float) or isinstance(b, float):
