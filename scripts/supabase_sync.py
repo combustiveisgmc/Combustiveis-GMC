@@ -5,6 +5,9 @@ atualizado sempre que as planilhas mudam, antes de deixar de usar as planilhas.
     py scripts/supabase_sync.py sincronizar        recarrega as tabelas cuja planilha mudou desde a última vez
     py scripts/supabase_sync.py sincronizar --tudo recarrega todas
     py scripts/supabase_sync.py conferir           linhas de cada planilha x linhas de cada tabela
+    py scripts/supabase_sync.py sincronizar base_transacoes --voltar-planilha
+                                                   VOLTA da virada: refaz base_transacoes da Base_copia (desde 19/11/2026
+                                                   o banco é a origem e a recópia automática fica desligada)
 
 Regras:
   - as planilhas só são lidas (cópia temporária; a Base.xlsx continua intocada);
@@ -40,7 +43,10 @@ FONTES = {
     # ignorar: colunas de fórmula da planilha que no banco são cópia (ano/mês da data, placa+hodômetro, vazias);
     # renomear: "ano" é o ano do veículo; chave: identidade estável do abastecimento (ver chave_abastecimento)
     'base_transacoes': {'arquivo': CTRL('Base_copia.xlsx'), 'aba': 'Transações', 'ignorar': ['ano_2', 'mes', 'cod_unid', 'data_ref', 'def_posto'],
-                        'renomear': {'ano': 'ano_veiculo'}, 'chave': True},
+                        'renomear': {'ano': 'ano_veiculo'}, 'chave': True,
+                        # 19/11/2026 (15.2 passo 3, virada): o banco é a origem; o portal grava direto nele (lib/aplicar-banco.js).
+                        # A recópia da planilha fica desligada; só com "sincronizar base_transacoes --voltar-planilha" (volta).
+                        'origem_banco': True},
     'placas': {'arquivo': CTRL('Controle_motoristas_e_placas.xlsx'), 'aba': 'Carros'},
     'motoristas': {'arquivo': CTRL('Controle_motoristas_e_placas.xlsx'), 'aba': 'Motoristas'},
     'cartoes_placas': {'arquivo': CTRL('CONTROLE CARTÕES FROTA.xlsx'), 'aba': 'CARTÕES'},
@@ -335,7 +341,7 @@ def carregar(conn, nome, mtime):
     return len(dados)
 
 
-def sincronizar(tudo=False, so=None):
+def sincronizar(tudo=False, so=None, voltar=False):
     if not os.path.isfile(CREDENCIAIS):
         return saida({'pulado': 'sem credenciais do Supabase neste computador'})
     estado = ler_estado()
@@ -343,6 +349,8 @@ def sincronizar(tudo=False, so=None):
     for nome, f in FONTES.items():
         if so and nome not in so:
             continue
+        if f.get('origem_banco') and not voltar:
+            continue   # banco é a origem (virada de 19/11/2026): nunca recopiar da planilha sem pedir
         if not os.path.isfile(f['arquivo']):
             continue
         st = os.stat(f['arquivo'])
@@ -390,7 +398,8 @@ if __name__ == '__main__':
         esquema()
     elif cmd == 'sincronizar':
         args = sys.argv[2:]
-        sincronizar(tudo='--tudo' in args, so=[a for a in args if not a.startswith('--')] or None)
+        sincronizar(tudo='--tudo' in args or '--voltar-planilha' in args, so=[a for a in args if not a.startswith('--')] or None,
+                    voltar='--voltar-planilha' in args)
     elif cmd == 'conferir':
         conferir()
     else:

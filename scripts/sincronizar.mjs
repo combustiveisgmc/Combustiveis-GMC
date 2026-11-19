@@ -837,10 +837,43 @@ function rodarModelo() {
   });
   p.on('error', () => { clearTimeout(fim); MODELO.rodando = false; MODELO.pendente = true; });
 }
+// Virada de 19/11/2026: base_transacoes deixou de ser recopiada da planilha (o portal grava direto no banco). A Base_copia segue
+// recebendo os mesmos pedidos, então a mudança dela ainda serve de sinal para recarregar o modelo.
+let mtimeBaseCopia = 0;
+function baseCopiaMudou() {
+  try { const m = fs.statSync(planilhaBaseCopia()).mtimeMs; if (m !== mtimeBaseCopia) { const antes = mtimeBaseCopia; mtimeBaseCopia = m; return antes !== 0; } } catch {}
+  return false;
+}
+// Comparação diária banco x planilha (15.2 passo 3, item 2; teste até 01/12/2026): uma vez por dia, a partir das 7h.
+const COMPARACAO = { dia: '', rodando: false };
+function rodarComparacao() {
+  const agora = new Date(), dia = agora.toISOString().slice(0, 10);
+  if (COMPARACAO.rodando || COMPARACAO.dia === dia || agora.getHours() < 7) return;
+  COMPARACAO.rodando = true;
+  let out = '';
+  const p = spawn('py', ['scripts/comparar_base.py'], { cwd: PROJETO, windowsHide: true, shell: process.platform === 'win32',
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+  const fim = setTimeout(() => { try { p.kill(); } catch {} }, 15 * 60 * 1000);
+  p.stdout.on('data', (d) => { out += d; });
+  p.stderr.on('data', (d) => { out += d; });
+  p.on('close', () => {
+    clearTimeout(fim);
+    COMPARACAO.rodando = false;
+    let r = null;
+    try { r = JSON.parse(out.trim().split(/\r?\n/).pop()); } catch {}
+    if (!r) { log('Comparação banco x planilha: falhou (' + out.trim().slice(-200) + ')'); return; }
+    COMPARACAO.dia = dia;
+    log(r.igual ? `Comparação banco x planilha: iguais (${r.banco} abastecimentos).`
+      : `Comparação banco x planilha: ATENÇÃO, ${r.so_na_planilha} só na planilha, ${r.so_no_banco} só no banco, ${r.diferentes} diferente(s) (${r.relatorio}).`);
+  });
+  p.on('error', () => { clearTimeout(fim); COMPARACAO.rodando = false; });
+}
 function processarSupabase() {
   rodarSupabase(SUPABASE.planilhas, 'planilhas');
   rodarSupabase(SUPABASE.d1, 'banco da Cloudflare');
+  if (baseCopiaMudou()) MODELO.pendente = true;
   rodarModelo();
+  if (!SUPABASE.planilhas.rodando && !MODELO.rodando) rodarComparacao();
 }
 
 // --vigiar: fica rodando e confere a cada 10 s (a tarefa agendada inicia no logon e religa se cair)

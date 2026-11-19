@@ -208,4 +208,5 @@ insere e renumera `linha` por data; refaz `chave`) e `gestao_aplicar_alteracao(p
 (acha a linha como o `planilha_base_copia.py`; placa nova completa G-J, motorista novo completa K; exclusão só com a mesma placa).
 Execução só para `service_role`. Quem chama: `lib/aplicar-banco.js` (portal, ao gravar e na varredura `/api/sync/banco/aplicar`).
 No D1, `banco_aplicado_em` (hora, 'anterior' ou 'aplicando:<hora>' enquanto reservado) e `banco_mensagem` mostram o resultado.
-Enquanto o vigia ainda recopia `base_transacoes` da Base_copia, a cópia prevalece (as duas recebem os mesmos pedidos).
+Desde 19/11/2026 10:47 `base_transacoes` não é mais recopiada da Base_copia: o banco é a origem (volta: `supabase_sync.py sincronizar
+base_transacoes --voltar-planilha`). `scripts/comparar_base.py` compara os dois até 01/12/2026.

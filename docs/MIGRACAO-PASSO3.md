@@ -44,3 +44,5 @@ guarda `linha`). `bomba_rateio`, `conferencia_cartoes`, `km_recalcular`, `estorn
 - 19/11/2026, item 1 feito ("Pode seguir com o item 1"): as 6 rotas que gravam nas filas chamam `lib/aplicar-banco.js` depois de
   gravar; a varredura `POST /api/sync/banco/aplicar` (vigia, 1x/min, antes de gravar a planilha) reaplica o que ficou pendente.
   Pedidos anteriores marcados `banco_aplicado_em = 'anterior'`. Próximo: item 2 (conferir banco x planilha por alguns dias).
+- 19/11/2026 10:47, virada antecipada ("Já pode desligar a recópia hoje e começar as comparações"): recópia desligada, filas vazias,
+  comparação de partida 62.939 = 62.939. Comparação diária até 01/12 (`scripts/comparar_base.py`).

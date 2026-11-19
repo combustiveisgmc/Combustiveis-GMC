@@ -6,6 +6,13 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Migração 15.2 passo 3 — virada: o banco é a origem dos abastecimentos.** A recópia da Base_copia para `base_transacoes` foi
+  desligada (`supabase_sync.py`, `origem_banco`); o banco agora só recebe os pedidos do portal. A planilha continua recebendo os
+  mesmos pedidos pelo vigia, como reserva. Teste até 01/12/2026: `scripts/comparar_base.py` compara banco x planilha abastecimento
+  por abastecimento (o vigia roda 1x por dia a partir das 7h e anota no log; relatório em `.dados/comparacao-base/`). Ponto de
+  partida 19/11 10:47: 62.939 iguais. Volta: `py scripts/supabase_sync.py sincronizar base_transacoes --voltar-planilha`. O modelo
+  `gestao` passa a ser recarregado quando a Base_copia muda.
+
 - **Migração 15.2 passo 3, item 1 — pedidos das filas aplicados também direto no banco.** Todo lote (Consolidador, D-1 das APIs,
   Inclusão da bomba interna, "Incluir" da Conferência) e toda correção/exclusão (Editar abastecimentos, Rateio das NFs, estornos,
   recálculo do KM, "Aplicar o do cartão") passa a ser aplicado no Supabase logo depois de gravado na fila, na ordem em que foi pedido
