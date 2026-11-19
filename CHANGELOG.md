@@ -6,6 +6,15 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Migração 15.2 passo 2 — Editar abastecimentos e Consolidador lendo do banco.** A lista do Editar abastecimentos
+  (`base-copia.json`, também usada pelo Estoque e pela Inclusão de abastecimento) e o histórico do Consolidador (`consolidacao.json`)
+  montados no banco iguais aos scripts `base_copia_lista.py` e `consolidador_historico.py` (tabela `public.dados_gerados`, funções
+  `gestao_gerar_base_copia` e `gestao_gerar_consolidacao`, no mesmo pg_cron dos painéis; migrações `20261119120000`, `121000`
+  (junções sem nulo: linhas sem matrícula sumiam; 22 s -> 3,5 s) e `122000`). "Gerado em" da lista = hora em que o banco passou a refletir
+  a planilha (a tela usa para saber quais correções já estão nela). Conferido nas 62.959 linhas: idênticos, a não ser espaços sobrando
+  no fim de nomes (o banco limpa), um "200" que estava como texto e matrícula/modelo guardados como texto ou número (a planilha já
+  misturava); o vigia identifica o abastecimento por placa + data, então não muda nada. Chaves KV `base-copia-fonte` e
+  `consolidacao-fonte` = `banco` (uma para cada arquivo). Teste em `tests/js/dados-painel.test.mjs`.
 - **Migração 100% nuvem, etapa 15.2 passo 1 — painéis lendo os abastecimentos do banco** (pedido do usuário: "Pode começar a
   próxima etapa"; agendador escolhido: Supabase Edge Functions). O banco monta a parte dos abastecimentos do arquivo dos painéis
   igual ao `importar_base.py` (função `gestao_gerar_dados_painel`, tabela `dados_painel`, pg_cron a cada 2 min só quando algo muda;

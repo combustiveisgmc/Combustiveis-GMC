@@ -53,3 +53,20 @@ test('sem dados no banco (ou chave desligada): devolve null e o portal usa a pla
     assert.equal(await fonteBanco({ DADOS: kv }), false);        // sem banco configurado
   });
 });
+
+// passo 2: lista do Editar abastecimentos e histórico do Consolidador (sem juntar nada; cada um com a sua chave)
+test('geradoDoBanco: busca pela versão, guarda e reaproveita; chave por arquivo', async () => {
+  const { geradoDoBanco, usaBanco, GERADOS } = await import('../../lib/dados-painel.js');
+  assert.deepEqual(GERADOS, { 'base-copia.json': 'base-copia', 'consolidacao.json': 'consolidacao' });
+  const kv = kvFalso({ 'base-copia-fonte': 'banco' });
+  const env = ENV(kv);
+  await comBanco({ gestao_dados_gerados_versao: { versao: '20261119092429' }, gestao_dados_gerados: '{"linhas":2,"col":{"linha":[2,3]}}' }, async (chamadas) => {
+    assert.equal(await usaBanco(env, 'base-copia'), true);
+    assert.equal(await usaBanco(env, 'consolidacao'), false);
+    const a = await geradoDoBanco(env, 'base-copia');
+    assert.equal(a.etag, '"b20261119092429"');
+    assert.deepEqual(JSON.parse(a.corpo).col.linha, [2, 3]);
+    await geradoDoBanco(env, 'base-copia');
+    assert.equal(chamadas.filter((c) => c === 'gestao_dados_gerados').length, 1);
+  });
+});

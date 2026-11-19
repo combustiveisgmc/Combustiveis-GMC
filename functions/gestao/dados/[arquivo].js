@@ -2,7 +2,7 @@
 // sincronizador. O login (e a permissão de abrir os dashboards) já foi conferido pelo _middleware.js de /gestao;
 // aqui cada arquivo só vai para quem pode abrir uma tela que usa ele (perms; sem perms = qualquer tela de dashboard).
 import { pode } from '../../../lib/permissoes.js';
-import { fonteBanco, abastecimentosDoBanco } from '../../../lib/dados-painel.js';
+import { fonteBanco, abastecimentosDoBanco, GERADOS, usaBanco, geradoDoBanco } from '../../../lib/dados-painel.js';
 const ARQUIVOS = {
   'abastecimentos.json': { dados: 'abastecimentos', versao: 'versao', falta: 'Ainda não há dados enviados. Rode a sincronização da Base.' },
   'anp.json': { perms: ['preco-anp', 'contratos-anp'], dados: 'anp', versao: 'anp-versao', falta: 'Os preços da ANP ainda não foram enviados. O computador da sincronização envia na próxima conferência.' },
@@ -36,6 +36,17 @@ export async function onRequestGet({ request, env, params, data }) {
         return new Response(b.corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', ETag: b.etag } });
       }
     } catch (e) { console.error('abastecimentos do banco: ' + (e && e.message)); }
+  }
+  // lista do Editar abastecimentos e histórico do Consolidador vindos do banco (passo 2): chave "<nome>-fonte" = "banco"
+  const gerado = GERADOS[params.arquivo];
+  if (gerado && await usaBanco(env, gerado)) {
+    try {
+      const b = await geradoDoBanco(env, gerado);
+      if (b) {
+        if (request.headers.get('If-None-Match') === b.etag) return new Response(null, { status: 304, headers: { ETag: b.etag } });
+        return new Response(b.corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', ETag: b.etag } });
+      }
+    } catch (e) { console.error(gerado + ' do banco: ' + (e && e.message)); }
   }
 
   const info = await env.DADOS.get(a.versao, 'json');

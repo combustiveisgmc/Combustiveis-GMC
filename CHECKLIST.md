@@ -154,7 +154,7 @@ Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fi
       locais, orçamento) continua vindo do vigia até a etapa 15.3. Ligado em produção em 19/11 (KV `abastecimentos-fonte` = `banco`;
       para voltar à planilha, apagar a chave). Veículos: decisão do usuário = **Cadastro de placas** (não mais a aba Metas da Base).
 - [ ] 1b. Área do motorista (Minha média) também do banco (hoje o vigia gera da Base.xlsx: `gerarPainelMotoristas`).
-- [ ] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco.
+- [x] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco (19/11; chaves KV `base-copia-fonte` e `consolidacao-fonte`).
 - [ ] 3. Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
       Consolidador e do D-1, preço do Rateio das NFs; o vigia deixa de espelhar a Base_copia no banco (o banco vira a origem).
 - [ ] 4. Rotinas dos cartões nas Edge Functions: tempo real e D-1 (Ticket/TruckPag), estornos TruckPag, cadastro de motoristas e
