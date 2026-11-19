@@ -2,6 +2,7 @@
 // sincronizador. O login (e a permissão de abrir os dashboards) já foi conferido pelo _middleware.js de /gestao;
 // aqui cada arquivo só vai para quem pode abrir uma tela que usa ele (perms; sem perms = qualquer tela de dashboard).
 import { pode } from '../../../lib/permissoes.js';
+import { fonteBanco, abastecimentosDoBanco } from '../../../lib/dados-painel.js';
 const ARQUIVOS = {
   'abastecimentos.json': { dados: 'abastecimentos', versao: 'versao', falta: 'Ainda não há dados enviados. Rode a sincronização da Base.' },
   'anp.json': { perms: ['preco-anp', 'contratos-anp'], dados: 'anp', versao: 'anp-versao', falta: 'Os preços da ANP ainda não foram enviados. O computador da sincronização envia na próxima conferência.' },
@@ -23,6 +24,18 @@ export async function onRequestGet({ request, env, params, data }) {
     return new Response(JSON.stringify({ erro: 'Seu acesso não inclui estes dados.' }), {
       status: 403, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
     });
+  }
+
+  // abastecimentos dos painéis vindos do banco (19/11/2026; lib/dados-painel.js), quando a chave "abastecimentos-fonte" = "banco".
+  // Sem os dados do banco, segue o arquivo das planilhas como antes.
+  if (params.arquivo === 'abastecimentos.json' && await fonteBanco(env)) {
+    try {
+      const b = await abastecimentosDoBanco(env);
+      if (b) {
+        if (request.headers.get('If-None-Match') === b.etag) return new Response(null, { status: 304, headers: { ETag: b.etag } });
+        return new Response(b.corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', ETag: b.etag } });
+      }
+    } catch (e) { console.error('abastecimentos do banco: ' + (e && e.message)); }
   }
 
   const info = await env.DADOS.get(a.versao, 'json');

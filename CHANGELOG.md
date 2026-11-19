@@ -4,6 +4,19 @@ Toda alteração pedida e feita no portal Gestão de Combustível, da mais nova 
 Cada alteração nova entra no topo, com a data, o que foi pedido e o que mudou. O detalhe técnico de cada item continua
 no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
+## 19/11/2026
+
+- **Migração 100% nuvem, etapa 15.2 passo 1 — painéis lendo os abastecimentos do banco** (pedido do usuário: "Pode começar a
+  próxima etapa"; agendador escolhido: Supabase Edge Functions). O banco monta a parte dos abastecimentos do arquivo dos painéis
+  igual ao `importar_base.py` (função `gestao_gerar_dados_painel`, tabela `dados_painel`, pg_cron a cada 2 min só quando algo muda;
+  migrações `20261119100000_gestao_dados_painel.sql` e `..101000_..._variavel.sql`). Fonte: `base_transacoes` (= Base_copia) e
+  veículos do cadastro de placas. O vigia manda à parte o que ainda vem das planilhas (KV `abastecimentos-extras`) e o portal junta
+  (`lib/dados-painel.js`, guardado no KV por versão). Liga/desliga pela chave KV `abastecimentos-fonte` = `banco` (publicado desligado).
+  Conferido com a lógica Python sobre a Base_copia em 62.959 linhas: 15 de 16 colunas idênticas, dicionários, endereços e "fora de
+  abastecimento" iguais; valor difere em R$ 0,0001 em 801 linhas (arredondamento). Veículos: o cadastro difere da aba Metas da Base
+  em 9 metas, 23 unidades (inclui as vendidas) e 3 placas que só estão na Metas — decisão do usuário antes de ligar.
+  Teste `tests/js/dados-painel.test.mjs`.
+
 ## 18/11/2026
 
 - **Cadastros como tabelas no banco** (pedido do usuário: as listas da engrenagem eram "tags"; a unidade tem de ser uma

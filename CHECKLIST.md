@@ -147,10 +147,18 @@ O vigia só é desligado no fim, com cada tarefa abaixo já rodando na nuvem e c
 - [ ] Categoria e marca do veículo como chave (id) do cadastro quando as placas saírem da planilha (15.3); hoje texto validado.
 
 ### 15.2 Abastecimentos no banco
-- [ ] `base_transacoes` vira a origem: painéis leem do banco (não mais da Base.xlsx via vigia).
-- [ ] Editar abastecimentos, Rateio das NFs e Bomba interna gravam direto no banco (sem fila para a Base_copia).
-- [ ] Consolidador grava os lotes no banco.
-- [ ] APIs Ticket e TruckPag (tempo real e D-1) numa tarefa agendada na nuvem, com as credenciais como segredo.
+Agendador escolhido pelo usuário (19/11/2026): **Supabase Edge Functions** (pg_cron chama as funções; credenciais dos cartões como
+segredos do Supabase). Precisa de um token de acesso do Supabase gerado pelo usuário para publicar as funções.
+Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fim):
+- [ ] 1. Painéis leem os abastecimentos do banco (`base_transacoes` = Base_copia) em vez da Base.xlsx; o resto do arquivo (negociações,
+      locais, orçamento) continua vindo do vigia até a etapa 15.3. **Pronto e conferido (19/11), publicado desligado**: falta o usuário
+      decidir a fonte dos veículos (cadastro x aba Metas) e ligar a chave KV `abastecimentos-fonte` = `banco`.
+- [ ] 1b. Área do motorista (Minha média) também do banco (hoje o vigia gera da Base.xlsx: `gerarPainelMotoristas`).
+- [ ] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco.
+- [ ] 3. Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
+      Consolidador e do D-1, preço do Rateio das NFs; o vigia deixa de espelhar a Base_copia no banco (o banco vira a origem).
+- [ ] 4. Rotinas dos cartões nas Edge Functions: tempo real e D-1 (Ticket/TruckPag), estornos TruckPag, cadastro de motoristas e
+      placas nos cartões, conciliação de NFs, conferência com os cartões.
 
 ### 15.3 Demais planilhas no banco
 - [ ] Placas e motoristas sem a planilha (já gravam no Supabase).

@@ -139,6 +139,12 @@ function verificar(forcar) {
 
     log('Enviando para a Cloudflare…');
     kvPut('abastecimentos', GERADO);
+    // migração 100% nuvem (19/11/2026): os abastecimentos dos painéis passam a vir do banco (public.dados_painel); as partes
+    // que ainda vêm das planilhas (negociações, coordenadas, orçamento) vão à parte e o portal junta (functions/gestao/dados)
+    const arqExtras = path.join(PASTA, 'abastecimentos-extras.json');
+    fs.writeFileSync(arqExtras, JSON.stringify({ negociacao: d.negociacao ?? null, fornecedoresBomba: d.fornecedoresBomba ?? null,
+      locais: d.locais || {}, locaisSuspeitos: d.locaisSuspeitos || [], negPostos: d.negPostos ?? null, orcamento: d.orcamento ?? null }));
+    kvPut('abastecimentos-extras', arqExtras);
     // cadastro dos fornecedores das bombas internas (com CNPJ) à parte: Movimentações e Rateio das NFs leem sem os dados todos
     const arqForn = path.join(PASTA, 'fornecedores-bomba.json');
     fs.writeFileSync(arqForn, JSON.stringify({ fornecedores: d.fornecedoresBomba || [], geradoEm: d.geradoEm }));
