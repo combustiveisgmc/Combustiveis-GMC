@@ -6,6 +6,12 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Menu lateral mais compacto.** Pedido do usuário: botões de grupo e de telas muito grandes, e muito espaço entre os grupos
+  minimizados. Telas de 38 para 32 px (texto 13,5 e ícone 16) com 2 px entre elas (eram 25 px); grupos viraram rótulo pequeno
+  em maiúsculas (12 px, cinza) com 10 px entre eles; o respiro entre o grupo e as telas agora some quando o grupo está fechado. Na
+  mesma altura cabem quatro grupos abertos em vez de um. Celular continua com alvos de toque de 40 px. Conferido aberto, com os grupos
+  fechados, recolhido (só ícones), no celular e no tema claro (contraste dos grupos 5,7:1).
+
 - **Bomba interna > Estoque: tanques desenhados no lugar das barras.** Pedido do usuário: trocar a barra do nível por um ícone de
   tanque com a % dentro, e para o Arla "um ícone diferente do de diesel ... aquele tanque mais quadrado" (a maioria é de 1.000 L).
   Diesel = tanque cilíndrico de armazenamento; Arla = contêiner IBC (tanque quadrado na grade metálica, palete, tampa e válvula),

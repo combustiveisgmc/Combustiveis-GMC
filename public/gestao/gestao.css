@@ -87,7 +87,7 @@ a{color:inherit;}
 /* ---- menu lateral (Drawer) ---- */
 .lateral{position:sticky;top:0;height:100vh;flex-shrink:0;width:var(--lateral-largura);background:var(--lateral);display:flex;flex-direction:column;z-index:30;}
 :root[data-theme="light"] .lateral{border-right:1px solid var(--borda);}
-.lateral-corpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding:var(--e-5);display:flex;flex-direction:column;gap:var(--e-5);scrollbar-width:thin;scrollbar-color:#333 transparent;}
+.lateral-corpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding:var(--e-4) var(--e-3);display:flex;flex-direction:column;gap:var(--e-3);scrollbar-width:thin;scrollbar-color:#333 transparent;}
 .lateral-topo{display:flex;align-items:center;gap:8px;padding:var(--e-2) 0;}
 /* logo do Grupo Miranda Coelho (18/11/2026): com o nome no menu aberto, só o símbolo no menu recolhido. Versão negativa
    (cinza vira claro) no tema escuro e a original no claro: .so-escuro / .so-claro */
@@ -105,25 +105,29 @@ a{color:inherit;}
 .usuario-nome{min-width:0;line-height:1.25;}
 .usuario-nome strong{display:block;font-size:16px;font-weight:600;overflow-wrap:anywhere;}
 .usuario-nome span{font-size:12px;color:var(--texto-2);}
-.menu{display:flex;flex-direction:column;gap:var(--e-5);}
-.menu a, .menu button.menu-item{position:relative;display:flex;align-items:center;gap:var(--e-2);width:100%;min-height:38px;padding:10px 15px 10px 10px;
-  border:0;border-radius:var(--r);background:transparent;color:var(--texto-2);text-decoration:none;text-align:left;font-size:14px;font-weight:500;}
+/* menu compacto (19/11/2026, pedido do usuário: botões de grupo e de telas muito grandes e muito espaço entre os grupos fechados):
+   telas de 32px com 2px entre elas; grupos como rótulo pequeno; o espaço do grupo some quando ele está fechado */
+.menu{display:flex;flex-direction:column;gap:2px;}
+.menu a, .menu button.menu-item{position:relative;display:flex;align-items:center;gap:var(--e-2);width:100%;min-height:32px;padding:6px 12px 6px 10px;
+  border:0;border-radius:var(--r);background:transparent;color:var(--texto-2);text-decoration:none;text-align:left;font-size:13.5px;font-weight:500;line-height:1.25;}
 .menu a:hover, .menu button.menu-item:hover{background:var(--cartao-3);color:var(--texto);}
 :root[data-theme="light"] .menu a:hover, :root[data-theme="light"] .menu button.menu-item:hover{background:var(--cartao-2);}
 .menu a[aria-current="page"]{background:var(--cartao);color:var(--texto);}
 :root[data-theme="light"] .menu a[aria-current="page"]{background:var(--primaria-suave);}
 .menu a[aria-current="page"] svg{color:var(--primaria-texto);}
-.menu svg{width:18px;height:18px;flex-shrink:0;}
+.menu svg{width:16px;height:16px;flex-shrink:0;}
 .menu .rotulo{flex:1 1 auto;min-width:0;}
-.menu-secao{display:flex;flex-direction:column;gap:6px;}
-.menu-grupo{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px 15px 10px 10px;border:0;border-radius:var(--r);background:none;
-  font-size:16px;font-weight:600;color:var(--texto);text-align:left;}
+.menu-secao{display:flex;flex-direction:column;margin-top:var(--e-2);}
+.menu-grupo{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:28px;padding:4px 12px 4px 10px;border:0;border-radius:var(--r);background:none;
+  font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--suave);text-align:left;}
 .menu-grupo:hover{color:var(--primaria-texto);}
-.menu-grupo .seta-grupo{width:16px;height:16px;transition:transform .18s ease;color:var(--suave);}
+.menu-grupo .seta-grupo{width:14px;height:14px;transition:transform .18s ease;color:var(--suave);}
 .menu-grupo[aria-expanded="false"] .seta-grupo{transform:rotate(-90deg);}
 .menu-itens{display:grid;grid-template-rows:1fr;transition:grid-template-rows .18s ease;}
-.menu-itens > div{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:6px;}
+/* o respiro entre o grupo e as telas fica dentro da parte que fecha: grupo fechado não deixa espaço sobrando */
+.menu-itens > div{overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:2px;padding-top:2px;}
 .menu-secao.fechada .menu-itens{grid-template-rows:0fr;}
+.menu-secao.fechada .menu-itens > div{padding-top:0;}
 .menu-selo{margin-left:auto;min-width:22px;height:19px;padding:0 7px;border-radius:var(--r-pilula);background:var(--selo);color:#fff;font-size:12px;font-weight:500;line-height:19px;text-align:center;font-variant-numeric:tabular-nums;}
 .lateral-rodape{flex-shrink:0;border-top:1px solid var(--borda-forte);padding:var(--e-3) var(--e-5);display:flex;flex-direction:column;gap:4px;}
 :root[data-theme="light"] .lateral-rodape{border-top-color:var(--borda);}
@@ -139,7 +143,7 @@ a{color:inherit;}
 .app.recolhido .lateral-topo{flex-direction:column;padding:0;}
 .app.recolhido .btn-recolher svg{transform:rotate(180deg);}
 .app.recolhido .usuario{justify-content:center;padding:var(--e-2) 0;background:none;}
-.app.recolhido .menu a, .app.recolhido .menu button.menu-item{justify-content:center;padding:10px 0;}
+.app.recolhido .menu a, .app.recolhido .menu button.menu-item{justify-content:center;padding:8px 0;}
 .app.recolhido .menu-secao .menu-itens{grid-template-rows:1fr;}
 .app.recolhido .menu-secao{border-top:1px solid var(--borda);padding-top:var(--e-2);}
 .app.recolhido .lateral-rodape{padding:var(--e-2);}
@@ -1135,8 +1139,11 @@ body.apresentando .pagina{padding-left:40px;padding-right:40px;}
   .app.menu-aberto .lateral{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);}
   .app.recolhido .lateral-marca, .app.recolhido .menu .rotulo, .app.recolhido .usuario-nome, .app.recolhido .interruptor{display:revert;}
   .app.recolhido .menu-grupo{display:flex;}
-  .app.recolhido .lateral-corpo{padding:var(--e-5);}
-  .app.recolhido .menu a, .app.recolhido .menu button.menu-item{justify-content:flex-start;padding:10px 15px 10px 10px;}
+  .app.recolhido .lateral-corpo{padding:var(--e-4) var(--e-3);}
+  .app.recolhido .menu a, .app.recolhido .menu button.menu-item{justify-content:flex-start;padding:9px 12px 9px 10px;}
+  /* no celular o menu é de toque: telas e grupos continuam com alvo confortável */
+  .menu a, .menu button.menu-item{min-height:40px;padding:9px 12px 9px 10px;font-size:14px;}
+  .menu-grupo{min-height:34px;}
   .app.recolhido .lateral-topo{flex-direction:row;}
   .app.recolhido .lateral-simbolo{display:none;}
   .app.recolhido .usuario{justify-content:flex-start;padding:var(--e-4);background:var(--fundo);}

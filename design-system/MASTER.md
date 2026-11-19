@@ -17,7 +17,7 @@ tabela com um cartão lateral. Escuro por padrão; claro no interruptor do menu.
 ### Layout
 | Região | Medida | Regra |
 |---|---|---|
-| Menu lateral (Drawer) | 249 px; recolhido 76 px | `--lateral`, respiro 25 px, blocos separados por 25 px: logotipo → cartão de perfil → grupos → rodapé fixo (tema, sair) |
+| Menu lateral (Drawer) | 249 px; recolhido 76 px | `--lateral`, respiro 20/15 px, blocos separados por 15 px: logotipo → grupos → rodapé fixo (tema, sair). Compacto desde 19/11/2026: telas 32 px (texto 13,5, ícone 16) com 2 px entre elas; grupos como rótulo 12/600 maiúsculo cinza (`--suave`), 28 px, 10 px entre grupos; grupo fechado não deixa espaço. Celular: telas 40 px e grupos 34 px (toque) |
 | Barra superior (Header_Navigation) | altura 88 px, respiro 25 px | título 20/600 à esquerda (grupo do menu acima, 12/500 laranja); à direita, 25 px entre itens: **Buscar página**, botão Atualizar (só ícone 38 px), ação laranja |
 | Conteúdo | grade de **12 colunas**, espaço 25 px, respiro 25 px | cada filho direto da página é uma faixa; os cartões ocupam colunas (ver "Composição") |
 | Celular (< 820 px) | 1 coluna, respiros 16 px | menu vira gaveta; busca vira linha própria; tabelas largas rolam dentro do cartão |
