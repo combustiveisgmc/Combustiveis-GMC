@@ -450,6 +450,15 @@ async function processarFilasBanco() {
 // Passo 4 (19/11/2026): rotina que já roda na nuvem (Edge Function, public.nuvem_rotinas modo 'ligado') não roda aqui, para as duas
 // nunca gravarem ao mesmo tempo. Consulta o banco no máximo 1x por minuto por rotina; sem banco ou com erro, o vigia segue rodando.
 const MODOS_NUVEM = new Map();
+// chamada a uma função do banco (Supabase) com a chave secreta de %LOCALAPPDATA%GestaoCombustivelsupabase.json; null se falhar
+async function rpcBanco(funcao, args, ms = 30_000) {
+  try {
+    const c = JSON.parse(fs.readFileSync(path.join(PASTA, 'supabase.json'), 'utf8').replace(/^\uFEFF/, ''));
+    const r = await fetch(c.url + '/rest/v1/rpc/' + funcao, { method: 'POST', signal: AbortSignal.timeout(ms),
+      headers: { apikey: c.service_role, Authorization: 'Bearer ' + c.service_role, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
 async function nuvemLigada(nome) {
   const m = MODOS_NUVEM.get(nome);
   if (m && Date.now() - m.em < 60_000) return m.ligada;
@@ -534,7 +543,8 @@ async function processarApisCartoes(forcar) {
   proximaApis = Date.now() + 5 * 60 * 1000;
   const m = await import('./cartoes_api.mjs');
   if (!m.temConfig()) return;
-  await m.processar({ api, kvPut, log, gerarHistorico: () => {
+  // tempo real comparado com o banco (19/11/2026: a Base.xlsx parou de ser a base dos painéis)
+  await m.processar({ api, kvPut, log, chavesBanco: (desde) => rpcBanco('gestao_chaves_tempo_real', { p_desde: desde }), gerarHistorico: () => {
     rodar('py', ['scripts/consolidador_historico.py']);
     fs.mkdirSync(path.dirname(HISTORICO_APIS), { recursive: true });
     fs.renameSync(CONSOLIDACAO_GERADO, HISTORICO_APIS);

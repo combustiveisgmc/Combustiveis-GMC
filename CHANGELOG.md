@@ -6,6 +6,15 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Migração 15.2 passo 1b — área do motorista do banco; tempo real sem contar em dobro.** A tela do motorista ("Minha média")
+  deixa de depender da Base.xlsx (que agora só é atualizada à mão): os abastecimentos dos últimos 13 meses de cada motorista vêm do
+  banco, com os mesmos números dos painéis (gerador dos painéis grava `public.dados_motoristas`; `gestao_painel_motorista`; chave KV
+  `motorista-fonte` = `banco`, sem resposta volta ao KV do vigia); veículos e metas do cadastro de placas. Conferido igual ao que o
+  vigia publicava nos dias em comum. **Correção:** desde que os painéis leem do banco (manhã de 19/11), 128 abastecimentos de 17 e
+  18/11 apareciam duas vezes (banco pelo D-1 + tempo real, que ainda comparava com a Base.xlsx). O vigia agora compara o tempo real
+  com o banco (`gestao_chaves_tempo_real`; fora o que o D-1 já mandou) e os painéis e a área do motorista descartam repetidos
+  (mesma placa, minuto e litros; `public/gestao/lib/tempo-real.js`). Tempo real passou de 158 para 30 transações (só as de hoje).
+
 - **Recuperados os abastecimentos de 16 a 18/11 que tinham sumido.** Pedido do usuário: os lançados pelas planilhas dos cartões
   não apareciam e o dia 17/11 estava vazio. Causa: no conflito do ownCloud entre os dois computadores do vigia (18/11), a versão da
   Base_copia que ficou valendo não tinha o que foi gravado de 16/11 ~14h a 18/11 13h20; a virada (19/11 10:47) copiou essa planilha

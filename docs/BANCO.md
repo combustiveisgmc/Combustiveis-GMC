@@ -216,3 +216,8 @@ base_transacoes --voltar-planilha`). `scripts/comparar_base.py` compara os dois 
 ultimo_resultado, ultimo_erro) e `public.nuvem_execucoes` (rotina, em, modo, ok, resultado; 60 dias), com RLS e sem políticas (só
 service_role). `gestao_nuvem_disparar()` (pg_cron `nuvem-rotinas` */5) chama as Edge Functions por pg_net com a chave do Vault.
 Detalhes em `docs/MIGRACAO-PASSO4.md`.
+
+## Área do motorista e tempo real (desde 19/11/2026, 15.2 passo 1b)
+`gestao_gerar_dados_painel` também grava `public.dados_motoristas` (uma linha por motorista: `chave` = `gestao.chave(nome)`, `linhas`
+json dos 13 meses). `gestao_painel_motorista(p_nome)` devolve as linhas e os veículos do cadastro; `gestao_chaves_tempo_real(p_desde)`
+devolve as chaves placa|minuto|litros×100 para o vigia montar o tempo real sem repetir o banco. Execução só para `service_role`.

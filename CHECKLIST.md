@@ -154,7 +154,8 @@ Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fi
 - [x] 1. Painéis leem os abastecimentos do banco (`base_transacoes` = Base_copia) em vez da Base.xlsx; o resto do arquivo (negociações,
       locais, orçamento) continua vindo do vigia até a etapa 15.3. Ligado em produção em 19/11 (KV `abastecimentos-fonte` = `banco`;
       para voltar à planilha, apagar a chave). Veículos: decisão do usuário = **Cadastro de placas** (não mais a aba Metas da Base).
-- [ ] 1b. Área do motorista (Minha média) também do banco (hoje o vigia gera da Base.xlsx: `gerarPainelMotoristas`).
+- [x] 1b. Área do motorista (Minha média) do banco (19/11; KV `motorista-fonte` = `banco`; o vigia ainda publica os grupos do KV como
+      reserva até 15.4). Tempo real comparado com o banco (corrigiu 17-18/11 em dobro nos painéis).
 - [x] 2. Lista do Editar abastecimentos e histórico do Consolidador lidos do banco (19/11; chaves KV `base-copia-fonte` e `consolidacao-fonte`).
 - [ ] 3. (inventário e plano em `docs/MIGRACAO-PASSO3.md`) Gravações do portal direto no banco: correções e exclusões do Editar abastecimentos, Inclusão (bomba interna), lotes do
       Consolidador e do D-1, preço do Rateio das NFs; o vigia deixa de espelhar a Base_copia no banco (o banco vira a origem).

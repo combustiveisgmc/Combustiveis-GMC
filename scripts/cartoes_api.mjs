@@ -242,11 +242,15 @@ function chavesDaBase() {
 let ultimaAssinatura = null;   // do conteúdo em tempo real já enviado
 // Uma volta: lê as APIs, grava o dia anterior (D-1) como lote do Consolidador e publica as transações fora da Base.
 // api(metodo, rota, corpo) = chamada autenticada ao site; kvPut(chave, arquivo) = envio ao KV; log(msg).
-export async function processar({ api, kvPut, log, gerarHistorico }) {
+export async function processar({ api, kvPut, log, gerarHistorico, chavesBanco }) {
   if (!temConfig()) return;
   const hoje = diaLocal();
-  const { chaves: naBase, ultimoDia } = chavesDaBase();
-  const inicio = [somarDias(hoje, -JANELA), ultimoDia ? somarDias(ultimoDia, 1) : INICIO_D1].sort().pop();
+  // 19/11/2026: os painéis leem do banco (que recebe o D-1), então o tempo real é o que o banco ainda não tem: chaves do banco nos
+  // últimos JANELA dias, sem corte pela última data (um lançamento de hoje pelo Consolidador esconderia o dia todo). Sem banco,
+  // como antes: o que a Base.xlsx (painéis) ainda não tem.
+  const doBanco = chavesBanco ? await chavesBanco(somarDias(hoje, -(JANELA + 1))).catch(() => null) : null;
+  const { chaves: naBase, ultimoDia } = doBanco && Array.isArray(doBanco.chaves) ? { chaves: new Set(doBanco.chaves), ultimoDia: null } : chavesDaBase();
+  const inicio = doBanco ? somarDias(hoje, -JANELA) : [somarDias(hoje, -JANELA), ultimoDia ? somarDias(ultimoDia, 1) : INICIO_D1].sort().pop();
   // também os dias do D-1 ainda não confirmados e os da revisão (lançamentos atrasados)
   const normal = [inicio, INICIO_D1].sort()[0];
   const primeiro = [normal, somarDias(hoje, -REVISAO)].sort()[0];
@@ -311,7 +315,9 @@ export async function processar({ api, kvPut, log, gerarHistorico }) {
   }
 
   // ---------- tempo real: transações que a Base.xlsx (painéis) ainda não tem ----------
-  const vivos = eventos.filter((ev) => ev._dia >= inicio && !naBase.has(chaveTransacao(ev.PLACA, ev['DATA TRANSACAO'], ev.LITROS)));
+  // com o banco: também fora o que o D-1 já mandou ou julgou repetido (o banco tem, mesmo se a placa/hora foi corrigida depois)
+  const vivos = eventos.filter((ev) => ev._dia >= inicio && !naBase.has(chaveTransacao(ev.PLACA, ev['DATA TRANSACAO'], ev.LITROS)) &&
+    !(doBanco && (enviados.has(idDe(ev)) || jaNaBase.has(idDe(ev)))));
   let linhas = [];
   if (vivos.length) {
     const base = CORE.carregarHistorico(hist);

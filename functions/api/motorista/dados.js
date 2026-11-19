@@ -1,5 +1,7 @@
 import { json } from '../../../lib/auth.js';
 import { motoristaDaSessao, motoristaDoCadastro, chaveNome, ESPELHO_TESTE } from '../../../lib/motoristas.js';
+import { rpc, temBanco } from '../../../lib/supabase.js';
+import { chaveLinha } from '../../../public/gestao/lib/tempo-real.js';
 
 // Área do motorista: os abastecimentos de quem entrou (e só os dele). A parte da Base vem do vigia já separada por nome
 // (KV "painel-motoristas:<grupo>", scripts/painel_motoristas.mjs); as transações das APIs dos cartões que a Base ainda não
@@ -21,25 +23,39 @@ export async function onRequestGet({ request, env }) {
   const cad = await motoristaDoCadastro(env, s.usuario);
   if (!cad || cad.situacao === 'DESLIGADO') return json({ erro: 'Seu acesso não está liberado. Fale com a gestão de combustível.' }, 403);
   const espelhoDe = ESPELHO_TESTE[s.usuario] || null;   // motorista de teste: abastecimentos de um motorista real, só na tela
-  const k = chaveNome(espelhoDe || cad.nome || s.nome);
-  const [grupo, veic, tr] = await Promise.all([
-    env.DADOS.get('painel-motoristas:' + grupoDe(k), 'json').catch(() => null),
-    env.DADOS.get('painel-veiculos', 'json').catch(() => null),
+  const nomeBusca = espelhoDe || cad.nome || s.nome;
+  const k = chaveNome(nomeBusca);
+  // 15.2 passo 1b (19/11/2026): com a chave KV "motorista-fonte" = "banco", os abastecimentos vêm do banco
+  // (gestao_painel_motorista: mesmos números dos painéis, até o último dia que o banco tem); sem resposta, volta ao KV do vigia
+  const doBanco = temBanco(env) && (await env.DADOS.get('motorista-fonte').catch(() => null)) === 'banco';
+  const [banco, tr] = await Promise.all([
+    doBanco ? rpc(env, 'gestao_painel_motorista', { p_nome: nomeBusca }, { ms: 10000 }) : null,
     env.DADOS.get('tempo-real', 'json').catch(() => null),
   ]);
-  const linhas = ((grupo && grupo.motoristas && grupo.motoristas[k]) || []).map((r) => ({
+  let grupo = null, veic = null;
+  if (!banco || !Array.isArray(banco.linhas)) {
+    [grupo, veic] = await Promise.all([
+      env.DADOS.get('painel-motoristas:' + grupoDe(k), 'json').catch(() => null),
+      env.DADOS.get('painel-veiculos', 'json').catch(() => null),
+    ]);
+  }
+  const brutas = banco && Array.isArray(banco.linhas) ? banco.linhas : (grupo && grupo.motoristas && grupo.motoristas[k]) || [];
+  const linhas = brutas.map((r) => ({
     dia: r[0], seg: r[1], placa: r[2], combustivel: r[3], posto: r[4], cidade: r[5], litros: r[6], km: r[7], hodometro: r[8], abastecimento: r[9] === 1, tempoReal: false,
   }));
   if (tr && tr.dic && tr.col) {
     const fora = new Set(tr.foraAbastecimento || []);
+    // tempo real que já está na lista (mesma placa, minuto e litros) não entra de novo
+    const ja = new Set(linhas.map((l) => chaveLinha(l.placa, l.dia, l.seg, l.litros)));
     for (let i = 0; i < tr.linhas; i++) {
       if (chaveNome(tr.dic.motorista[tr.col.motorista[i]]) !== k) continue;
+      if (ja.has(chaveLinha(tr.dic.placa[tr.col.placa[i]], tr.col.data[i], tr.col.seg ? tr.col.seg[i] : null, tr.col.litros[i]))) continue;
       linhas.push({ dia: tr.col.data[i], seg: tr.col.seg ? tr.col.seg[i] : null, placa: tr.dic.placa[tr.col.placa[i]], combustivel: tr.dic.combustivel[tr.col.combustivel[i]],
         posto: tr.dic.fornecedor[tr.col.fornecedor[i]], cidade: tr.dic.cidade[tr.col.cidade[i]], litros: tr.col.litros[i] || 0, km: tr.col.km[i] || 0,
         hodometro: tr.col.hodometro[i], abastecimento: !fora.has(i), tempoReal: true });
     }
   }
-  const todos = (veic && veic.veiculos) || {};
+  const todos = (banco && banco.veiculos) || (veic && veic.veiculos) || {};
   const veiculos = {};
   for (const l of linhas) if (todos[l.placa]) veiculos[l.placa] = todos[l.placa];
   // Programa PRIME: avisos dos abastecimentos que a gestão tirou do PRIME e a nota/estrelas dos meses já fechados
@@ -65,5 +81,5 @@ export async function onRequestGet({ request, env }) {
   } catch {}   // tabelas do PRIME ainda não criadas: a área do motorista segue sem elas
   // acesso a este portal (aba Senhas): o usuário e se ainda usa a senha inicial
   const ac = await env.DB.prepare('SELECT senha_hash IS NOT NULL AS propria FROM motoristas_acesso WHERE usuario = ?').bind(s.usuario).first().catch(() => null);
-  return json({ nome: cad.nome, unidade: cad.unidade, usuario: s.usuario, senhaPropria: !!(ac && ac.propria), espelhoDe, senhas: cad.senhas || {}, geradoEm: grupo ? grupo.geradoEm : null, tempoRealEm: tr ? tr.geradoEm : null, linhas, veiculos, prime });
+  return json({ nome: cad.nome, unidade: cad.unidade, usuario: s.usuario, senhaPropria: !!(ac && ac.propria), espelhoDe, senhas: cad.senhas || {}, geradoEm: banco && banco.linhas ? banco.geradoEm : grupo ? grupo.geradoEm : null, tempoRealEm: tr ? tr.geradoEm : null, linhas, veiculos, prime });
 }

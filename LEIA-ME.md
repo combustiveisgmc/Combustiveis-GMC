@@ -35,6 +35,12 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
   e o banco estiverem em versões diferentes (um lote acabou de entrar), nada é exportado e o aviso pede para recarregar a página.
 
 
+## Área do motorista e tempo real (desde 19/11/2026)
+- A área do motorista ("Minha média") lê os abastecimentos do banco, com os mesmos números dos painéis (chave KV `motorista-fonte` =
+  `banco`; apagar a chave volta ao que o vigia publica).
+- O tempo real (transações das APIs ainda não gravadas) é comparado com o banco: só entra o que o banco ainda não tem; os painéis e a
+  área do motorista também descartam repetidos (mesma placa, minuto e litros).
+
 ## Gravações dos abastecimentos direto no banco (desde 19/11/2026)
 - Tudo o que entra nas filas da Base_copia (lotes do Consolidador, D-1 das APIs, Inclusão da bomba interna, "Incluir" da Conferência;
   correções e exclusões do Editar abastecimentos, Rateio das NFs, estornos, recálculo do KM) é aplicado também no banco (Supabase,

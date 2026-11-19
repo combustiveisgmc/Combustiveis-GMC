@@ -1,4 +1,5 @@
 // Carrega os abastecimentos gerados por scripts/importar_base.py e oferece formatação pt-BR.
+import { chaveLinha } from './tempo-real.js';
 
 let promessa = null;
 let versaoAtual = null;
@@ -54,10 +55,22 @@ export function versaoNoServidor() {
 
 // Transforma o formato colunar em linhas prontas para filtrar e somar. tr = transações em tempo real (APIs dos cartões),
 // no mesmo formato colunar: entram no fim, com tempoReal: true.
+// A transação do tempo real que a base já tem (mesma placa, minuto e litros) não entra de novo: desde 19/11/2026 a base vem do
+// banco, que recebe o D-1 antes de o tempo real ser refeito (17 e 18/11 chegaram a aparecer em dobro).
+export function juntarTempoReal(linhas, doTempoReal) {
+  const ja = new Set(linhas.map((l) => chaveLinha(l.placa, l.dia, l.seg, l.litros)));
+  let repetidas = 0;
+  for (const l of doTempoReal) {
+    if (ja.has(chaveLinha(l.placa, l.dia, l.seg, l.litros))) repetidas++;
+    else linhas.push(l);
+  }
+  return repetidas;
+}
 function decodificar(bruto, tr) {
   const linhas = linhasDe(bruto, bruto.veiculos, false);
-  if (tr && tr.linhas) for (const l of linhasDe(tr, bruto.veiculos, true)) linhas.push(l);
-  return montar(bruto, linhas, tr);
+  // o aviso de tempo real conta só as que entraram (porCartao fica como veio do vigia)
+  const entraram = tr && tr.linhas ? tr.linhas - juntarTempoReal(linhas, linhasDe(tr, bruto.veiculos, true)) : 0;
+  return montar(bruto, linhas, tr && tr.linhas ? { ...tr, linhas: entraram } : tr);
 }
 function linhasDe(bruto, veiculos, tempoReal) {
   const { dic, col } = bruto;
