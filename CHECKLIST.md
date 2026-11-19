@@ -140,6 +140,7 @@ O vigia só é desligado no fim, com cada tarefa abaixo já rodando na nuvem e c
 ### 15.1 Exportação e cadastros (primeira etapa)
 - [x] Botão **Exportar** no Editar abastecimentos: planilha igual à Base_copia (48 colunas A..AV, Arial 8, cabeçalho em negrito,
       filtro automático, formato de cada coluna), só com os abastecimentos dos filtros da tela; fonte `public.base_transacoes` (18/11).
+      19/11: cores das linhas por cartão (TRUCKPAG, VIBRA, VELOE) e alinhamento de cada coluna, como na Base_copia.
 - [x] Opções dos cadastros viram **tabelas** (esquema `cadastro` no Supabase): unidades, categorias de veículo, marcas, avisos de
       posto, produtos de contrato; engrenagem mantém os cadastros; modelo `gestao` usa os ids do cadastro (18/11).
 - [x] Placa e motorista só gravam com unidade/categoria/marca cadastradas (validação no banco antes da fila da planilha).

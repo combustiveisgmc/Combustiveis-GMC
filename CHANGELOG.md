@@ -6,6 +6,12 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Exportar do Editar abastecimentos com as cores dos cartões.** Pedido do usuário: o export "não veio com as formatações, como
+  por exemplo as cores das linhas referente a cada cartão". Agora cada linha sai com a cor do cartão como na Base_copia (TRUCKPAG
+  verde #99FF99, VIBRA azul #9DC3E6, VELOE lilás #DBB7FF; cartão físico/Ticket sem cor), pintada de A a AU, e cada coluna com o
+  alinhamento da planilha (números à direita, textos à esquerda, data centralizada). Conferido abrindo o arquivo gerado; 63 mil
+  linhas em ~20 s (antes ~33 s, os estilos agora são reaproveitados).
+
 - **Migração passo 4 começou — rotinas do vigia na nuvem (Supabase Edge Functions).** Infraestrutura: tabelas
   `nuvem_rotinas` (modo desligado/simular/ligado, estado de cada rotina) e `nuvem_execucoes` (histórico), pg_cron
   `nuvem-rotinas` a cada 5 min, segredos e Vault (migração `20261119160000`; `scripts/nuvem_publicar.mjs`). Primeira rotina:

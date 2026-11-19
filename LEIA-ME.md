@@ -29,6 +29,8 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Botão **Exportar** na tabela do Editar abastecimentos: baixa uma planilha igual à Base_copia (aba Transações, 48 colunas, mesma
   formatação) só com os abastecimentos que estão nos filtros da tela (período, placa, motorista, posto, cartão, informações adicionais,
   "só os KM para conferir", "só os alterados"). É ela que atualiza a Base.xlsx à mão (o BI e outras planilhas leem a Base).
+- Sai com a formatação da Base_copia: cor da linha de cada cartão (TRUCKPAG verde, VIBRA azul, VELOE lilás; Ticket sem cor),
+  alinhamento e formato de cada coluna.
 - Vem do banco (Supabase, `base_transacoes`). Correções ainda não gravadas na Base_copia saem como estavam antes. Se a lista da tela
   e o banco estiverem em versões diferentes (um lote acabou de entrar), nada é exportado e o aviso pede para recarregar a página.
 

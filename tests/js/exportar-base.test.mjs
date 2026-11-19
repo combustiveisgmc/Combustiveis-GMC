@@ -80,3 +80,22 @@ test('confere: mesma placa, mesmo minuto e mesmos litros', async () => {
   assert.equal(confere(r, { placa: 'ABC1D23', serial, litros: 120 }), false);
   assert.equal(confere(r, undefined), false);
 });
+
+// 19/11/2026 (pedido do usuário: "não veio com as formatações, como por exemplo as cores das linhas referente a cada cartão")
+test('estiloCelula: cor da linha por cartão (A..AU), alinhamento e formato de cada coluna', async () => {
+  const { estiloCelula, corDoCartao } = await import('../../public/gestao/lib/exportar-base.js');
+  assert.equal(corDoCartao('TRUCKPAG'), 'FF99FF99');
+  assert.equal(corDoCartao(' Vibra '), 'FF9DC3E6');
+  assert.equal(corDoCartao('VELOE'), 'FFDBB7FF');
+  assert.equal(corDoCartao('Cartao Fisico'), null);                 // Ticket: sem cor, como na Base_copia
+  const a = estiloCelula(1, 'TRUCKPAG');
+  assert.deepEqual(a.fill, { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF99FF99' } });
+  assert.equal(a.alignment.horizontal, 'right');
+  assert.equal(a.numFmt, '0');
+  assert.equal(estiloCelula(5, 'VELOE').alignment.horizontal, 'center');   // data
+  assert.equal(estiloCelula(6, 'VELOE').alignment.horizontal, 'left');     // placa
+  assert.ok(estiloCelula(47, 'VIBRA').fill);                                 // AU pintada
+  assert.equal(estiloCelula(48, 'VIBRA').fill, undefined);                   // AV (chave auxiliar) sem cor
+  assert.equal(estiloCelula(1, 'Cartao Fisico').fill, undefined);
+  assert.equal(estiloCelula(1, 'Cartao Fisico').font.name, 'Arial');
+});

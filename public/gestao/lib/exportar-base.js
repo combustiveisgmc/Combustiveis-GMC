@@ -69,6 +69,24 @@ export function carregarExcelJS() {
   return carregando;
 }
 
+// Cor da linha de cada cartão (FORMA DE PAGAMENTO), como na Base_copia (lido em 19/11/2026, pedido do usuário: "não veio com as
+// formatações, como por exemplo as cores das linhas referente a cada cartão"). Cartão físico (Ticket) e outras: sem cor.
+// Pinta de A a AU (a AV, chave auxiliar, fica sem cor, como na planilha).
+export const CORES_CARTAO = { TRUCKPAG: 'FF99FF99', VIBRA: 'FF9DC3E6', VELOE: 'FFDBB7FF' };
+const COLUNAS_PINTADAS = 47;
+// alinhamento de cada coluna A..AV na Base_copia (r = direita, l = esquerda, c = centro, - = Geral)
+const ALINHA = 'r l r l c l l l l r l l l l r r r r r r r l - l - l l l l l l l l l l l - l l - - l - - l l -'.split(' ');
+const HORIZONTAL = { r: 'right', l: 'left', c: 'center' };
+export const corDoCartao = (forma) => CORES_CARTAO[String(forma ?? '').trim().toUpperCase()] || null;
+// estilo de uma célula de dados: coluna (1 = A) e forma de pagamento da linha
+export function estiloCelula(coluna, forma) {
+  const [, , formato] = COLUNAS[coluna - 1];
+  const h = HORIZONTAL[ALINHA[coluna - 1]];
+  const cor = coluna <= COLUNAS_PINTADAS ? corDoCartao(forma) : null;
+  return { font: { name: 'Arial', size: 8 }, ...(formato ? { numFmt: formato } : {}), ...(h ? { alignment: { horizontal: h } } : {}),
+    ...(cor ? { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: cor } } } : {}) };
+}
+
 const letra = (n) => { let s = ''; for (let i = n; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + ((i - 1) % 26)) + s; return s; };
 // linhas = saída de linhaPlanilha; devolve o workbook do ExcelJS pronto para writeBuffer()
 export function montarPlanilha(ExcelJS, linhas) {
@@ -79,7 +97,19 @@ export function montarPlanilha(ExcelJS, linhas) {
   ws.columns = COLUNAS.map(([titulo, largura, formato]) => ({ header: titulo, width: largura, style: { font: fonte, ...(formato ? { numFmt: formato } : {}) } }));
   const cab = ws.getRow(1);
   cab.eachCell({ includeEmpty: true }, (cel) => { cel.font = { ...fonte, bold: true }; cel.alignment = { horizontal: 'center' }; cel.numFmt = 'General'; });
-  for (const l of linhas) ws.addRow(l);
+  // um objeto de estilo por coluna e cor, reaproveitado (dezenas de milhares de linhas; atribuir cel.style inteiro evita o ExcelJS
+  // mexer no estilo compartilhado da coluna)
+  const estilos = new Map();
+  const estilo = (c, forma) => {
+    const k = c + '|' + (corDoCartao(forma) || '');
+    if (!estilos.has(k)) estilos.set(k, estiloCelula(c, forma));
+    return estilos.get(k);
+  };
+  for (const l of linhas) {
+    const row = ws.addRow(l);
+    const forma = l[1];
+    for (let c = 1; c <= COLUNAS.length; c++) row.getCell(c).style = estilo(c, forma);
+  }
   ws.autoFilter = 'A1:' + letra(COLUNAS.length) + (linhas.length + 1);
   return wb;
 }
