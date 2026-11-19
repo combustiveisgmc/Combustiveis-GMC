@@ -6,6 +6,12 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Bomba interna > Estoque: tanques desenhados no lugar das barras.** Pedido do usuário: trocar a barra do nível por um ícone de
+  tanque com a % dentro, e para o Arla "um ícone diferente do de diesel ... aquele tanque mais quadrado" (a maioria é de 1.000 L).
+  Diesel = tanque cilíndrico de armazenamento; Arla = contêiner IBC (tanque quadrado na grade metálica, palete, tampa e válvula),
+  com a % numa plaquinha. O líquido sobe com o nível nas mesmas cores de alerta (verde; amarelo abaixo de 25%; vermelho abaixo de
+  10%; contorno vermelho com estoque negativo). Conferido nos temas escuro e claro e no celular.
+
 - **Resultado PRIME: a economia de quem não recebeu por deflator volta para a conta.** Pedido do usuário: "no somatório do resultado
   a economia dos deflatores não pode ser retirada da soma apenas a premiação, visto que eles economizaram de qualquer forma". Quem
   estava premiado na conta e ficou fora da lista de premiados sem deflatores sai só da premiação; a economia dele (com 95% da meta ou

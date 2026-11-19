@@ -77,17 +77,57 @@ export async function montar(ctx) {
     (copiaEm ? ' e da Base_copia (Consolidador) lida em ' + copiaEm.toLocaleDateString('pt-BR') + ' às ' + copiaEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '.'
       : '. A lista da Base_copia não pôde ser lida agora: os abastecimentos consolidados que ainda não estão na Base ficaram de fora.'));
 
+  // tanque de armazenamento (cilindro com tampa e aros) no lugar da barra (pedido do usuário em 19/11/2026): o líquido sobe com o
+  // nível, na cor do alerta (verde; amarelo abaixo de 25%; vermelho abaixo de 10% ou negativo), e a % fica no meio do tanque
+  // Arla: contêiner IBC de 1.000 L (a maioria dos tanques de Arla), quadrado, com a grade metálica, palete, tampa e válvula
+  // (pedido do usuário em 19/11/2026: "um ícone diferente do de diesel ... aquele tanque mais quadrado")
+  function ibcSvg(e, pct, nivel, id) {
+    const alt = Math.max(0, Math.min(100, pct * 100));
+    const TOPO = 18, FUNDO = 112;                        // parte de dentro do tanque
+    const y = FUNDO - (FUNDO - TOPO) * alt / 100;
+    return `<svg class="be-tq be-ibc ${nivel}" viewBox="0 0 120 136" role="img" aria-label="${esc(NOME_TANQUE[e.tanque])}: ${num(pct * 100)}% (${num(e.volume, 3)} de ${num(e.capacidade, 0)} litros)">
+      <defs><clipPath id="${id}"><rect x="14" y="${TOPO}" width="92" height="${FUNDO - TOPO}" rx="8"/></clipPath></defs>
+      <rect class="be-tq-tampa" x="50" y="4" width="20" height="9" rx="2"/>
+      <rect class="be-tq-corpo" x="14" y="${TOPO}" width="92" height="${FUNDO - TOPO}" rx="8"/>
+      <g clip-path="url(#${id})"><rect class="be-tq-liquido" x="0" y="${y.toFixed(1)}" width="120" height="${(140 - y).toFixed(1)}"/></g>
+      <path class="be-tq-aro be-ibc-grade" d="M45,14 V116 M75,14 V116 M10,49 H110 M10,82 H110"/>
+      <rect class="be-tq-contorno" x="10" y="14" width="100" height="102" rx="4"/>
+      <rect class="be-tq-tampa" x="52" y="112" width="16" height="9" rx="2"/>
+      <rect class="be-tq-tampa" x="6" y="118" width="108" height="8" rx="2"/>
+      <path class="be-tq-tampa" d="M10,126 h14 v8 h-14 Z M53,126 h14 v8 h-14 Z M96,126 h14 v8 h-14 Z"/>
+      <rect class="be-ibc-placa" x="34" y="54" width="52" height="25" rx="4"/>
+      <text class="be-tq-pct" x="60" y="73" text-anchor="middle">${num(pct * 100)}%</text>
+    </svg>`;
+  }
+
+  function tanqueSvg(e, pct, nivel, id) {
+    if (e.tanque === 'arla') return ibcSvg(e, pct, nivel, id);
+    const alt = Math.max(0, Math.min(100, pct * 100));
+    const TOPO = 14, FUNDO = 146;                        // de onde a ponta da elipse de cima vai até a de baixo
+    const y = FUNDO - (FUNDO - TOPO) * alt / 100;        // altura do líquido
+    const corpo = 'M12,26 A38,12 0 0 1 88,26 L88,134 A38,12 0 0 1 12,134 Z';
+    return `<svg class="be-tq ${nivel}" viewBox="0 0 100 156" role="img" aria-label="${esc(NOME_TANQUE[e.tanque])}: ${num(pct * 100)}% (${num(e.volume, 3)} de ${num(e.capacidade, 0)} litros)">
+      <defs><clipPath id="${id}"><path d="${corpo}"/></clipPath></defs>
+      <rect class="be-tq-tampa" x="40" y="4" width="20" height="10" rx="2"/>
+      <path class="be-tq-corpo" d="${corpo}"/>
+      <g clip-path="url(#${id})">
+        <rect class="be-tq-liquido" x="0" y="${y.toFixed(1)}" width="100" height="${(160 - y).toFixed(1)}"/>
+        ${alt > 0 && alt < 100 ? `<ellipse class="be-tq-superficie" cx="50" cy="${y.toFixed(1)}" rx="38" ry="12"/>` : ''}
+      </g>
+      <path class="be-tq-aro" d="M12,26 A38,12 0 0 0 88,26"/>
+      <path class="be-tq-aro be-tq-faixa" d="M12,62 A38,12 0 0 0 88,62 M12,98 A38,12 0 0 0 88,98"/>
+      <path class="be-tq-contorno" d="${corpo}"/>
+      <text class="be-tq-pct" x="50" y="84" text-anchor="middle">${num(pct * 100)}%</text>
+    </svg>`;
+  }
+
   function cartao(b) {
     const tanques = ['diesel', 'arla'].map((t) => calcularEstoque(b, t, { linhas: saidas, movimentacoes: movs, manuais })).filter(Boolean);
     const barras = tanques.map((e) => {
       const pct = e.pct === null ? 0 : e.pct;
-      const alt = Math.max(0, Math.min(100, pct * 100));
       const nivel = e.volume < 0 ? 'be-negativo' : pct < 0.1 ? 'be-critico' : pct < 0.25 ? 'be-baixo' : '';
       return `<div class="be-tanque-col">
-        <div class="be-barra ${nivel}" role="img" aria-label="${esc(NOME_TANQUE[e.tanque])}: ${num(pct * 100)}% (${num(e.volume, 3)} de ${num(e.capacidade, 0)} litros)">
-          <div class="be-nivel" style="height:${alt}%"></div>
-          <span class="be-pct" style="bottom:${Math.min(alt, 88)}%">${num(pct * 100)}%</span>
-        </div>
+        ${tanqueSvg(e, pct, nivel, 'be-clip-' + b.id + '-' + e.tanque)}
         <strong class="be-nome-tanque">${esc(NOME_TANQUE[e.tanque])}</strong>
         <dl class="be-info">
           <div><dt>Volume</dt><dd class="num">${num(e.volume, 3)} L</dd></div>

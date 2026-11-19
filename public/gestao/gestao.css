@@ -1041,13 +1041,23 @@ table.ea-tabela .ea-acao{text-align:center;padding-left:2px;padding-right:2px;}
 .be-posto{margin:0;}
 .be-tanques{flex:1;display:flex;gap:20px;justify-content:center;align-items:flex-start;}
 .be-tanque-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1 1 0;min-width:0;max-width:200px;}
-.be-barra{position:relative;width:64px;height:190px;border-radius:var(--r-icone);background:#333;overflow:hidden;}
-:root[data-theme="light"] .be-barra{background:var(--cartao-2);}
-.be-nivel{position:absolute;left:0;right:0;bottom:0;background:var(--pilula-ok);transition:height .4s ease;}
-.be-barra.be-baixo .be-nivel{background:var(--pilula-alerta);}
-.be-barra.be-critico .be-nivel, .be-barra.be-negativo .be-nivel{background:var(--pilula-ruim);}
-.be-barra.be-negativo{box-shadow:0 0 0 2px var(--pilula-ruim);}
-.be-pct{position:absolute;left:0;right:0;text-align:center;font-weight:600;font-size:13px;color:var(--texto);margin-bottom:4px;font-variant-numeric:tabular-nums;}
+/* tanque de armazenamento no lugar da barra (19/11/2026): cilindro em SVG, líquido na cor do alerta, % no meio */
+.be-tq{width:112px;height:auto;aspect-ratio:100/156;display:block;overflow:visible;}
+.be-tq-corpo{fill:#333;}
+:root[data-theme="light"] .be-tq-corpo{fill:var(--cartao-2);}
+.be-tq-tampa{fill:var(--borda-forte);}
+.be-tq-liquido{fill:var(--pilula-ok);transition:y .4s ease, height .4s ease;}
+.be-tq.be-baixo .be-tq-liquido{fill:var(--pilula-alerta);}
+.be-tq.be-critico .be-tq-liquido, .be-tq.be-negativo .be-tq-liquido{fill:var(--pilula-ruim);}
+.be-tq-superficie{fill:#fff;opacity:.22;}
+.be-tq-aro{fill:none;stroke:var(--borda-forte);stroke-width:1.5;}
+.be-tq-faixa{opacity:.55;}
+.be-tq-contorno{fill:none;stroke:var(--borda-forte);stroke-width:2;}
+.be-tq.be-negativo .be-tq-contorno{stroke:var(--pilula-ruim);stroke-width:3;}
+.be-ibc{width:136px;aspect-ratio:120/136;}
+.be-ibc-grade{opacity:.85;stroke-width:2.5;}
+.be-ibc-placa{fill:var(--cartao);stroke:var(--borda-forte);stroke-width:1.5;opacity:.92;}
+.be-tq-pct{font-size:20px;font-weight:700;fill:var(--texto);paint-order:stroke;stroke:var(--cartao);stroke-width:4px;stroke-linejoin:round;font-variant-numeric:tabular-nums;}
 .be-nome-tanque{font-size:13px;font-weight:600;}
 .be-info{margin:0;width:100%;display:grid;gap:3px;font-size:12px;}
 .be-info div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--borda);padding-bottom:2px;}
