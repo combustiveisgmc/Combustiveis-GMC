@@ -6,6 +6,13 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Resultado PRIME: a economia de quem não recebeu por deflator volta para a conta.** Pedido do usuário: "no somatório do resultado
+  a economia dos deflatores não pode ser retirada da soma apenas a premiação, visto que eles economizaram de qualquer forma". Quem
+  estava premiado na conta e ficou fora da lista de premiados sem deflatores sai só da premiação; a economia dele (com 95% da meta ou
+  mais, como todos) continua no resultado. Vale para a tela inteira (resumo, barras e tabela por unidade). No painel "Antes x depois
+  dos deflatores" a economia virou uma coluna só (é a mesma nos dois) e a diferença no resultado é o prêmio que não foi pago. Meses
+  afetados: jan a set/2026 (de 5 a 17 motoristas por mês voltam para a conta; de −100 a +565 litros).
+
 - **Passo 4 — tempo real, D-1 e Rateio das NFs na nuvem (em simulação).** As regras saíram de `scripts/cartoes_api.mjs` e
   `scripts/bomba_rateio.mjs` para `lib/nuvem/cartoes.js` e `lib/nuvem/rateio-bomba.js`, usadas pelo vigia e pela nuvem; o vigia
   ficou só com os arquivos. Comprovado igual: as duas versões rodadas em cópias isoladas com os mesmos dados (inclusive um D-1 de 32

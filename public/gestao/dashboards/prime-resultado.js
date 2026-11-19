@@ -10,8 +10,9 @@
 //  - premiação = prêmio de telemetria + prêmio combustível dos motoristas + o prêmio do encarregado, dividido entre as
 //    unidades dele na proporção dos motoristas de cada uma no ranking;
 //  - resultado = economia em R$ − premiação; retorno = economia ÷ premiação;
-//  - painel "Antes x depois dos deflatores" (13/11/2026): a mesma conta com o prêmio original da conta (premioAntesPagamento,
-//    quem não recebeu ainda na economia) contra o que foi pago pela lista de premiados sem deflatores.
+//  - painel "Antes x depois dos deflatores" (13/11/2026): a mesma conta com o prêmio original da conta (premioAntesPagamento)
+//    contra o que foi pago pela lista de premiados sem deflatores. A economia é a mesma nos dois: quem não recebeu economizou
+//    de qualquer forma, os deflatores só tiram o prêmio (19/11/2026).
 import { carregarDados, fmt, esc, fmtMes, mesDoDia, ehDiesel } from '../lib/dados.js';
 import { htmlApoio, metaHtml, statusHtml } from '../lib/filtros.js';
 import { tabelaOrdenavel } from '../lib/tabela.js';
@@ -106,8 +107,7 @@ export async function montar(ctx) {
     colunas: [
       { id: 'u', rot: 'Unidade', v: (a) => nomeUni(a.u), html: (a) => '<strong>' + esc(nomeUni(a.u)) + '</strong><small class="cidade-linha">' + esc(a.u) + '</small>' },
       { id: 'nao', rot: 'Não receberam', dica: 'Motoristas premiados na conta que ficaram fora da lista de premiados (deflatores)', n: true, v: (a) => a.nao, html: (a) => fmt.int(a.nao) + '<small class="cidade-linha">de ' + fmt.int(a.premiadosAntes) + ' premiados</small>' },
-      { id: 'econA', rot: 'Economia antes', n: true, v: (a) => a.econA, html: (a) => rsInt(a.econA), cls: (a) => ((a.econA || 0) < 0 ? 'neg-txt' : '') },
-      { id: 'econD', rot: 'Economia depois', n: true, v: (a) => a.econD, html: (a) => rsInt(a.econD), cls: (a) => ((a.econD || 0) < 0 ? 'neg-txt' : '') },
+      { id: 'econ', rot: 'Economia R$', dica: 'A mesma antes e depois: quem não recebeu economizou de qualquer forma', n: true, v: (a) => a.econ, html: (a) => rsInt(a.econ), cls: (a) => ((a.econ || 0) < 0 ? 'neg-txt' : '') },
       { id: 'premA', rot: 'Premiação antes', n: true, v: (a) => a.premA, html: (a) => rsInt(a.premA) },
       { id: 'premD', rot: 'Premiação depois', n: true, v: (a) => a.premD, html: (a) => rsInt(a.premD) },
       { id: 'resA', rot: 'Resultado antes', n: true, v: (a) => a.resA, html: (a) => rsInt(a.resA), cls: (a) => ((a.resA || 0) >= 0 ? 'pos-txt' : 'neg-txt') },
@@ -129,7 +129,7 @@ export async function montar(ctx) {
     el('prr-def-conta').textContent = fmt.int(d.naoRecebeu) + ' motoristas não receberam';
     el('prr-def-corpo').innerHTML = '<dl class="apoio apoio-pilha">' + htmlApoio([
       { rot: 'Prêmio que não foi pago', val: rsInt(a.premio - d.premio), det: det(fmt.int(d.naoRecebeu) + ' de ' + fmt.int(a.premiados) + ' premiados na conta ficaram fora da lista') },
-      { rot: 'Economia em R$', val: rsInt(d.econR), det: antes(dif(d.econR, a.econR), rsInt(a.econR)) },
+      { rot: 'Economia em R$', val: rsInt(d.econR), det: det('a mesma antes e depois: os deflatores só tiram o prêmio') },
       { rot: 'Premiação total', val: rsInt(d.premio), det: antes(dif(d.premio, a.premio), rsInt(a.premio)) },
       { rot: 'Resultado (economia − premiação)', val: rsInt(d.resultado),
         det: det('antes ' + rsInt(a.resultado)) + ' ' + statusHtml(melhorou, (melhorou ? '+ ' : '− ') + rsInt(Math.abs(d.resultado - a.resultado))) },
@@ -138,17 +138,17 @@ export async function montar(ctx) {
     const porU = new Map(A.linhas.map((x) => [x.u, x]));
     const linhas = D.linhas.map((x) => {
       const y = porU.get(x.u) || {};
-      return { u: x.u, nao: x.naoRecebeu, premiadosAntes: y.premiados || 0, econA: y.econR ?? null, econD: x.econR, premA: y.premio || 0, premD: x.premio,
+      return { u: x.u, nao: x.naoRecebeu, premiadosAntes: y.premiados || 0, econ: x.econR, premA: y.premio || 0, premD: x.premio,
         resA: y.resultado ?? null, resD: x.resultado, difRes: dif(x.resultado, y.resultado ?? null) };
     });
     const cel = (v, c) => '<td class="n num' + (c ? ' ' + c : '') + '">' + v + '</td>';
     tabDef.atualizar(linhas, '<tr><th>Total</th>' + cel(fmt.int(d.naoRecebeu) + '<small class="cidade-linha">de ' + fmt.int(a.premiados) + ' premiados</small>') +
-      cel(rsInt(a.econR)) + cel(rsInt(d.econR)) + cel(rsInt(a.premio)) + cel(rsInt(d.premio)) +
+      cel(rsInt(d.econR), d.econR < 0 ? 'neg-txt' : '') + cel(rsInt(a.premio)) + cel(rsInt(d.premio)) +
       cel(rsInt(a.resultado), a.resultado >= 0 ? 'pos-txt' : 'neg-txt') + cel('<strong>' + rsInt(d.resultado) + '</strong>', d.resultado >= 0 ? 'pos-txt' : 'neg-txt') +
       cel(rsDif(d.resultado - a.resultado), clsDif(d.resultado - a.resultado)) + '</tr>');
-    el('prr-def-nota').textContent = 'Antes = a conta do portal no fechamento, com o prêmio de todos os motoristas que bateram as metas e a economia de todos com ' +
-      'a % mínima da meta. Depois = o que foi pago pela lista de premiados sem deflatores: quem estava premiado na conta e não recebeu sai da premiação e também da economia ' +
-      '(como quem ficou abaixo da meta). O prêmio dos encarregados é o mesmo nos dois. Diferença positiva = o resultado melhorou depois dos deflatores.';
+    el('prr-def-nota').textContent = 'Antes = a conta do portal no fechamento, com o prêmio de todos os motoristas que bateram as metas. Depois = o que foi pago pela ' +
+      'lista de premiados sem deflatores: quem estava premiado na conta e não recebeu sai só da premiação. A economia é a mesma nos dois (todos com a % mínima da meta), ' +
+      'porque quem não recebeu economizou de qualquer forma. O prêmio dos encarregados é o mesmo nos dois. Diferença no resultado = o prêmio que não foi pago.';
   }
 
   function desenhar() {
@@ -200,9 +200,9 @@ export async function montar(ctx) {
         if (r.naoRecebeu) a.naoRecebeu++;
         a.qtd += r.qtd || 0; a.km += r.km || 0; a.litros += r.litros || 0; a.litrosMeta += r.litrosMeta || 0;
         a.econPosL += Math.max(0, (r.litrosMeta || 0) - (r.litros || 0));   // só quem ficou acima da meta (economizou de fato)
-        // naoRecebeu = estava premiado na conta mas não recebeu (deflatores), pelo relatório de premiados de quem cuida do pagamento
-        // (decisão do usuário em 12/11/2026): depois dos deflatores sai da economia como quem ficou abaixo da meta
-        if (r.pct !== null && r.pct !== undefined && r.pct >= PCT_MIN - 1e-9 && (antes || !r.naoRecebeu)) { a.considerados++; a.litrosC += r.litros || 0; a.litrosMetaC += r.litrosMeta || 0; }
+        // naoRecebeu = estava premiado na conta mas não recebeu (deflatores). Continua na economia: economizou de qualquer forma, os
+        // deflatores só tiram o prêmio (correção pedida pelo usuário em 19/11/2026; de 12/11 a 19/11 ele saía também da economia)
+        if (r.pct !== null && r.pct !== undefined && r.pct >= PCT_MIN - 1e-9) { a.considerados++; a.litrosC += r.litros || 0; a.litrosMetaC += r.litrosMeta || 0; }
         a.premioSS += ss; a.premioComb += comb;
         uni.set(k, a);
       }
@@ -283,7 +283,7 @@ export async function montar(ctx) {
       'Premiação = prêmio de telemetria e de combustível dos motoristas + o do encarregado, dividido entre as unidades dele pela quantidade de motoristas de cada uma. ' +
       '"Economia de quem bateu a meta" soma só os motoristas que gastaram menos que a meta (a economia geral desconta os que gastaram mais).' +
       (info.parametros && info.parametros.pagamento ? ' Neste mês a premiação dos motoristas é a que foi paga (lista de premiados sem deflatores): ' + fmt.int(info.parametros.pagamento.naoRecebeu || 0) +
-        ' motoristas premiados na conta não receberam e saíram também da economia.' : '') +
+        ' motoristas premiados na conta não receberam (saem da premiação; a economia deles continua na conta).' : '') +
       (premioEncSemUni ? ' ' + rsInt(premioEncSemUni) + ' de encarregados sem motoristas no ranking entram só no total.' : '');
   }
 
