@@ -26,3 +26,6 @@ __pycache__/
 # Cópias de conflito do ownCloud
 *conflicted copy*
 *(conflito*
+
+# CLI do Supabase (projeto vinculado, versão)
+supabase/.temp/

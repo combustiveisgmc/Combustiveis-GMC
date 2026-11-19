@@ -6,6 +6,14 @@ no `briefing.md` (Histórico) e no `LEIA-ME.md`.
 
 ## 19/11/2026
 
+- **Migração passo 4 começou — rotinas do vigia na nuvem (Supabase Edge Functions).** Infraestrutura: tabelas
+  `nuvem_rotinas` (modo desligado/simular/ligado, estado de cada rotina) e `nuvem_execucoes` (histórico), pg_cron
+  `nuvem-rotinas` a cada 5 min, segredos e Vault (migração `20261119160000`; `scripts/nuvem_publicar.mjs`). Primeira rotina:
+  **estornos da TruckPag** (`supabase/functions/estornos-truckpag`) em **simulação** — roda a cada 6 h, anota o que excluiria e o
+  vigia continua gravando; estado herdado do vigia (sem ele a nuvem excluiria um abastecimento refeito que o vigia já tinha tratado).
+  As regras foram para `lib/nuvem/estornos.js`, usadas pelo vigia e pela nuvem (conferidas iguais às antigas na lista real). O vigia
+  pula a rotina quando a da nuvem estiver ligada. Plano das demais em `docs/MIGRACAO-PASSO4.md`.
+
 - **Migração 15.2 passo 3 — virada: o banco é a origem dos abastecimentos.** A recópia da Base_copia para `base_transacoes` foi
   desligada (`supabase_sync.py`, `origem_banco`); o banco agora só recebe os pedidos do portal. A planilha continua recebendo os
   mesmos pedidos pelo vigia, como reserva. Teste até 01/12/2026: `scripts/comparar_base.py` compara banco x planilha abastecimento

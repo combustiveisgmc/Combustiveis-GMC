@@ -163,7 +163,8 @@ Ordem (cada passo conferido antes do próximo; o vigia continua ligado até o fi
         (volta: `py scripts/supabase_sync.py sincronizar base_transacoes --voltar-planilha`).
   - [ ] 3.2 Teste até 01/12/2026: `scripts/comparar_base.py` diário (vigia, 7h) igual + nenhum `banco_mensagem` com "erro".
   - [ ] 3.4 Varredura no agendador da nuvem (passo 4) no lugar do vigia.
-- [ ] 4. Rotinas dos cartões nas Edge Functions: tempo real e D-1 (Ticket/TruckPag), estornos TruckPag, cadastro de motoristas e
+- [~] 4. Rotinas dos cartões nas Edge Functions (plano e situação em `docs/MIGRACAO-PASSO4.md`; infraestrutura pronta em 19/11;
+      estornos TruckPag em simulação): tempo real e D-1 (Ticket/TruckPag), estornos TruckPag, cadastro de motoristas e
       placas nos cartões, conciliação de NFs, conferência com os cartões.
 
 ### 15.3 Demais planilhas no banco

@@ -44,6 +44,12 @@ computador novo, rode `npx wrangler login` para entrar na conta Cloudflare.
 - Para ver o resultado de cada pedido: colunas `banco_aplicado_em` e `banco_mensagem` das tabelas `consolidador_lotes` e
   `alteracoes_base_copia` no D1 ("anterior" = pedido de antes da integração; "erro: ..." = não aplicado, conferir à mão).
 
+## Rotinas na nuvem (Supabase Edge Functions, desde 19/11/2026)
+- As rotinas do vigia passam, uma a uma, para funções no Supabase agendadas pelo próprio banco (a cada 5 min ele confere quais
+  rodam). Cada uma começa em **simulação** (só anota o que faria, para comparar com o vigia) e depois é **ligada** (o vigia pula a dele).
+- Situação e plano: `docs/MIGRACAO-PASSO4.md`. Hoje: estornos da TruckPag em simulação.
+- Publicar depois de mudar uma regra: `node scripts/nuvem_publicar.mjs` (o teste avisa se a cópia em `supabase/functions/_shared` ficou velha).
+
 ## Banco de dados no Supabase (desde 12/11/2026)
 
 - Projeto Supabase (Postgres 17) ligado ao repositório do GitHub (pasta `.`, branch `main`). As tabelas ficam em

@@ -12,6 +12,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { itensExclusao, cadeia, placaK } from '../lib/nuvem/estornos.js';
+export { itensExclusao };
 
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PENDENTES = path.join(PROJETO, '.dados', 'km-recalcular.json');
@@ -22,9 +24,6 @@ const MINUTO = 1 / 1440;               // datas em número serial do Excel (dias
 const IDX = { data: 4, placa: 5, fuel: 13, hodo: 16 };
 
 const lerJson = (a, p) => { try { return JSON.parse(fs.readFileSync(a, 'utf8')); } catch { return p; } };
-const normKey = (s) => String(s ?? '').trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/\s+/).filter(Boolean).join(' ');
-const cadeia = (fuel) => { const k = normKey(fuel); return k.includes('DIESEL') ? 'DIESEL' : k; };   // igual ao chaveCadeia do Consolidador
-const placaK = (p) => String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 export function anotar(linhas) {
@@ -38,43 +37,6 @@ export function anotar(linhas) {
   if (!novos.length) return;
   fs.mkdirSync(path.dirname(PENDENTES), { recursive: true });
   fs.writeFileSync(PENDENTES, JSON.stringify(lerJson(PENDENTES, []).concat(novos)));
-}
-
-// Exclusão de linhas da Base_copia (estorno, duplicado) + km do abastecimento seguinte de cada uma: o seguinte que contava
-// o trecho a partir da linha excluída passa a contar do abastecimento anterior a ela.
-// lista = base-copia.json (colunar); indices = posições na lista. Devolve os itens para /api/sync/base-copia/automaticas.
-export function itensExclusao(lista, indices) {
-  const { col, dic } = lista;
-  const fora = new Set(indices), itens = [];
-  const chaveDe = (i) => placaK(dic.placa[col.placa[i]]) + '§' + cadeia(dic.fuel[col.fuel[i]]);
-  const cadeias = new Map();
-  for (let i = 0; i < col.linha.length; i++) {
-    if (num(col.dt[i]) === null || num(col.hodo[i]) === null) continue;
-    const k = chaveDe(i);
-    if (!cadeias.has(k)) cadeias.set(k, []);
-    cadeias.get(k).push(i);
-  }
-  for (const c of cadeias.values()) c.sort((a, b) => col.dt[a] - col.dt[b] || col.hodo[a] - col.hodo[b]);
-  for (const i of indices) {
-    itens.push({ acao: 'excluir', linha: col.linha[i], placa: dic.placa[col.placa[i]], data: col.dt[i], celulas: {}, antes: {} });
-    const c = cadeias.get(chaveDe(i));
-    if (!c) continue;
-    const pos = c.indexOf(i);
-    if (pos < 0) continue;
-    // anterior e seguinte que ficam (pula as outras linhas excluídas)
-    let a = pos - 1; while (a >= 0 && fora.has(c[a])) a--;
-    let s = pos + 1; while (s < c.length && fora.has(c[s])) s++;
-    if (a < 0 || s >= c.length) continue;
-    const seg = c[s], kmAtual = num(col.km[seg]);
-    const kmNovo = Math.round((col.hodo[seg] - col.hodo[c[a]]) * 100) / 100;
-    // só se o km do seguinte vinha da linha excluída (ou de outra excluída entre elas)
-    const vinhaDeExcluida = c.slice(a + 1, s).some((x) => kmAtual !== null && Math.abs(kmAtual - (col.hodo[seg] - col.hodo[x])) < 0.5);
-    if (kmNovo < 0 || !vinhaDeExcluida || Math.abs(kmAtual - kmNovo) < 0.5 || itens.some((x) => x.linha === col.linha[seg] && x.acao !== 'excluir')) continue;
-    const litros = num(col.litros[seg]);
-    itens.push({ linha: col.linha[seg], placa: dic.placa[col.placa[seg]], data: col.dt[seg],
-      celulas: { R: kmNovo, S: litros ? Math.round(kmNovo / litros * 10000) / 10000 : null }, antes: { R: kmAtual, S: num(col.kml[seg]) } });
-  }
-  return itens;
 }
 
 export async function recalcular({ api, log }) {

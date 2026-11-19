@@ -447,6 +447,23 @@ async function processarFilasBanco() {
   const r = await api('POST', '/api/sync/banco/aplicar', {});
   if (r && (r.aplicados || r.erros)) log(`Banco: ${r.aplicados} pedido(s) das filas aplicado(s)${r.erros ? `, ${r.erros} com erro (ver banco_mensagem)` : ''}.`);
 }
+// Passo 4 (19/11/2026): rotina que já roda na nuvem (Edge Function, public.nuvem_rotinas modo 'ligado') não roda aqui, para as duas
+// nunca gravarem ao mesmo tempo. Consulta o banco no máximo 1x por minuto por rotina; sem banco ou com erro, o vigia segue rodando.
+const MODOS_NUVEM = new Map();
+async function nuvemLigada(nome) {
+  const m = MODOS_NUVEM.get(nome);
+  if (m && Date.now() - m.em < 60_000) return m.ligada;
+  let ligada = false;
+  try {
+    const c = JSON.parse(fs.readFileSync(path.join(PASTA, 'supabase.json'), 'utf8').replace(/^\uFEFF/, ''));
+    const r = await fetch(c.url + '/rest/v1/rpc/gestao_nuvem_modo', { method: 'POST', signal: AbortSignal.timeout(10_000),
+      headers: { apikey: c.service_role, Authorization: 'Bearer ' + c.service_role, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_nome: nome }) });
+    if (r.ok) ligada = (await r.json()) === 'ligado';
+  } catch { ligada = (m && m.ligada) || false; }
+  MODOS_NUVEM.set(nome, { em: Date.now(), ligada });
+  return ligada;
+}
 const CONSOLIDACAO_GERADO = path.join(PROJETO, '.dados', 'consolidacao.json');
 const ultimoEstadoLote = new Map();
 async function processarConsolidador() {
@@ -523,7 +540,7 @@ async function processarApisCartoes(forcar) {
     fs.renameSync(CONSOLIDACAO_GERADO, HISTORICO_APIS);
   } });
   // estornos feitos na TruckPag depois do D-1: exclui da Base_copia (scripts/estornos_truckpag.mjs; a cada 6 horas)
-  try { await (await import('./estornos_truckpag.mjs')).processar({ api, log }); }
+  if (!(await nuvemLigada('estornos-truckpag'))) try { await (await import('./estornos_truckpag.mjs')).processar({ api, log }); }
   catch (e) { log('Estornos TruckPag: ' + String(e.message || e).slice(0, 200)); }
   // cadastro de motoristas x cartões (scripts/motoristas_cartoes.mjs): cria os novos e repete as edições (se ligado), com os
   // dados pessoais digitados no portal, que são apagados depois do envio. O "completar pela Ticket" (CNH etc.) saiu em

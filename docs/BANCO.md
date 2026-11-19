@@ -210,3 +210,9 @@ Execução só para `service_role`. Quem chama: `lib/aplicar-banco.js` (portal, 
 No D1, `banco_aplicado_em` (hora, 'anterior' ou 'aplicando:<hora>' enquanto reservado) e `banco_mensagem` mostram o resultado.
 Desde 19/11/2026 10:47 `base_transacoes` não é mais recopiada da Base_copia: o banco é a origem (volta: `supabase_sync.py sincronizar
 base_transacoes --voltar-planilha`). `scripts/comparar_base.py` compara os dois até 01/12/2026.
+
+## Rotinas da nuvem (desde 19/11/2026, passo 4)
+`public.nuvem_rotinas` (nome, modo desligado|simular|ligado, intervalo_min, estado jsonb, disparada_em, ultima_execucao,
+ultimo_resultado, ultimo_erro) e `public.nuvem_execucoes` (rotina, em, modo, ok, resultado; 60 dias), com RLS e sem políticas (só
+service_role). `gestao_nuvem_disparar()` (pg_cron `nuvem-rotinas` */5) chama as Edge Functions por pg_net com a chave do Vault.
+Detalhes em `docs/MIGRACAO-PASSO4.md`.

@@ -9,7 +9,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { itensExclusao } from './km_recalcular.mjs';
+import { acharNaBase, itensExclusao, serial } from '../lib/nuvem/estornos.js';
+export { acharNaBase };
 
 const PROJETO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG = path.join(process.env.LOCALAPPDATA || '', 'GestaoCombustivel', 'apis-cartoes.json');
@@ -19,13 +20,6 @@ const INTERVALO = 6 * 3600e3, DIAS = 35;
 const lerJson = (a, p) => { try { return JSON.parse(fs.readFileSync(a, 'utf8')); } catch { return p; } };
 const p2 = (x) => String(x).padStart(2, '0');
 const diaLocal = (ms) => { const d = new Date(ms); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); };
-const placaK = (p) => String(p || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-// "AAAA-MM-DD HH:MM:SS(.mmm)" (hora local) -> número serial do Excel, como a coluna E da Base_copia
-function serial(s) {
-  const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
-  return m ? Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]) / 864e5 + 25569 : null;
-}
-
 async function relatorio(ini, fim) {
   const c = lerJson(CONFIG, {}).truckpag;
   const r = await fetch(c.hosts[0] + '/api/integracao-clientes/relatorios/analitico-transacao', { method: 'POST', signal: AbortSignal.timeout(120_000),
@@ -34,37 +28,6 @@ async function relatorio(ini, fim) {
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const j = await r.json();
   return Array.isArray(j.data) ? j.data : [];
-}
-
-// lista = base-copia.json; estornadas = transações ESTORNADA; aprovadas = as válidas (COMPRA/MANUAL APROVADA) do mesmo
-// período -> {indices, ambiguos: [transação], semLinha: [transação]}.
-// O posto costuma desfazer e refazer na hora (mesma litragem e hodômetro, segundos depois): a linha é achada pelo segundo
-// exato (±5 s); sem ela, até 1,5 min, mas nunca uma linha que bate (±5 s) com uma transação aprovada.
-export function acharNaBase(lista, estornadas, aprovadas = []) {
-  const { col, dic } = lista;
-  const SEG = 5 / 86400, MIN = 1.5 / 1440;
-  const indices = [], ambiguos = [], semLinha = [];
-  const candidatas = (t, janela) => {
-    const dt = serial(t.transacao_data), litros = Number(t.litragem), km = Number(t.quilometragem);
-    if (dt === null || !(litros > 0)) return [];
-    const r = [];
-    for (let i = 0; i < col.linha.length; i++) {
-      if (Math.abs(col.dt[i] - dt) > janela || Math.abs((col.litros[i] || 0) - litros) > 0.011) continue;
-      if (String(dic.forma[col.forma[i]] || '').toUpperCase() !== 'TRUCKPAG') continue;
-      if (col.hodo[i] !== km && placaK(dic.placa[col.placa[i]]) !== placaK(t.veiculo_placa)) continue;
-      r.push(i);
-    }
-    return r;
-  };
-  const deAprovada = new Set(aprovadas.flatMap((a) => candidatas(a, SEG)));
-  for (const t of estornadas) {
-    let achadas = candidatas(t, SEG).filter((i) => !deAprovada.has(i));
-    if (!achadas.length) achadas = candidatas(t, MIN).filter((i) => !deAprovada.has(i));
-    if (achadas.length === 1) indices.push(achadas[0]);
-    else if (achadas.length > 1) ambiguos.push(t);
-    else semLinha.push(t);
-  }
-  return { indices: [...new Set(indices)], ambiguos, semLinha };
 }
 
 export async function processar({ api, log, forcar = false }) {
